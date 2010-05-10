@@ -26,6 +26,7 @@ begin
     gemspec.has_rdoc = true
     gemspec.add_dependency("samlown-couchrest", ">= 1.0.0")
     gemspec.add_dependency("mime-types", ">= 1.15")
+    gemspec.add_dependency("activesupport", ">= 2.3.0")
     gemspec.version = CouchRest::ExtendedDocument::VERSION
     gemspec.date = "2008-11-22"
     gemspec.require_path = "lib"

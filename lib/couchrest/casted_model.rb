@@ -1,7 +1,3 @@
-require 'couchrest'
-require File.join(File.dirname(__FILE__), 'mixins/callbacks')
-require File.join(File.dirname(__FILE__), 'mixins/properties')
-
 module CouchRest
   module CastedModel
     
