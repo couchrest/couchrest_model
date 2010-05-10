@@ -15,8 +15,8 @@ class Cat < CouchRest::ExtendedDocument
   use_database DB
 
   property :name, :accessible => true
-  property :toys, :cast_as => ['CatToy'], :default => [], :accessible => true
-  property :favorite_toy, :cast_as => 'CatToy', :accessible => true
+  property :toys, :cast_as => [CatToy], :default => [], :accessible => true
+  property :favorite_toy, :cast_as => CatToy, :accessible => true
   property :number
 end
 

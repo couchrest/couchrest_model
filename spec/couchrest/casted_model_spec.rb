@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-require File.expand_path('../../../spec_helper', __FILE__)
+require File.expand_path('../../spec_helper', __FILE__)
 require File.join(FIXTURE_PATH, 'more', 'person')
 require File.join(FIXTURE_PATH, 'more', 'card')
 require File.join(FIXTURE_PATH, 'more', 'cat')
@@ -201,7 +201,7 @@ describe CouchRest::CastedModel do
 
   describe "saving document with array of casted models and validation" do
     before :each do
-      @cat = Cat.new
+      @cat = Cat.new :name => "felix"
       @cat.save
     end
 

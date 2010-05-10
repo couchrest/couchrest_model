@@ -4,6 +4,11 @@
 
 * Minor enhancements
 
+== 0.4.0
+
+* Major enhancements
+  * Separated ExtendedDocument from main CouchRest gem (Sam Lown)
+
 == 0.37
 
 * Minor enhancements

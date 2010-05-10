@@ -1,1 +1,1 @@
-require File.join(File.dirname(__FILE__),'lib', 'couchrest.rb')
+require File.join(File.dirname(__FILE__),'lib', 'couchrest', 'extended_document')

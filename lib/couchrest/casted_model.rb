@@ -1,11 +1,12 @@
-require File.expand_path('../../mixins/properties', __FILE__)
-
+require 'couchrest'
+require File.join(File.dirname(__FILE__), 'mixins/callbacks')
+require File.join(File.dirname(__FILE__), 'mixins/properties')
 
 module CouchRest
   module CastedModel
     
     def self.included(base)
-      base.send(:include, ::CouchRest::Callbacks)
+      base.send(:include, ::CouchRest::Mixins::Callbacks)
       base.send(:include, ::CouchRest::Mixins::Properties)
       base.send(:attr_accessor, :casted_by)
       base.send(:attr_accessor, :document_saved)

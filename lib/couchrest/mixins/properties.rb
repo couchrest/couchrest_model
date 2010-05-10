@@ -1,7 +1,7 @@
 require 'time'
-require File.join(File.dirname(__FILE__), '..', 'more', 'property')
-require File.join(File.dirname(__FILE__), '..', 'more', 'casted_array')
-require File.join(File.dirname(__FILE__), '..', 'more', 'typecast')
+require File.join(File.dirname(__FILE__), '..', 'property')
+require File.join(File.dirname(__FILE__), '..', 'casted_array')
+require File.join(File.dirname(__FILE__), '..', 'typecast')
 
 module CouchRest
   module Mixins

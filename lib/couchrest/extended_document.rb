@@ -1,13 +1,21 @@
+gem 'samlown-couchrest'
+require 'couchrest'
+require 'active_support'
 require 'mime/types'
-require File.join(File.dirname(__FILE__), "property")
-require File.join(File.dirname(__FILE__), '..', 'mixins', 'extended_document_mixins')
 require "enumerator"
+require File.join(File.dirname(__FILE__), "monkeypatches")
+require File.join(File.dirname(__FILE__), "property")
+require File.join(File.dirname(__FILE__), 'mixins')
+require File.join(File.dirname(__FILE__), 'casted_model')
 
 module CouchRest
   
   # Same as CouchRest::Document but with properties and validations
   class ExtendedDocument < Document
-    include CouchRest::Callbacks
+
+    VERSION = "1.0.0"
+
+    include CouchRest::Mixins::Callbacks
     include CouchRest::Mixins::DocumentQueries    
     include CouchRest::Mixins::Views
     include CouchRest::Mixins::DesignDoc

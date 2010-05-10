@@ -1,7 +1,7 @@
 require 'time'
 require 'bigdecimal'
 require 'bigdecimal/util'
-require File.join(File.dirname(__FILE__), '..', 'more', 'property')
+require File.join(File.dirname(__FILE__), 'property')
 
 class Time                       
   # returns a local time value much faster than Time.parse

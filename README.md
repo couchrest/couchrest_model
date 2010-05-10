@@ -1,25 +1,25 @@
-# CouchRest: CouchDB, close to the metal
+# CouchRest::ExtendedDocument: CouchDB, not too close to the metal
 
-CouchRest is based on [CouchDB's couch.js test
-library](http://svn.apache.org/repos/asf/couchdb/trunk/share/www/script/couch.js),
-which I find to be concise, clear, and well designed. CouchRest lightly wraps
-CouchDB's HTTP API, managing JSON serialization, and remembering the URI-paths
-to CouchDB's API endpoints so you don't have to.
+CouchRest::ExtendedDocument adds additional functionality to the standard CouchRest Document class such as
+setting properties, callbacks, typecasting, and validations.
 
-CouchRest is designed to make a simple base for application and framework-specific object oriented APIs. CouchRest is Object-Mapper agnostic, the parsed JSON it returns from CouchDB shows up as subclasses of Ruby's Hash. Naked JSON, just as it was mean to be.
+Note: CouchRest only supports CouchDB 0.9.0 or newer.
 
-Note: CouchRest only support CouchDB 0.9.0 or newer.
+## Install
 
-## Easy Install
-
-    $ sudo gem install couchrest
+    $ sudo gem install couchrest_extended_document
    
-### Relax, it's RESTful
+## Usage
 
-CouchRest rests on top of a HTTP abstraction layer using by default Heroku’s excellent REST Client Ruby HTTP wrapper.
-Other adapters can be added to support more http libraries.
+    require 'couchrest/extended_document'
 
-### Running the Specs
+    class Cat < CouchRest::ExtendedDocument
+
+      property :name, :type => String
+
+    end
+
+## Testing
 
 The most complete documentation is the spec/ directory. To validate your
 CouchRest install, from the project root directory run `rake`, or `autotest`
@@ -27,7 +27,7 @@ CouchRest install, from the project root directory run `rake`, or `autotest`
 
 ## Docs
 
-API: [http://rdoc.info/projects/couchrest/couchrest](http://rdoc.info/projects/couchrest/couchrest)
+API: [http://rdoc.info/projects/couchrest/couchrest_extended_document](http://rdoc.info/projects/couchrest/couchrest_extended_document)
 
 Check the wiki for documentation and examples [http://wiki.github.com/couchrest/couchrest](http://wiki.github.com/couchrest/couchrest)
 

@@ -1,5 +1,4 @@
 # Ported from dm-migrations
-require File.join(File.dirname(__FILE__), '..', 'support', 'class')
 
 module CouchRest
   

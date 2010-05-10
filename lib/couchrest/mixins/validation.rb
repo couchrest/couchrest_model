@@ -28,7 +28,6 @@ class Object
 end
 
 require 'pathname'
-require File.join(File.dirname(__FILE__), '..', 'support', 'class')
 
 dir = File.join(Pathname(__FILE__).dirname.expand_path, '..', 'validation')
 
