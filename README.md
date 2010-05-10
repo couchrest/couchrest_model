@@ -13,7 +13,7 @@ Note: CouchRest only supports CouchDB 0.9.0 or newer.
 
 ### General   
 
-    require 'couchrest/extended_document'
+    require 'couchrest_extended_document'
 
     class Cat < CouchRest::ExtendedDocument
 
