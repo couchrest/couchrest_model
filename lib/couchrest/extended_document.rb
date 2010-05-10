@@ -1,5 +1,7 @@
+
 gem 'samlown-couchrest'
 require 'couchrest'
+
 require 'active_support'
 require 'mime/types'
 require "enumerator"

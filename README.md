@@ -11,12 +11,24 @@ Note: CouchRest only supports CouchDB 0.9.0 or newer.
    
 ## Usage
 
+### General   
+
     require 'couchrest/extended_document'
 
     class Cat < CouchRest::ExtendedDocument
 
       property :name, :type => String
 
+    end
+
+### Rails
+
+In your environment.rb file require the gem as follows:
+
+    Rails::Initializer.run do |config|
+      ....
+      config.gem "couchrest_extended_document"
+      ....
     end
 
 ## Testing

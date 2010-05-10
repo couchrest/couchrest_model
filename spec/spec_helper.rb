@@ -1,7 +1,7 @@
 require "rubygems"
 require "spec" # Satisfies Autotest and anyone else not using the Rake tasks
 
-require File.join(File.dirname(__FILE__), '..','lib','couchrest','extended_document')
+require File.join(File.dirname(__FILE__), '..','lib','couchrest_extended_document')
 # check the following file to see how to use the spec'd features.
 
 unless defined?(FIXTURE_PATH)
