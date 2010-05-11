@@ -1,5 +1,6 @@
 
 require File.join(File.dirname(__FILE__), "property")
+require File.join(File.dirname(__FILE__), "validation")
 require File.join(File.dirname(__FILE__), 'mixins')
 
 module CouchRest
@@ -7,7 +8,7 @@ module CouchRest
   # Same as CouchRest::Document but with properties and validations
   class ExtendedDocument < Document
 
-    VERSION = "1.0.1"
+    VERSION = "1.0.2"
 
     include CouchRest::Mixins::Callbacks
     include CouchRest::Mixins::DocumentQueries    
@@ -17,6 +18,8 @@ module CouchRest
     include CouchRest::Mixins::ClassProxy
     include CouchRest::Mixins::Collection
     include CouchRest::Mixins::AttributeProtection
+
+    include CouchRest::Validation
 
     def self.subclasses
       @subclasses ||= []

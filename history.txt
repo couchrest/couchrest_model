@@ -4,7 +4,12 @@
 
 * Minor enhancements
 
-== 0.4.0
+== 1.0.2
+
+* Minor enhancements
+  * Enable Validation by default and refactored location (Sam Lown)
+
+== 1.0.0
 
 * Major enhancements
   * Separated ExtendedDocument from main CouchRest gem (Sam Lown)
