@@ -1,6 +1,6 @@
 require 'rake'
 require "rake/rdoctask"
-require File.join(File.expand_path(File.dirname(__FILE__)),'lib','couchrest','extended_document')
+require File.join(File.expand_path(File.dirname(__FILE__)),'lib','couchrest_extended_document')
 
 begin
   require 'spec/rake/spectask'
