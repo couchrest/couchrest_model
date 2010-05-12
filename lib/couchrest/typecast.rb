@@ -28,7 +28,7 @@ module CouchRest
 
       def typecast_value(value, klass, init_method)
         return nil if value.nil?
-        klass = ::CouchRest.constantize(klass) unless klass.is_a?(Class)
+        klass = klass.constantize unless klass.is_a?(Class)
         if value.instance_of?(klass) || klass == Object
           value
         elsif [String, TrueClass, Integer, Float, BigDecimal, DateTime, Time, Date, Class].include?(klass)
@@ -164,7 +164,7 @@ module CouchRest
 
         # Typecast a value to a Class
         def typecast_to_class(value)
-          ::CouchRest.constantize(value.to_s)
+          value.to_s.constantize
         rescue NameError
           value
         end

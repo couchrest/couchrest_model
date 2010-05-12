@@ -26,7 +26,7 @@ module CouchRest
               base_type = TrueClass 
             else
               begin
-                base_type = ::CouchRest.constantize(base_type)
+                base_type = base_type.constantize
               rescue  # leave base type as a string and convert in more/typecast
               end
             end

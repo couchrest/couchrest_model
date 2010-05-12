@@ -8,7 +8,7 @@ module CouchRest
   # Same as CouchRest::Document but with properties and validations
   class ExtendedDocument < Document
 
-    VERSION = "1.0.2"
+    VERSION = "1.0.3"
 
     include CouchRest::Mixins::Callbacks
     include CouchRest::Mixins::DocumentQueries    
@@ -19,7 +19,8 @@ module CouchRest
     include CouchRest::Mixins::Collection
     include CouchRest::Mixins::AttributeProtection
 
-    include CouchRest::Validation
+    # Including validation here does not work due to the way inheritance is handled.
+    #include CouchRest::Validation
 
     def self.subclasses
       @subclasses ||= []
@@ -48,17 +49,19 @@ module CouchRest
 
     # Creates a new instance, bypassing attribute protection
     #
+    #
     # ==== Returns
     #  a document instance
-    def self.create_from_database(passed_keys={})
-      new(passed_keys, :directly_set_attributes => true)      
+    def self.create_from_database(doc = {})
+      base = (doc['couchrest-type'].blank? || doc['couchrest-type'] == self.to_s) ? self : doc['couchrest-type'].constantize
+      base.new(doc, :directly_set_attributes => true)      
     end
     
-    def initialize(passed_keys={}, options={})
+    def initialize(doc = {}, options = {})
       apply_defaults # defined in CouchRest::Mixins::Properties
-      remove_protected_attributes(passed_keys) unless options[:directly_set_attributes]
-      directly_set_attributes(passed_keys) unless passed_keys.nil?
-      super(passed_keys)
+      remove_protected_attributes(doc) unless options[:directly_set_attributes]
+      directly_set_attributes(doc) unless doc.nil?
+      super(doc)
       cast_keys      # defined in CouchRest::Mixins::Properties
       unless self['_id'] && self['_rev']
         self['couchrest-type'] = self.class.to_s

@@ -4,6 +4,15 @@
 
 * Minor enhancements
 
+== 1.0.3
+
+* Minor enhancements
+  * Removed Validation by default, requires too many structure changes (FAIL)
+  * Added support for instantiation of documents read from database as couchrest-type provided (Sam Lown)
+  * Improved attachment handling for detecting file type (Sam Lown)
+  * Removing some monkey patches and relying on active_support for constantize and humanize (Sam Lown)
+
+
 == 1.0.2
 
 * Minor enhancements
@@ -13,6 +22,9 @@
 
 * Major enhancements
   * Separated ExtendedDocument from main CouchRest gem (Sam Lown)
+
+* Minor enhancements
+  * active_support included by default
 
 == 0.37
 

@@ -68,6 +68,19 @@ describe "ExtendedDocument attachments" do
       @obj.create_attachment(:file => @file_ext, :name => @attachment_name, :content_type => @content_type)
       @obj['_attachments'][@attachment_name]['content_type'].should == @content_type
     end
+
+    it "should detect the content-type automatically" do
+      @obj.create_attachment(:file => File.open(FIXTURE_PATH + '/attachments/couchdb.png'), :name => "couchdb.png")
+      @obj['_attachments']['couchdb.png']['content_type'].should == "image/png" 
+    end
+
+    it "should use name to detect the content-type automatically if no file" do
+      file = File.open(FIXTURE_PATH + '/attachments/couchdb.png')
+      file.stub!(:path).and_return("badfilname")
+      @obj.create_attachment(:file => File.open(FIXTURE_PATH + '/attachments/couchdb.png'), :name => "couchdb.png")
+      @obj['_attachments']['couchdb.png']['content_type'].should == "image/png" 
+    end
+
   end
 
   describe 'reading, updating, and deleting an attachment' do
@@ -96,7 +109,7 @@ describe "ExtendedDocument attachments" do
       reloaded_obj.read_attachment(@attachment_name).should == file.read
     end
   
-    it 'should se the content-type if passed' do
+    it 'should set the content-type if passed' do
       file = File.open(FIXTURE_PATH + '/attachments/README')
       @file.should_not == file
       @obj.update_attachment(:file => file, :name => @attachment_name, :content_type => @content_type)

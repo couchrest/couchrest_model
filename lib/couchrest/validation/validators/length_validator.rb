@@ -54,7 +54,7 @@ module CouchRest
 
         # XXX: HACK seems hacky to do this on every validation, probably should
         #      do this elsewhere?
-        field = CouchRest.humanize(field_name)
+        field = field_name.to_s.humanize
         min = @range ? @range.min : @min
         max = @range ? @range.max : @max
         equal = @equal

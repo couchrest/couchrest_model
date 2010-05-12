@@ -2,7 +2,8 @@ module CouchRest
   module Mixins
     module ExtendedAttachments
 
-      # creates a file attachment to the current doc
+      # Add a file attachment to the current document. Expects
+      # :file and :name to be included in the arguments.
       def create_attachment(args={})
         raise ArgumentError unless args[:file] && args[:name]
         return if has_attachment?(args[:name])
@@ -52,13 +53,14 @@ module CouchRest
       
       private
       
-        def get_mime_type(file)
-          ::MIME::Types.type_for(file.path).empty? ? 
-            'text\/plain' : MIME::Types.type_for(file.path).first.content_type.gsub(/\//,'\/')
+        def get_mime_type(path)
+          type = ::MIME::Types.type_for(path)
+          type.empty? ? nil : type.first.content_type
         end
 
         def set_attachment_attr(args)
-          content_type = args[:content_type] ? args[:content_type] : get_mime_type(args[:file])
+          content_type = args[:content_type] ? args[:content_type] : get_mime_type(args[:file].path)
+          content_type ||= (get_mime_type(args[:name]) || 'text/plain')
           self['_attachments'][args[:name]] = {
             'content_type' => content_type,
             'data'         => args[:file].read
