@@ -11,6 +11,7 @@
   * Added support for instantiation of documents read from database as couchrest-type provided (Sam Lown)
   * Improved attachment handling for detecting file type (Sam Lown)
   * Removing some monkey patches and relying on active_support for constantize and humanize (Sam Lown)
+  * Added support for setting type directly on property (Sam Lown)
 
 
 == 1.0.2

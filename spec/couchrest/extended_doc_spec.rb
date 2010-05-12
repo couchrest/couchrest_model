@@ -18,6 +18,14 @@ describe "ExtendedDocument" do
     property :name
     timestamps!
   end
+
+  class WithSimplePropertyType < CouchRest::ExtendedDocument
+    use_database TEST_SERVER.default_database
+    property :name, String
+    property :preset, String, :default => 'none'
+    property :tags, [String]
+    timestamps!
+  end
   
   class WithCallBacks < CouchRest::ExtendedDocument
     include ::CouchRest::Validation
@@ -275,6 +283,18 @@ describe "ExtendedDocument" do
     it "should set default value of read-only property" do
       obj = WithDefaultValues.new
       obj.read_only_with_default.should == 'generic'
+    end
+  end
+
+  describe "simplified way of setting property types" do
+    it "should set defaults" do
+      obj = WithSimplePropertyType.new
+      obj.preset.should eql('none')
+    end
+
+    it "should handle arrays" do
+      obj = WithSimplePropertyType.new(:tags => ['spec'])
+      obj.tags.should == ['spec']
     end
   end
   

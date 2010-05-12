@@ -82,10 +82,18 @@ module CouchRest
      
       module ClassMethods
         
-        def property(name, options={})
+        def property(name, *options)
+          opts = { }
+          type = options.shift
+          if type.class != Hash
+            opts[:type] = type
+            opts.merge!(options.shift || {})
+          else
+            opts.update(type)
+          end
           existing_property = self.properties.find{|p| p.name == name.to_s}
-          if existing_property.nil? || (existing_property.default != options[:default])
-            define_property(name, options)
+          if existing_property.nil? || (existing_property.default != opts[:default])
+            define_property(name, opts)
           end
         end
         
