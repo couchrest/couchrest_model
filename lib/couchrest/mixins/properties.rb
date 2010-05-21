@@ -119,7 +119,7 @@ module CouchRest
               end
             EOS
 
-            if property.type == 'boolean'
+            if ['boolean', TrueClass.to_s.downcase].include?(property.type.to_s.downcase)
               class_eval <<-EOS, __FILE__, __LINE__
                 def #{property.name}?
                   if self['#{property.name}'].nil? || self['#{property.name}'] == false || self['#{property.name}'].to_s.downcase == 'false'

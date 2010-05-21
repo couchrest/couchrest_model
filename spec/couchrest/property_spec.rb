@@ -598,7 +598,20 @@ describe "ExtendedDocument properties" do
           @course['active'].should equal(value)
         end
       end
+
+      it "should respond to requests with ? modifier" do
+        @course.active = 'false'
+        @course.active?.should be_false
+      end
     end
+
+    describe 'when type primitive is a TrueClass' do
+      it "should respond to requests with ? modifier" do
+        @course.very_active = 'true'
+        @course.very_active?.should be_true
+      end
+    end
+
   end
 end
 

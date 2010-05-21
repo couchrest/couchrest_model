@@ -15,6 +15,7 @@ class Course < CouchRest::ExtendedDocument
   property :started_on, :type => 'Date'
   property :updated_at, :type => 'DateTime'
   property :active, :type => 'Boolean'
+  property :very_active, :type => TrueClass
   property :klass, :type => 'Class'
   
   view_by :title
