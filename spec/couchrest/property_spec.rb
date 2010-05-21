@@ -578,11 +578,7 @@ describe "ExtendedDocument properties" do
     end
     
     describe 'when type primitive is a Boolean' do
-      class RootBeerFloat < CouchRest::ExtendedDocument	
-        use_database DB
-        property :tasty, TrueClass
-      end
- 
+
       [ true, 'true', 'TRUE', '1', 1, 't', 'T' ].each do |value|
         it "returns true when value is #{value.inspect}" do
           @course.active = value
@@ -605,26 +601,20 @@ describe "ExtendedDocument properties" do
       end
 
       it "should respond to requests with ? modifier" do
-        @course.active = 'false'
+        @course.active = nil 
         @course.active?.should be_false
+        @course.active = false
+        @course.active?.should be_false
+        @course.active = true
+        @course.active?.should be_true
       end
 
-      it "should add an accessor with a '?' for boolean attributes that returns true or false" do
-        RootBeerFloat.new(:tasty => true).tasty?.should == true
-        RootBeerFloat.new(:tasty => 'you bet').tasty?.should == true
-        RootBeerFloat.new(:tasty => 123).tasty?.should == true
-      
-        RootBeerFloat.new(:tasty => false).tasty?.should == false
-        RootBeerFloat.new(:tasty => 'false').tasty?.should == false
-        RootBeerFloat.new(:tasty => 'FaLsE').tasty?.should == false
-        RootBeerFloat.new(:tasty => nil).tasty?.should == false
-      end
-
-    end
-
-    describe 'when type primitive is a TrueClass' do
-      it "should respond to requests with ? modifier" do
-        @course.very_active = 'true'
+      it "should respond to requests with ? modifier on TrueClass" do
+        @course.very_active = nil 
+        @course.very_active?.should be_false
+        @course.very_active = false
+        @course.very_active?.should be_false
+        @course.very_active = true
         @course.very_active?.should be_true
       end
     end
