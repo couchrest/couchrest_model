@@ -578,6 +578,11 @@ describe "ExtendedDocument properties" do
     end
     
     describe 'when type primitive is a Boolean' do
+      class RootBeerFloat < CouchRest::ExtendedDocument	
+        use_database DB
+        property :tasty, TrueClass
+      end
+ 
       [ true, 'true', 'TRUE', '1', 1, 't', 'T' ].each do |value|
         it "returns true when value is #{value.inspect}" do
           @course.active = value
@@ -603,6 +608,18 @@ describe "ExtendedDocument properties" do
         @course.active = 'false'
         @course.active?.should be_false
       end
+
+      it "should add an accessor with a '?' for boolean attributes that returns true or false" do
+        RootBeerFloat.new(:tasty => true).tasty?.should == true
+        RootBeerFloat.new(:tasty => 'you bet').tasty?.should == true
+        RootBeerFloat.new(:tasty => 123).tasty?.should == true
+      
+        RootBeerFloat.new(:tasty => false).tasty?.should == false
+        RootBeerFloat.new(:tasty => 'false').tasty?.should == false
+        RootBeerFloat.new(:tasty => 'FaLsE').tasty?.should == false
+        RootBeerFloat.new(:tasty => nil).tasty?.should == false
+      end
+
     end
 
     describe 'when type primitive is a TrueClass' do
