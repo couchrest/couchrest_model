@@ -4,6 +4,11 @@
 
 * Minor enhancements
 
+== 1.0.5 
+
+* Minor enhancements
+  * Added 'find' alias for 'get' for easier rails transition
+
 == 1.0.3
 
 * Minor enhancements
