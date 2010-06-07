@@ -54,6 +54,7 @@ module CouchRest
       private
       
         def get_mime_type(path)
+          return nil if path.nil?
           type = ::MIME::Types.type_for(path)
           type.empty? ? nil : type.first.content_type
         end
