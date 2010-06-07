@@ -56,6 +56,7 @@ module CouchRest
             nil
           end
         end
+        alias :find :get
         
         # Load a document from the database by id
         # An exception will be raised if the document isn't found
@@ -72,6 +73,7 @@ module CouchRest
           doc = db.get id
           create_from_database(doc)
         end
+        alias :find! :get!
         
       end
       

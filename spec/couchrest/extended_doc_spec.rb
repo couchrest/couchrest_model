@@ -328,14 +328,19 @@ describe "ExtendedDocument" do
       foundart = Article.get @art.id
       foundart.title.should == "All About Getting"
     end
-    
+    it "should load and instantiate with find" do
+      foundart = Article.find @art.id
+      foundart.title.should == "All About Getting"
+    end
     it "should return nil if `get` is used and the document doesn't exist" do
       foundart = Article.get 'matt aimonetti'
       foundart.should be_nil
     end                     
-    
     it "should raise an error if `get!` is used and the document doesn't exist" do
        lambda{foundart = Article.get!('matt aimonetti')}.should raise_error
+    end
+    it "should raise an error if `find!` is used and the document doesn't exist" do
+       lambda{foundart = Article.find!('matt aimonetti')}.should raise_error
     end
   end
 
