@@ -4,12 +4,12 @@
 
 * Minor enhancements
 
-== 1.0.5 
+== 1.0.0.beta5
 
 * Minor enhancements
   * Added 'find' alias for 'get' for easier rails transition
 
-== 1.0.3
+== 1.0.0.beta3
 
 * Minor enhancements
   * Removed Validation by default, requires too many structure changes (FAIL)
@@ -19,12 +19,12 @@
   * Added support for setting type directly on property (Sam Lown)
 
 
-== 1.0.2
+== 1.0.0.beta2
 
 * Minor enhancements
   * Enable Validation by default and refactored location (Sam Lown)
 
-== 1.0.0
+== 1.0.0.beta
 
 * Major enhancements
   * Separated ExtendedDocument from main CouchRest gem (Sam Lown)
