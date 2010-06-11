@@ -15,16 +15,16 @@ end
 begin
   require 'jeweler'
   Jeweler::Tasks.new do |gemspec|
-    gemspec.name = "samlown-couchrest_extended_document"
+    gemspec.name = "couchrest_extended_document"
     gemspec.summary = "Extend CouchRest Document class with useful features."
     gemspec.description = "CouchRest::ExtendedDocument provides aditional features to the standard CouchRest::Document class such as properties, view designs, callbacks, typecasting and validations."
     gemspec.email = "jchris@apache.org"
-    gemspec.homepage = "http://github.com/samlown/couchrest_extended_document"
+    gemspec.homepage = "http://github.com/couchrest/couchrest_extended_document"
     gemspec.authors = ["J. Chris Anderson", "Matt Aimonetti", "Marcos Tapajos", "Will Leinweber"]
     gemspec.extra_rdoc_files = %w( README.md LICENSE THANKS.md )
     gemspec.files = %w( LICENSE README.md Rakefile THANKS.md history.txt couchrest.gemspec) + Dir["{examples,lib,spec,utils}/**/*"] - Dir["spec/tmp"]
     gemspec.has_rdoc = true
-    gemspec.add_dependency("samlown-couchrest", ">= 1.0.0")
+    gemspec.add_dependency("couchrest", ">= 1.0.0.beta")
     gemspec.add_dependency("mime-types", ">= 1.15")
     gemspec.add_dependency("activesupport", ">= 2.3.0")
     gemspec.version = CouchRest::ExtendedDocument::VERSION

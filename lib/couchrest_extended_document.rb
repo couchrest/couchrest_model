@@ -1,7 +1,7 @@
 
 # require File.join(File.dirname(__FILE__), "couchrest", "extended_document")
 
-gem 'samlown-couchrest'
+gem 'couchrest'
 
 require 'couchrest'
 
