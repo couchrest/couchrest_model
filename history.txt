@@ -4,6 +4,12 @@
 
 * Minor enhancements
 
+== 1.0.0.beta6
+
+* Minor enhancements
+  * Added 'find_by_*' alias for finding first item in view with matching key.
+  * Fixed issue with active_support in Rails3.
+
 == 1.0.0.beta5
 
 * Minor enhancements
