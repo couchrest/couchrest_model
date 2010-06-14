@@ -5,7 +5,7 @@ gem 'couchrest'
 
 require 'couchrest'
 
-require 'activesupport'
+require 'active_support/core_ext'
 require 'mime/types'
 require "enumerator"
 

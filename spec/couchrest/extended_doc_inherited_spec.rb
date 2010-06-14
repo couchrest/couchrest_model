@@ -2,7 +2,7 @@ require File.expand_path('../../spec_helper', __FILE__)
 
 begin
   require 'rubygems' unless ENV['SKIP_RUBYGEMS']  
-  require 'activesupport'
+  require 'active_support/json'
   ActiveSupport::JSON.backend = :JSONGem
 
   class PlainParent
@@ -36,5 +36,5 @@ begin
   end
 
 rescue LoadError
-  puts "This spec requires 'active_support' to be loaded"
+  puts "This spec requires 'active_support/json' to be loaded"
 end
