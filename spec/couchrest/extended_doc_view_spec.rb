@@ -101,7 +101,7 @@ describe "ExtendedDocument views" do
     before(:all) do
       reset_test_db!
       %w{aaa bbb ddd eee}.each do |title|
-        Course.new(:title => title).save
+        Course.new(:title => title, :active => (title == 'bbb')).save
       end
     end
 
@@ -113,6 +113,17 @@ describe "ExtendedDocument views" do
 
     it "should return nil if not found" do
       course = Course.find_by_title('fff')
+      course.should be_nil
+    end
+
+    it "should peform search on view with two properties" do
+      course = Course.find_by_title_and_active(['bbb', true])
+      course.should_not be_nil
+      course.title.should eql('bbb') # Ensure really is a Course!
+    end
+
+    it "should return nil if not found" do
+      course = Course.find_by_title_and_active(['bbb', false])
       course.should be_nil
     end
 

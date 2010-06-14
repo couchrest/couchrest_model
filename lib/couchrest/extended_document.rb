@@ -130,7 +130,7 @@ module CouchRest
       if has_view?(m)
         query = args.shift || {}
         return view(m, query, *args, &block)
-      elsif m.to_s =~ /^find_(.+)/
+      elsif m.to_s =~ /^find_(by_.+)/
         view_name = $1
         if has_view?(view_name)
           query = {:key => args.first, :limit => 1}

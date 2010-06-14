@@ -19,5 +19,7 @@ class Course < CouchRest::ExtendedDocument
   property :klass, :type => 'Class'
   
   view_by :title
+  view_by :title, :active
   view_by :dept, :ducktype => true
+
 end
