@@ -96,6 +96,30 @@ describe "ExtendedDocument views" do
       courses[0]["doc"]["title"].should =='aaa'
     end
   end
+
+  describe "find a single item using a view" do
+    before(:all) do
+      reset_test_db!
+      %w{aaa bbb ddd eee}.each do |title|
+        Course.new(:title => title).save
+      end
+    end
+
+    it "should return single matched record" do
+      course = Course.find_by_title('bbb')
+      course.should_not be_nil
+      course.title.should eql('bbb') # Ensure really is a Course!
+    end
+
+    it "should return nil if not found" do
+      course = Course.find_by_title('fff')
+      course.should be_nil
+    end
+
+    it "should raise exception if view not present" do
+      lambda { Course.find_by_foobar('123') }.should raise_error(NoMethodError)
+    end
+  end
   
   describe "a ducktype view" do
     before(:all) do

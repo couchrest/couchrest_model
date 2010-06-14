@@ -129,10 +129,15 @@ module CouchRest
     def self.method_missing(m, *args, &block)
       if has_view?(m)
         query = args.shift || {}
-        view(m, query, *args, &block)
-      else
-        super
+        return view(m, query, *args, &block)
+      elsif m.to_s =~ /^find_(.+)/
+        view_name = $1
+        if has_view?(view_name)
+          query = {:key => args.first, :limit => 1}
+          return view(view_name, query).first
+        end
       end
+      super
     end
     
     ### instance methods
