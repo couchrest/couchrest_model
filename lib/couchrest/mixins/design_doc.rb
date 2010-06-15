@@ -98,7 +98,7 @@ module CouchRest
           if saved
             changes = force
             design_doc['views'].each do |name, view|
-              if saved['views'][name] != view
+              if !compare_views(saved['views'][name], view)
                 changes = true
                 saved['views'][name] = view
               end
@@ -112,6 +112,12 @@ module CouchRest
             design_doc.save
             design_doc
           end
+        end
+
+        # Return true if the two views match
+        def compare_views(orig, repl)
+          return false if orig.nil? or repl.nil?
+          (orig['map'].to_s.strip == repl['map'].to_s.strip) && (orig['reduce'].to_s.strip == repl['reduce'].to_s.strip)
         end
 
       end # module ClassMethods

@@ -33,6 +33,27 @@ describe "ExtendedDocument views" do
       doc = Article.database.get Article.design_doc.id
       doc['views']['by_date'].should_not be_nil
     end
+    it "should save design doc if a view changed" do
+      Article.by_date
+      orig = Article.stored_design_doc
+      orig['views']['by_date']['map'] = "function() { }"
+      Article.database.save_doc(orig)
+      rev = Article.stored_design_doc['_rev']
+      Article.req_design_doc_refresh # prepare for re-load
+      Article.by_date
+      orig = Article.stored_design_doc
+      orig['views']['by_date']['map'].should eql(Article.design_doc['views']['by_date']['map'])
+      orig['_rev'].should_not eql(rev)
+    end
+    it "should not save design doc if not changed" do
+      Article.by_date
+      orig = Article.stored_design_doc['_rev']
+      Article.req_design_doc_refresh
+      Article.by_date
+      Article.stored_design_doc['_rev'].should eql(orig)
+    end
+
+
     it "should return the matching raw view result" do
       view = Article.by_date :raw => true
       view['rows'].length.should == 4
