@@ -28,6 +28,13 @@ Note: CouchRest::ExtendedDocument only supports CouchDB 0.10.0 or newer.
 
     end
 
+### Notable Issues
+
+ExtendedDocument uses active_support for some of its internals. Ensure you have a stable active support gem installed 
+or at least 3.0.0.beta4.
+
+JSON gem versions 1.4.X are kown to cause problems with stack overflows and general badness. Version 1.2.4 appears to work fine.
+
 ### Ruby on Rails
 
 CouchRest::ExtendedDocument is compatible with rails and provides some ActiveRecord-like methods.
