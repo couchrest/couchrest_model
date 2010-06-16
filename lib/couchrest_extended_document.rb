@@ -6,6 +6,7 @@ gem 'couchrest'
 require 'couchrest'
 
 require 'active_support/core_ext'
+require 'active_support/json'
 require 'mime/types'
 require "enumerator"
 
