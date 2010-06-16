@@ -57,7 +57,45 @@ describe "ExtendedDocument properties" do
     @card.created_at.should_not be_nil
     @card.updated_at.should_not be_nil
   end
-  
+
+  it "should let you use read_attribute method" do
+    @card.last_name = "Aimonetti"
+    @card.read_attribute(:last_name).should eql('Aimonetti')
+    @card.read_attribute('last_name').should eql('Aimonetti')
+    last_name_prop = @card.properties.find{|p| p.name == 'last_name'}
+    @card.read_attribute(last_name_prop).should eql('Aimonetti')
+  end
+
+  it "should let you use write_attribute method" do
+    @card.write_attribute(:last_name, 'Aimonetti 1')
+    @card.last_name.should eql('Aimonetti 1')
+    @card.write_attribute('last_name', 'Aimonetti 2')
+    @card.last_name.should eql('Aimonetti 2')
+    last_name_prop = @card.properties.find{|p| p.name == 'last_name'}
+    @card.write_attribute(last_name_prop, 'Aimonetti 3')
+    @card.last_name.should eql('Aimonetti 3')
+  end
+
+  it "should let you use write_attribute on readonly properties" do
+    lambda {
+      @card.read_only_value = "foo"
+    }.should raise_error
+    @card.write_attribute(:read_only_value, "foo")
+    @card.read_only_value.should == 'foo'
+  end
+
+  it "should cast via write_attribute" do
+    @card.write_attribute(:cast_alias, {:name => ["Sam", "Lown"]})
+    @card.cast_alias.class.should eql(Person)
+    @card.cast_alias.name.last.should eql("Lown")
+  end
+
+  it "should not cast via write_attribute if property not casted" do
+    @card.write_attribute(:first_name, {:name => "Sam"})
+    @card.first_name.class.should eql(Hash)
+    @card.first_name[:name].should eql("Sam")
+  end
+
   
   describe "mass assignment protection" do
 
@@ -645,4 +683,108 @@ describe "a casted model retrieved from the database" do
       @cat.toys[1].casted_by.should === @cat
     end
   end
+end
+
+describe "Property Class" do
+
+  it "should provide name as string" do
+    property = CouchRest::Property.new(:test, String)
+    property.name.should eql('test')
+    property.to_s.should eql('test')
+  end
+
+  it "should provide class from type" do
+    property = CouchRest::Property.new(:test, String)
+    property.type_class.should eql(String)
+  end
+
+  it "should provide base class from type in array" do
+    property = CouchRest::Property.new(:test, [String])
+    property.type_class.should eql(String)
+  end
+
+  it "should leave type as string if requested" do
+    property = CouchRest::Property.new(:test, 'String')
+    property.type.should eql('String')
+    property.type_class.should eql(String)
+  end
+
+  it "should leave type nil and return string by default" do
+    property = CouchRest::Property.new(:test, nil)
+    property.type.should be_nil
+    # Type cast should never be used on non-casted property!
+    property.type_class.should eql(String)
+  end
+
+  it "should convert empty type array to [String]" do
+    property = CouchRest::Property.new(:test, [])
+    property.type_class.should eql(String)
+  end
+
+  it "should convert boolean text-type TrueClass" do
+    property = CouchRest::Property.new(:test, 'boolean')
+    property.type.should eql('boolean') # no change
+    property.type_class.should eql(TrueClass)
+  end
+
+  it "should set init method option or leave as 'new'" do
+    # (bad example! Time already typecast)
+    property = CouchRest::Property.new(:test, Time)
+    property.init_method.should eql('new')
+    property = CouchRest::Property.new(:test, Time, :init_method => 'parse')
+    property.init_method.should eql('parse')
+  end
+
+  ## Property Casting method. More thoroughly tested earlier.
+
+  describe "casting" do
+    it "should cast a value" do
+      property = CouchRest::Property.new(:test, Date)
+      parent = mock("FooObject")
+      property.cast(parent, "2010-06-16").should eql(Date.new(2010, 6, 16))
+      property.cast_value(parent, "2010-06-16").should eql(Date.new(2010, 6, 16))
+    end
+
+    it "should cast an array of values" do
+      property = CouchRest::Property.new(:test, [Date])
+      parent = mock("FooObject")
+      property.cast(parent, ["2010-06-01", "2010-06-02"]).should eql([Date.new(2010, 6, 1), Date.new(2010, 6, 2)])
+    end
+
+    it "should set a CastedArray on array of Objects" do
+      property = CouchRest::Property.new(:test, [Object])
+      parent = mock("FooObject")
+      property.cast(parent, ["2010-06-01", "2010-06-02"]).class.should eql(::CouchRest::CastedArray)
+    end
+
+    it "should not set a CastedArray on array of Strings" do
+      property = CouchRest::Property.new(:test, [String])
+      parent = mock("FooObject")
+      property.cast(parent, ["2010-06-01", "2010-06-02"]).class.should_not eql(::CouchRest::CastedArray)
+    end
+
+    it "should raise and error if value is array when type is not" do
+      property = CouchRest::Property.new(:test, Date)
+      parent = mock("FooClass")
+      lambda {
+        cast = property.cast(parent, [Date.new(2010, 6, 1)])
+      }.should raise_error
+    end
+
+
+    it "should set parent as casted_by object in CastedArray" do
+      property = CouchRest::Property.new(:test, [Object])
+      parent = mock("FooObject")
+      property.cast(parent, ["2010-06-01", "2010-06-02"]).casted_by.should eql(parent)     
+    end
+
+    it "should set casted_by on new value" do
+      property = CouchRest::Property.new(:test, CatToy)
+      parent = mock("CatObject")
+      cast = property.cast(parent, {:name => 'catnip'})
+      cast.casted_by.should eql(parent)
+    end
+
+  end
+
 end

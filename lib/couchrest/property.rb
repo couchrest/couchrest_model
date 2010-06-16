@@ -62,6 +62,8 @@ module CouchRest
       return String unless casted # This is rubbish, to handle validations
       return @type_class unless @type_class.nil?
       base = @type.is_a?(Array) ? @type.first : @type
+      base = String if base.nil?
+      base = TrueClass if base.is_a?(String) && base.downcase == 'boolean'
       @type_class = base.is_a?(Class) ? base : base.constantize
     end
 
@@ -76,21 +78,8 @@ module CouchRest
         if type.nil?
           @casted = false
           @type = nil 
-        elsif type.is_a?(Array) && type.empty?
-          @type = [Object]
         else
-          base_type = type.is_a?(Array) ? type.first : type
-          if base_type.is_a?(String)
-            if base_type.downcase == 'boolean'
-              base_type = TrueClass 
-            else
-              begin
-                base_type = base_type.constantize
-              rescue  # leave base type as a string and convert in more/typecast
-              end
-            end
-          end
-          @type = type.is_a?(Array) ? [base_type] : base_type 
+          @type = type
         end
       end
 

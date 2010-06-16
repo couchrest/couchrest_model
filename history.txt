@@ -8,7 +8,11 @@
 
 * Minor enhancements
   * Added 'find_by_*' alias for finding first item in view with matching key.
-  * Fixed issue with active_support in Rails3.
+  * Fixed issue with active_support in Rails3 and text in README for JSON.
+  * Refactoring of properties, added read_attribute and write_attribute methods.
+
+* Major enhancements
+  * Added support for anonymous CastedModels defined in Documents
 
 == 1.0.0.beta5
 
