@@ -5,17 +5,15 @@ module CouchRest
       base.send(:include, ::CouchRest::Mixins::Callbacks)
       base.send(:include, ::CouchRest::Mixins::Properties)
       base.send(:attr_accessor, :casted_by)
-      base.send(:attr_accessor, :document_saved)
     end
     
     def initialize(keys={})
       raise StandardError unless self.is_a? Hash
-      apply_defaults # defined in CouchRest::Mixins::Properties
+      apply_all_property_defaults # defined in CouchRest::Mixins::Properties
       super()
       keys.each do |k,v|
-        self[k.to_s] = v
+        write_attribute(k.to_s, v)
       end if keys
-      cast_keys      # defined in CouchRest::Mixins::Properties
     end
     
     def []= key, value
@@ -36,7 +34,7 @@ module CouchRest
     # False if the casted model has already
     # been saved in the containing document
     def new?
-      !@document_saved
+      @casted_by.nil? ? true : @casted_by.new?
     end
     alias :new_record? :new?
     

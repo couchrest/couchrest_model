@@ -100,7 +100,7 @@ module CouchRest
         end
 
         # length
-        if property.type == String
+        if property.type_class == String
           # XXX: maybe length should always return a Range, with the min defaulting to 1
           # 52 being the max set 
           len = property.options.fetch(:length, property.options.fetch(:size, 52))
@@ -137,16 +137,16 @@ module CouchRest
         end
 
         # numeric validator
-        if "Integer" == property.type
+        if property.type_class == Integer
           opts[:integer_only] = true
           validates_numericality_of property.name, options_with_message(opts, property, :is_number)
-        elsif Float == property.type
+        elsif Float == property.type_class
           opts[:precision] = property.precision
           opts[:scale]     = property.scale
           validates_numericality_of property.name, options_with_message(opts, property, :is_number)
         end
         
-        # marked the property has checked
+        # marked the property as checked
         property.autovalidation_check = true
         
       end

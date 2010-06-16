@@ -19,8 +19,11 @@ end
 class DummyModel < CouchRest::ExtendedDocument
   use_database TEST_SERVER.default_database
   raise "Default DB not set" if TEST_SERVER.default_database.nil?
-  property :casted_attribute, :cast_as => 'WithCastedModelMixin'
-  property :keywords,         :cast_as => ["String"]
+  property :casted_attribute, WithCastedModelMixin
+  property :keywords,         ["String"]
+  property :sub_models do |child|
+    child.property :title
+  end
 end
 
 class CastedCallbackDoc < CouchRest::ExtendedDocument
@@ -80,6 +83,20 @@ describe CouchRest::CastedModel do
     end
     it "should be nil" do
       @casted_obj.should == nil
+    end
+  end
+
+  describe "anonymous sub casted models" do
+    before :each do
+      @obj = DummyModel.new
+    end
+    it "should be empty initially" do
+      @obj.sub_models.should_not be_nil
+      @obj.sub_models.should be_empty
+    end
+    it "should be updatable using a hash" do
+      @obj.sub_models << {:title => 'test'}
+      @obj.sub_models.first.title.should eql('test')
     end
   end
   
@@ -308,6 +325,7 @@ describe CouchRest::CastedModel do
       @cat.create
       @cat.save
       @cat.favorite_toy.should_not be_new
+      @cat.toys.first.casted_by.should eql(@cat)
       @cat.toys.first.should_not be_new
     end
     

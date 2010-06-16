@@ -80,10 +80,9 @@ module CouchRest
         end
       EOS
       base.class_eval <<-RUBY_EVAL, __FILE__, __LINE__ + 1
-        def self.define_property(name, options={})
-          super
-          auto_generate_validations(properties.last) if properties && properties.size > 0
-          autovalidation_check = true
+        def self.define_property(name, options={}, &block)
+          property = super
+          auto_generate_validations(property) unless property.nil?
         end
       RUBY_EVAL
     end

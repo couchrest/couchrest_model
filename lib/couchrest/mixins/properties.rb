@@ -1,7 +1,6 @@
 require 'time'
 require File.join(File.dirname(__FILE__), '..', 'property')
 require File.join(File.dirname(__FILE__), '..', 'casted_array')
-require File.join(File.dirname(__FILE__), '..', 'typecast')
 
 module CouchRest
   module Mixins
@@ -9,8 +8,6 @@ module CouchRest
       
       class IncludeError < StandardError; end
       
-      include ::CouchRest::More::Typecast
-
       def self.included(base)
         base.class_eval <<-EOS, __FILE__, __LINE__ + 1
             extlib_inheritable_accessor(:properties) unless self.respond_to?(:properties)
@@ -19,70 +16,36 @@ module CouchRest
         base.extend(ClassMethods)
         raise CouchRest::Mixins::Properties::IncludeError, "You can only mixin Properties in a class responding to [] and []=, if you tried to mixin CastedModel, make sure your class inherits from Hash or responds to the proper methods" unless (base.new.respond_to?(:[]) && base.new.respond_to?(:[]=))
       end
-      
-      def apply_defaults
+
+      # Returns the Class properties
+      #
+      # ==== Returns
+      # Array:: the list of properties for model's class
+      def properties
+        self.class.properties
+      end
+
+      def read_attribute(property)
+        self[property.to_s]
+      end
+
+      def write_attribute(property, value)
+        prop = property.is_a?(::CouchRest::Property) ? property : self.class.properties.detect {|p| p.to_s == property.to_s}
+        raise "Missing property definition for #{property.to_s}" unless prop
+        self[prop.to_s] = prop.cast(self, value)
+      end
+
+      def apply_all_property_defaults
         return if self.respond_to?(:new?) && (new? == false)
-        return unless self.class.respond_to?(:properties) 
-        return if self.class.properties.empty?
         # TODO: cache the default object
         self.class.properties.each do |property|
-          key = property.name.to_s
-          # let's make sure we have a default
-          unless property.default.nil?
-              if property.default.class == Proc
-                self[key] = property.default.call
-              else
-                self[key] = Marshal.load(Marshal.dump(property.default))
-              end
-            end
+          write_attribute(property, property.default_value)
         end
       end
-      
-      def cast_keys
-        return unless self.class.properties
-        self.class.properties.each do |property|
-          cast_property(property)
-        end
-      end
-      
-      def cast_property(property, assigned=false)
-        return unless property.casted
-        key = self.has_key?(property.name) ? property.name : property.name.to_sym
-        # Don't cast the property unless it has a value
-        return unless self[key]
-        if property.type.is_a?(Array)
-          klass = property.type[0]
-          self[key] = [self[key]] unless self[key].is_a?(Array)
-          arr = self[key].collect do |value|
-            value = typecast_value(value, klass, property.init_method)
-            associate_casted_to_parent(value, assigned)
-            value
-          end
-          # allow casted_by calls to be passed up chain by wrapping in CastedArray
-          self[key] = klass != String ? ::CouchRest::CastedArray.new(arr) : arr
-          self[key].casted_by = self if self[key].respond_to?(:casted_by)
-        else
-          self[key] = typecast_value(self[key], property.type, property.init_method)
-          associate_casted_to_parent(self[key], assigned)
-        end
-      end
-      
-      def associate_casted_to_parent(casted, assigned)
-        casted.casted_by = self if casted.respond_to?(:casted_by)
-        casted.document_saved = true if !assigned && casted.respond_to?(:document_saved)
-      end
-      
-      def cast_property_by_name(property_name)
-        return unless self.class.properties
-        property = self.class.properties.detect{|property| property.name == property_name}
-        return unless property
-        cast_property(property, true)
-      end
-      
      
       module ClassMethods
         
-        def property(name, *options)
+        def property(name, *options, &block)
           opts = { }
           type = options.shift
           if type.class != Hash
@@ -93,21 +56,29 @@ module CouchRest
           end
           existing_property = self.properties.find{|p| p.name == name.to_s}
           if existing_property.nil? || (existing_property.default != opts[:default])
-            define_property(name, opts)
+            define_property(name, opts, &block)
           end
         end
         
         protected
         
           # This is not a thread safe operation, if you have to set new properties at runtime
-          # make sure to use a mutex.
-          def define_property(name, options={})
+          # make sure a mutex is used.
+          def define_property(name, options={}, &block)
             # check if this property is going to casted
-            options[:casted] = !!(options[:cast_as] || options[:type])
-            property = CouchRest::Property.new(name, (options.delete(:cast_as) || options.delete(:type)), options)
+            type = options.delete(:type) || options.delete(:cast_as)
+            if block_given?
+              type = Class.new(Hash) do
+                include CastedModel
+              end
+              type.class_eval { yield type }
+              type = [type] # inject as an array
+            end
+            property = CouchRest::Property.new(name, type, options)
             create_property_getter(property) 
             create_property_setter(property) unless property.read_only == true
             properties << property
+            property
           end
           
           # defines the getter for the property (and optional aliases)
@@ -115,18 +86,15 @@ module CouchRest
             # meth = property.name
             class_eval <<-EOS, __FILE__, __LINE__ + 1
               def #{property.name}
-                self['#{property.name}']
+                read_attribute('#{property.name}')
               end
             EOS
 
             if ['boolean', TrueClass.to_s.downcase].include?(property.type.to_s.downcase)
               class_eval <<-EOS, __FILE__, __LINE__
                 def #{property.name}?
-                  if self['#{property.name}'].nil? || self['#{property.name}'] == false
-                    false
-                  else
-                    true
-                  end
+                  value = read_attribute('#{property.name}')
+                  !(value.nil? || value == false)
                 end
               EOS
             end
@@ -143,8 +111,7 @@ module CouchRest
             property_name = property.name
             class_eval <<-EOS
               def #{property_name}=(value)
-                self['#{property_name}'] = value
-                cast_property_by_name('#{property_name}')
+                write_attribute('#{property_name}', value)
               end
             EOS
 

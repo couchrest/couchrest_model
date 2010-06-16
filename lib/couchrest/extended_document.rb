@@ -18,6 +18,7 @@ module CouchRest
     include CouchRest::Mixins::ClassProxy
     include CouchRest::Mixins::Collection
     include CouchRest::Mixins::AttributeProtection
+    include CouchRest::Mixins::Attributes
 
     # Including validation here does not work due to the way inheritance is handled.
     #include CouchRest::Validation
@@ -57,12 +58,17 @@ module CouchRest
       base.new(doc, :directly_set_attributes => true)      
     end
     
+
+    # Instantiate a new ExtendedDocument by preparing all properties
+    # using the provided document hash.
+    #
+    # Options supported:
+    # 
+    # * :directly_set_attributes: true when data comes directly from database
+    #
     def initialize(doc = {}, options = {})
-      apply_defaults # defined in CouchRest::Mixins::Properties
-      remove_protected_attributes(doc) unless options[:directly_set_attributes]
-      directly_set_attributes(doc) unless doc.nil?
+      prepare_all_attributes(doc, options) # defined in CouchRest::Mixins::Attributes
       super(doc)
-      cast_keys      # defined in CouchRest::Mixins::Properties
       unless self['_id'] && self['_rev']
         self['couchrest-type'] = self.class.to_s
       end
@@ -94,12 +100,12 @@ module CouchRest
     # decent time format by default. See Time#to_json
     def self.timestamps!
       class_eval <<-EOS, __FILE__, __LINE__
-        property(:updated_at, :read_only => true, :type => 'Time', :auto_validation => false)
-        property(:created_at, :read_only => true, :type => 'Time', :auto_validation => false)
+        property(:updated_at, Time, :read_only => true, :protected => true, :auto_validation => false)
+        property(:created_at, Time, :read_only => true, :protected => true, :auto_validation => false)
         
         set_callback :save, :before do |object|
-          object['updated_at'] = Time.now
-          object['created_at'] = object['updated_at'] if object.new?
+          write_attribute('updated_at', Time.now)
+          write_attribute('created_at', Time.now) if object.new?
         end
       EOS
     end
@@ -142,14 +148,6 @@ module CouchRest
     
     ### instance methods
     
-    # Returns the Class properties
-    #
-    # ==== Returns
-    # Array:: the list of properties for the instance
-    def properties
-      self.class.properties
-    end
-    
     # Gets a reference to the actual document in the DB
     # Calls up to the next document if there is one,
     # Otherwise we're at the top and we return self
@@ -163,28 +161,6 @@ module CouchRest
       !@casted_by
     end
     
-    # Takes a hash as argument, and applies the values by using writer methods
-    # for each key. It doesn't save the document at the end. Raises a NoMethodError if the corresponding methods are
-    # missing. In case of error, no attributes are changed.    
-    def update_attributes_without_saving(hash)
-      # remove attributes that cannot be updated, silently ignoring them
-      # which matches Rails behavior when, for instance, setting created_at.
-      # make a copy, we don't want to change arguments
-      attrs = hash.dup
-      %w[_id _rev created_at updated_at].each {|attr| attrs.delete(attr)}
-      check_properties_exist(attrs)
-			set_attributes(attrs)
-    end
-    alias :attributes= :update_attributes_without_saving
-
-    # Takes a hash as argument, and applies the values by using writer methods
-    # for each key. Raises a NoMethodError if the corresponding methods are
-    # missing. In case of error, no attributes are changed.
-    def update_attributes(hash)
-      update_attributes_without_saving hash
-      save
-    end
-
     # for compatibility with old-school frameworks
     alias :new_record? :new?
     alias :new_document? :new?
@@ -255,7 +231,6 @@ module CouchRest
       raise ArgumentError, "a document requires a database to be saved to (The document or the #{self.class} default database were not set)" unless database
       set_unique_id if new? && self.respond_to?(:set_unique_id)
       result = database.save_doc(self, bulk)
-      mark_as_saved 
       result["ok"] == true
     end
     
@@ -281,43 +256,6 @@ module CouchRest
         end
       end
     end
-    
-    protected
-    
-    # Set document_saved flag on all casted models to true
-    def mark_as_saved
-      self.each do |key, prop|
-        if prop.is_a?(Array)
-          prop.each do |item|
-            if item.respond_to?(:document_saved)
-              item.send(:document_saved=, true)
-            end
-          end
-        elsif prop.respond_to?(:document_saved)
-          prop.send(:document_saved=, true)
-        end
-      end
-    end
-
-		private
-
-		def check_properties_exist(attrs)
-      attrs.each do |attribute_name, attribute_value|
-        raise NoMethodError, "#{attribute_name}= method not available, use property :#{attribute_name}" unless self.respond_to?("#{attribute_name}=")
-      end      
-		end
-    
-    def directly_set_attributes(hash)
-      hash.each do |attribute_name, attribute_value|
-        if self.respond_to?("#{attribute_name}=")
-          self.send("#{attribute_name}=", hash.delete(attribute_name))
-        end
-      end
-    end
-    
-		def set_attributes(hash)
-			attrs = remove_protected_attributes(hash)
-			directly_set_attributes(attrs)
-		end
+  
   end
 end

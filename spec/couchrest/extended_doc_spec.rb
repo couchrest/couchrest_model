@@ -226,18 +226,19 @@ describe "ExtendedDocument" do
       @art['title'].should == "something else"
     end
     
-    it "should flip out if an attribute= method is missing" do
+    it "should not flip out if an attribute= method is missing and ignore it" do
       lambda {
-        @art.update_attributes_without_saving('slug' => "new-slug", :title => "super danger")        
-      }.should raise_error
+        @art.update_attributes_without_saving('slug' => "new-slug", :title => "super danger")
+      }.should_not raise_error
+      @art.slug.should == "big-bad-danger"
     end
     
-    it "should not change other attributes if there is an error" do
-      lambda {
-        @art.update_attributes_without_saving('slug' => "new-slug", :title => "super danger")        
-      }.should raise_error
-      @art['title'].should == "big bad danger"
-    end
+    #it "should not change other attributes if there is an error" do
+    #  lambda {
+    #    @art.update_attributes_without_saving('slug' => "new-slug", :title => "super danger")        
+    #  }.should raise_error
+    #  @art['title'].should == "big bad danger"
+    #end
   end
   
   describe "update attributes" do

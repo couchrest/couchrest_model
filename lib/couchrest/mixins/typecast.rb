@@ -1,7 +1,6 @@
 require 'time'
 require 'bigdecimal'
 require 'bigdecimal/util'
-require File.join(File.dirname(__FILE__), 'property')
 
 class Time                       
   # returns a local time value much faster than Time.parse
@@ -23,19 +22,19 @@ class Time
 end
 
 module CouchRest
-  module More
+  module Mixins
     module Typecast
 
-      def typecast_value(value, klass, init_method)
+      def typecast_value(value, property) # klass, init_method)
         return nil if value.nil?
-        klass = klass.constantize unless klass.is_a?(Class)
+        klass = property.type_class
         if value.instance_of?(klass) || klass == Object
           value
         elsif [String, TrueClass, Integer, Float, BigDecimal, DateTime, Time, Date, Class].include?(klass)
           send('typecast_to_'+klass.to_s.downcase, value)
         else
           # Allow the init_method to be defined as a Proc for advanced conversion
-          init_method.is_a?(Proc) ? init_method.call(value) : klass.send(init_method, value)
+          property.init_method.is_a?(Proc) ? property.init_method.call(value) : klass.send(property.init_method, value)
         end
       end
 
