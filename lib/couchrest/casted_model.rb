@@ -2,19 +2,18 @@ module CouchRest
   module CastedModel
     
     def self.included(base)
+      base.send(:include, ::CouchRest::Mixins::AttributeProtection)
+      base.send(:include, ::CouchRest::Mixins::Attributes)
       base.send(:include, ::CouchRest::Mixins::Callbacks)
       base.send(:include, ::CouchRest::Mixins::Properties)
-      base.send(:include, ::CouchRest::Mixins::Assocations)
+      base.send(:include, ::CouchRest::Mixins::Associations)
       base.send(:attr_accessor, :casted_by)
     end
     
-    def initialize(keys={})
+    def initialize(keys = {})
       raise StandardError unless self.is_a? Hash
-      apply_all_property_defaults # defined in CouchRest::Mixins::Properties
+      prepare_all_attributes(keys)
       super()
-      keys.each do |k,v|
-        write_attribute(k.to_s, v)
-      end if keys
     end
     
     def []= key, value

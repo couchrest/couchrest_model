@@ -16,6 +16,7 @@
 * Major enhancements
   * Added support for anonymous CastedModels defined in Documents
   * Added initial support for simple belongs_to associations 
+  * Added support for basic collection_of association (unique to document databases!)
 
 == 1.0.0.beta5
 
