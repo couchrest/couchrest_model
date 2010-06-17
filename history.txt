@@ -11,9 +11,11 @@
   * Fixed issue with active_support in Rails3 and text in README for JSON.
   * Refactoring of properties, added read_attribute and write_attribute methods.
   * Now possible to send anything to update_attribtues method. Invalid or readonly attributes will be ignored.
+  * Attributes with arrays are *always* instantiated as a CastedArray.
 
 * Major enhancements
   * Added support for anonymous CastedModels defined in Documents
+  * Added initial support for simple belongs_to associations 
 
 == 1.0.0.beta5
 

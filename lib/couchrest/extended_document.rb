@@ -19,6 +19,7 @@ module CouchRest
     include CouchRest::Mixins::Collection
     include CouchRest::Mixins::AttributeProtection
     include CouchRest::Mixins::Attributes
+    include CouchRest::Mixins::Associations
 
     # Including validation here does not work due to the way inheritance is handled.
     #include CouchRest::Validation

@@ -4,7 +4,7 @@ class Invoice < CouchRest::ExtendedDocument
   
   # Set the default database to use
   use_database DB
-  
+
   # Official Schema
   property :client_name
   property :employee_name
