@@ -8,7 +8,7 @@ module CouchRest
   # Same as CouchRest::Document but with properties and validations
   class ExtendedDocument < Document
 
-    VERSION = "1.0.0.beta5"
+    VERSION = "1.0.0.beta6"
 
     include CouchRest::Mixins::Callbacks
     include CouchRest::Mixins::DocumentQueries    
