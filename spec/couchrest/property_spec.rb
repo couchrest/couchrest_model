@@ -42,13 +42,14 @@ describe "ExtendedDocument properties" do
   end
   
   it "should let you use an alias for a casted attribute" do
-    @card.cast_alias = Person.new(:name => "Aimonetti")
+    @card.cast_alias = Person.new(:name => ["Aimonetti"])
     @card.cast_alias.name.should == ["Aimonetti"]
     @card.calias.name.should == ["Aimonetti"]
-    card = Card.new(:first_name => "matt", :cast_alias => {:name => "Aimonetti"})
+    card = Card.new(:first_name => "matt", :cast_alias => {:name => ["Aimonetti"]})
     card.cast_alias.name.should == ["Aimonetti"]
     card.calias.name.should == ["Aimonetti"]
   end
+
   
   it "should be auto timestamped" do
     @card.created_at.should be_nil
@@ -658,6 +659,57 @@ describe "ExtendedDocument properties" do
     end
 
   end
+end
+
+describe "properties of array of casted models" do
+  
+  before(:each) do
+    @course = Course.new :title => 'Test Course'
+  end
+
+  it "should allow attribute to be set from an array of objects" do
+    @course.questions = [Question.new(:q => "works?"), Question.new(:q => "Meaning of Life?")]
+    @course.questions.length.should eql(2)
+  end
+
+  it "should allow attribute to be set from an array of hashes" do
+    @course.questions = [{:q => "works?"}, {:q => "Meaning of Life?"}]
+    @course.questions.length.should eql(2)
+    @course.questions.last.q.should eql("Meaning of Life?")
+    @course.questions.last.class.should eql(Question) # typecasting
+  end
+
+  it "should allow attribute to be set from hash with ordered keys and objects" do
+    @course.questions = { '0' => Question.new(:q => "Test1"), '1' => Question.new(:q => 'Test2') }
+    @course.questions.length.should eql(2)
+    @course.questions.last.q.should eql('Test2')
+    @course.questions.last.class.should eql(Question)
+  end
+
+  it "should allow attribute to be set from hash with ordered keys and sub-hashes" do
+    @course.questions = { '0' => {:q => "Test1"}, '1' => {:q => 'Test2'} }
+    @course.questions.length.should eql(2)
+    @course.questions.last.q.should eql('Test2')
+    @course.questions.last.class.should eql(Question)
+  end
+
+  it "should allow attribute to be set from hash with ordered keys and HashWithIndifferentAccess" do
+    # This is similar to what you'd find in an HTML POST parameters
+    hash = HashWithIndifferentAccess.new({ '0' => {:q => "Test1"}, '1' => {:q => 'Test2'} })
+    @course.questions = hash
+    @course.questions.length.should eql(2)
+    @course.questions.last.q.should eql('Test2')
+    @course.questions.last.class.should eql(Question)
+  end
+
+
+  it "should raise an error if attempting to set single value for array type" do
+    lambda {
+      @course.questions = Question.new(:q => 'test1')
+    }.should raise_error
+  end
+
+
 end
 
 describe "a casted model retrieved from the database" do

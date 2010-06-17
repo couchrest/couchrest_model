@@ -348,7 +348,7 @@ describe CouchRest::CastedModel do
   describe "calling base_doc from a nested casted model" do
     before :each do
       @course = Course.new(:title => 'Science 101')
-      @professor = Person.new(:name => 'Professor Plum')
+      @professor = Person.new(:name => ['Professor', 'Plum'])
       @cat = Cat.new(:name => 'Scratchy')
       @toy1 = CatToy.new
       @toy2 = CatToy.new

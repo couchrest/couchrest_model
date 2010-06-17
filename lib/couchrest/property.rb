@@ -28,8 +28,18 @@ module CouchRest
     def cast(parent, value)
       return value unless casted
       if type.is_a?(Array)
-        # Convert to array if it is not already
-        value = [value].compact unless value.is_a?(Array)
+        if value.nil?
+          value = []
+        elsif [Hash, HashWithIndifferentAccess].include?(value.class)
+          # Assume provided as a Hash where key is index!
+          data = value
+          value = [ ]
+          data.keys.sort.each do |k|
+            value << data[k]
+          end
+        elsif value.class != Array
+          raise "Expecting an array or keyed hash for property #{parent.class.name}##{self.name}"
+        end
         arr = value.collect { |data| cast_value(parent, data) }
         # allow casted_by calls to be passed up chain by wrapping in CastedArray
         value = type_class != String ? ::CouchRest::CastedArray.new(arr, self) : arr

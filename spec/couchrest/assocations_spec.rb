@@ -146,6 +146,12 @@ describe "Assocations" do
       @invoice.entries.should be_empty
     end
 
+    it "should ignore nil entries" do
+      @invoice.entries = [ nil ]
+      @invoice.entry_ids.should be_empty
+      @invoice.entries.should be_empty
+    end
+
     describe "proxy" do
 
       it "should ensure new entries to proxy are matched" do

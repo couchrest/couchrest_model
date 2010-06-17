@@ -12,6 +12,8 @@
   * Refactoring of properties, added read_attribute and write_attribute methods.
   * Now possible to send anything to update_attribtues method. Invalid or readonly attributes will be ignored.
   * Attributes with arrays are *always* instantiated as a CastedArray.
+  * Setting a property of type Array (or keyed hash) must be an array or an error will be raised.
+  * Now possible to set Array attribute from hash where keys determine order.
 
 * Major enhancements
   * Added support for anonymous CastedModels defined in Documents

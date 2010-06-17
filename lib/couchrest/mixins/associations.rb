@@ -75,6 +75,9 @@ module CouchRest
         #
         # Addtional options match those of the the belongs_to method.
         #
+        # NOTE: This method is *not* recommended for large collections or collections that change
+        # frequently! Use with prudence.
+        #
         def collection_of(attrib, *options)
           opts = {
             :foreign_key => attrib.to_s.singularize + '_ids',
@@ -153,7 +156,6 @@ module CouchRest
           EOS
         end
 
-
       end
 
     end
@@ -168,9 +170,9 @@ module CouchRest
     def initialize(array, casted_by, property)
       self.property = property
       self.casted_by = casted_by
-      array ||= []
+      (array ||= []).compact!
       casted_by[property.to_s] = [] # replace the original array!
-      array.each do |obj|
+      array.compact.each do |obj|
         casted_by[property.to_s] << obj.id
       end
       super(array)
