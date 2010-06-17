@@ -77,3 +77,4 @@ describe "Assocations" do
   end
 
 end
+
