@@ -102,15 +102,24 @@ module CouchRest
           fetch_view_with_docs(db, name, query, raw, &block)
         end
 
-        # Find the first entry that matches the provided key.
-        # Request like:
+        # Find the first entry in the view. If the second parameter is a string
+        # it will be used as the key for the request, for example:
         #
-        #     Course.find_first_from_view('teachers', 'Fred')
+        #     Course.first_from_view('by_teacher', 'Fred')
         #
-        def find_first_from_view(name, *args)
-          key = args[0]
-          query = args[1] || {}
-          query.update(:limit => 1, :key => key)
+        # More advanced requests can be performed by providing a hash:
+        #
+        #     Course.first_from_view('by_teacher', :startkey => 'bbb', :endkey => 'eee')
+        #
+        def first_from_view(name, *args)
+          query = {:limit => 1}
+          case args.first
+          when String, Array
+            query.update(args[1]) unless args[1].nil?
+            query[:key] = args.first
+          when Hash
+            query.update(args.first)
+          end
           view(name, query).first
         end
 

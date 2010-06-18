@@ -94,9 +94,10 @@ module CouchRest
           docs
         end
         
-        def find_first_from_view(name, *args)
-          (args[1] ||= {})[:database] = @database
-          doc = @klass.find_first_from_view(name, args)
+        def first_from_view(name, *args)
+          # add to first hash available, or add to end
+          (args.last.is_a?(Hash) ? args.last : (args << {}).last)[:database] = @database
+          doc = @klass.first_from_view(name, *args)
           doc.database = @database if doc && doc.respond_to?(:database)
           doc
         end
