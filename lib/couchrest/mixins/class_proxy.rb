@@ -47,10 +47,14 @@ module CouchRest
         def method_missing(m, *args, &block)
           if has_view?(m)
             query = args.shift || {}
-            view(m, query, *args, &block)
-          else
-            super
+            return view(m, query, *args, &block)
+          elsif m.to_s =~ /^find_(by_.+)/
+            view_name = $1
+            if has_view?(view_name)
+              return find_first_from_view(view_name, *args) 
+            end
           end
+          super
         end
         
         # Mixins::DocumentQueries
@@ -76,6 +80,7 @@ module CouchRest
           doc.database = @database if doc && doc.respond_to?(:database)
           doc
         end
+        alias :find :get
         
         # Mixins::Views
         
@@ -89,6 +94,12 @@ module CouchRest
           docs
         end
         
+        def find_first_from_view(name, *args)
+          (args[1] ||= {})[:database] = @database
+          doc = @klass.find_first_from_view(name, args)
+          doc.database = @database if doc && doc.respond_to?(:database)
+          doc
+        end
        
         # Mixins::DesignDoc
         

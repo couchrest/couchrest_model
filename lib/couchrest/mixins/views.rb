@@ -102,6 +102,18 @@ module CouchRest
           fetch_view_with_docs(db, name, query, raw, &block)
         end
 
+        # Find the first entry that matches the provided key.
+        # Request like:
+        #
+        #     Course.find_first_from_view('teachers', 'Fred')
+        #
+        def find_first_from_view(name, *args)
+          key = args[0]
+          query = args[1] || {}
+          query.update(:limit => 1, :key => key)
+          view(name, query).first
+        end
+
         private
 
         def fetch_view_with_docs(db, name, opts, raw=false, &block)

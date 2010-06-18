@@ -126,7 +126,7 @@ describe "ExtendedDocument views" do
       end
     end
 
-    it "should return single matched record" do
+    it "should return single matched record with find helper" do
       course = Course.find_by_title('bbb')
       course.should_not be_nil
       course.title.should eql('bbb') # Ensure really is a Course!
@@ -151,6 +151,7 @@ describe "ExtendedDocument views" do
     it "should raise exception if view not present" do
       lambda { Course.find_by_foobar('123') }.should raise_error(NoMethodError)
     end
+
   end
   
   describe "a ducktype view" do
