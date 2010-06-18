@@ -51,7 +51,7 @@ module CouchRest
           elsif m.to_s =~ /^find_(by_.+)/
             view_name = $1
             if has_view?(view_name)
-              return find_first_from_view(view_name, *args) 
+              return first_from_view(view_name, *args) 
             end
           end
           super

@@ -60,6 +60,10 @@ describe "Proxy Class" do
     @us.first_from_view('by_title', 'bbb', :limit => 1)
   end
 
+  it "should allow dynamic view matching for single elements" do
+    @us.should_receive(:first_from_view).with('by_title', 'bbb')
+    @us.find_by_title('bbb')
+  end
 
   it "should yield" do
     things = []
