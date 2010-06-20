@@ -1,9 +1,4 @@
-class Card < CouchRest::ExtendedDocument  
-  # Include the validation module to get access to the validation methods
-  include CouchRest::Validation
-  # set the auto_validation before defining the properties
-  auto_validate!
-  
+class Card < CouchRest::Model::Base 
   # Set the default database to use
   use_database DB
   

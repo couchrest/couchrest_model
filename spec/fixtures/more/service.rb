@@ -1,12 +1,10 @@
-class Service < CouchRest::ExtendedDocument  
-  # Include the validation module to get access to the validation methods
-  include CouchRest::Validation
-  auto_validate!
+class Service < CouchRest::Model::Base
   # Set the default database to use
   use_database DB
   
   # Official Schema
-  property :name, :length => 4...20
-  property :price, :type => 'Integer'
+  property :name
+  property :price, Integer
   
+  validates_length_of :name, :minimum => 4, :maximum => 20
 end

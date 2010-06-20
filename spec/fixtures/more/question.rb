@@ -1,5 +1,5 @@
 class Question < Hash
-  include ::CouchRest::CastedModel
+  include ::CouchRest::Model::CastedModel
   
   property :q
   property :a

@@ -1,39 +1,33 @@
 # encoding: utf-8
 
 require File.expand_path('../../spec_helper', __FILE__)
+require File.join(FIXTURE_PATH, 'more', 'cat')
 require File.join(FIXTURE_PATH, 'more', 'person')
 require File.join(FIXTURE_PATH, 'more', 'card')
-require File.join(FIXTURE_PATH, 'more', 'cat')
 require File.join(FIXTURE_PATH, 'more', 'question')
 require File.join(FIXTURE_PATH, 'more', 'course')
 
 
 class WithCastedModelMixin < Hash
-  include CouchRest::CastedModel
+  include CouchRest::Model::CastedModel
   property :name
   property :no_value
-  property :details, :type => 'Object', :default => {}
-  property :casted_attribute, :cast_as => 'WithCastedModelMixin'
+  property :details, Object, :default => {}
+  property :casted_attribute, WithCastedModelMixin
 end
 
-class DummyModel < CouchRest::ExtendedDocument
+class DummyModel < CouchRest::Model::Base
   use_database TEST_SERVER.default_database
   raise "Default DB not set" if TEST_SERVER.default_database.nil?
   property :casted_attribute, WithCastedModelMixin
-  property :keywords,         ["String"]
+  property :keywords,         [String]
   property :sub_models do |child|
     child.property :title
   end
 end
 
-class CastedCallbackDoc < CouchRest::ExtendedDocument
-  use_database TEST_SERVER.default_database
-  raise "Default DB not set" if TEST_SERVER.default_database.nil?
-  property :callback_model, :cast_as => 'WithCastedCallBackModel'
-end
 class WithCastedCallBackModel < Hash
-  include CouchRest::CastedModel
-  include CouchRest::Validation
+  include CouchRest::Model::CastedModel
   property :name
   property :run_before_validate
   property :run_after_validate
@@ -46,7 +40,13 @@ class WithCastedCallBackModel < Hash
   end
 end
 
-describe CouchRest::CastedModel do
+class CastedCallbackDoc < CouchRest::Model::Base
+  use_database TEST_SERVER.default_database
+  raise "Default DB not set" if TEST_SERVER.default_database.nil?
+  property :callback_model, WithCastedCallBackModel
+end
+
+describe CouchRest::Model::CastedModel do
   
   describe "A non hash class including CastedModel" do
     it "should fail raising and include error" do
@@ -227,7 +227,7 @@ describe CouchRest::CastedModel do
       @cat.toys.push(toy)
       @cat.save.should be_true
       @cat = Cat.get @cat.id
-      @cat.toys.class.should == CouchRest::CastedArray
+      @cat.toys.class.should == CouchRest::Model::CastedArray
       @cat.toys.first.class.should == CatToy
       @cat.toys.first.should === toy
     end
@@ -240,7 +240,7 @@ describe CouchRest::CastedModel do
     end
     
     it "should not fail if the casted model doesn't have validation" do
-      Cat.property :masters, :cast_as => ['Person'], :default => []
+      Cat.property :masters, [Person], :default => []
       Cat.validates_presence_of :name
       cat = Cat.new(:name => 'kitty')
       cat.should be_valid

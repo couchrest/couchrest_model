@@ -1,16 +1,16 @@
 # encoding: utf-8
 require File.expand_path('../../spec_helper', __FILE__)
+require File.join(FIXTURE_PATH, 'more', 'cat')
 require File.join(FIXTURE_PATH, 'more', 'person')
 require File.join(FIXTURE_PATH, 'more', 'card')
 require File.join(FIXTURE_PATH, 'more', 'invoice')
 require File.join(FIXTURE_PATH, 'more', 'service')
 require File.join(FIXTURE_PATH, 'more', 'event')
-require File.join(FIXTURE_PATH, 'more', 'cat')
 require File.join(FIXTURE_PATH, 'more', 'user')
 require File.join(FIXTURE_PATH, 'more', 'course')
 
 
-describe "ExtendedDocument properties" do
+describe "Model properties" do
   
   before(:each) do
     reset_test_db!
@@ -134,27 +134,27 @@ describe "ExtendedDocument properties" do
       @card.first_name = nil
       @card.should_not be_valid
       @card.errors.should_not be_empty
-      @card.errors.on(:first_name).should == ["First name must not be blank"]
+      @card.errors[:first_name].should == ["can't be blank"]
     end
     
     it "should let you look up errors for a field by a string name" do
       @card.first_name = nil
       @card.should_not be_valid
-      @card.errors.on('first_name').should == ["First name must not be blank"]
+      @card.errors['first_name'].should == ["can't be blank"]
     end
 
     it "should validate the presence of 2 attributes" do
       @invoice.clear
       @invoice.should_not be_valid
       @invoice.errors.should_not be_empty
-      @invoice.errors.on(:client_name).first.should == "Client name must not be blank"
-      @invoice.errors.on(:employee_name).should_not be_empty
+      @invoice.errors[:client_name].should == ["can't be blank"]
+      @invoice.errors[:employee_name].should_not be_empty
     end
     
     it "should let you set an error message" do
       @invoice.location = nil
       @invoice.valid?
-      @invoice.errors.on(:location).should == ["Hey stupid!, you forgot the location"]
+      @invoice.errors[:location].should == ["Hey stupid!, you forgot the location"]
     end
     
     it "should validate before saving" do
@@ -165,37 +165,6 @@ describe "ExtendedDocument properties" do
     end
   end
   
-  describe "autovalidation" do
-    before(:each) do
-      @service = Service.new(:name => "Coumpound analysis", :price => 3_000)
-    end
-    
-    it "should be valid" do
-      @service.should be_valid
-    end
-    
-    it "should not respond to properties not setup" do
-      @service.respond_to?(:client_name).should be_false
-    end
-    
-    describe "property :name, :length => 4...20" do
-      
-      it "should autovalidate the presence when length is set" do
-        @service.name = nil
-        @service.should_not be_valid
-        @service.errors.should_not be_nil
-        @service.errors.on(:name).first.should == "Name must be between 4 and 19 characters long"
-      end
-    
-      it "should autovalidate the correct length" do
-        @service.name = "a"
-        @service.should_not be_valid
-        @service.errors.should_not be_nil
-        @service.errors.on(:name).first.should == "Name must be between 4 and 19 characters long"
-      end
-    end
-  end
- 
   describe "casting" do
     before(:each) do
       @course = Course.new(:title => 'Relaxation')
@@ -740,50 +709,43 @@ end
 describe "Property Class" do
 
   it "should provide name as string" do
-    property = CouchRest::Property.new(:test, String)
+    property = CouchRest::Model::Property.new(:test, String)
     property.name.should eql('test')
     property.to_s.should eql('test')
   end
 
   it "should provide class from type" do
-    property = CouchRest::Property.new(:test, String)
+    property = CouchRest::Model::Property.new(:test, String)
     property.type_class.should eql(String)
   end
 
   it "should provide base class from type in array" do
-    property = CouchRest::Property.new(:test, [String])
+    property = CouchRest::Model::Property.new(:test, [String])
     property.type_class.should eql(String)
   end
 
-  it "should leave type as string if requested" do
-    property = CouchRest::Property.new(:test, 'String')
-    property.type.should eql('String')
-    property.type_class.should eql(String)
+  it "should raise error if type as string requested" do
+    lambda {
+      property = CouchRest::Model::Property.new(:test, 'String')
+    }.should raise_error
   end
 
-  it "should leave type nil and return string by default" do
-    property = CouchRest::Property.new(:test, nil)
+  it "should leave type nil and return class as nil also" do
+    property = CouchRest::Model::Property.new(:test, nil)
     property.type.should be_nil
-    # Type cast should never be used on non-casted property!
-    property.type_class.should eql(String)
+    property.type_class.should be_nil
   end
 
-  it "should convert empty type array to [String]" do
-    property = CouchRest::Property.new(:test, [])
-    property.type_class.should eql(String)
-  end
-
-  it "should convert boolean text-type TrueClass" do
-    property = CouchRest::Property.new(:test, 'boolean')
-    property.type.should eql('boolean') # no change
-    property.type_class.should eql(TrueClass)
+  it "should convert empty type array to [Object]" do
+    property = CouchRest::Model::Property.new(:test, [])
+    property.type_class.should eql(Object)
   end
 
   it "should set init method option or leave as 'new'" do
     # (bad example! Time already typecast)
-    property = CouchRest::Property.new(:test, Time)
+    property = CouchRest::Model::Property.new(:test, Time)
     property.init_method.should eql('new')
-    property = CouchRest::Property.new(:test, Time, :init_method => 'parse')
+    property = CouchRest::Model::Property.new(:test, Time, :init_method => 'parse')
     property.init_method.should eql('parse')
   end
 
@@ -791,32 +753,32 @@ describe "Property Class" do
 
   describe "casting" do
     it "should cast a value" do
-      property = CouchRest::Property.new(:test, Date)
+      property = CouchRest::Model::Property.new(:test, Date)
       parent = mock("FooObject")
       property.cast(parent, "2010-06-16").should eql(Date.new(2010, 6, 16))
       property.cast_value(parent, "2010-06-16").should eql(Date.new(2010, 6, 16))
     end
 
     it "should cast an array of values" do
-      property = CouchRest::Property.new(:test, [Date])
+      property = CouchRest::Model::Property.new(:test, [Date])
       parent = mock("FooObject")
       property.cast(parent, ["2010-06-01", "2010-06-02"]).should eql([Date.new(2010, 6, 1), Date.new(2010, 6, 2)])
     end
 
     it "should set a CastedArray on array of Objects" do
-      property = CouchRest::Property.new(:test, [Object])
+      property = CouchRest::Model::Property.new(:test, [Object])
       parent = mock("FooObject")
-      property.cast(parent, ["2010-06-01", "2010-06-02"]).class.should eql(::CouchRest::CastedArray)
+      property.cast(parent, ["2010-06-01", "2010-06-02"]).class.should eql(CouchRest::Model::CastedArray)
     end
 
     it "should not set a CastedArray on array of Strings" do
-      property = CouchRest::Property.new(:test, [String])
+      property = CouchRest::Model::Property.new(:test, [String])
       parent = mock("FooObject")
-      property.cast(parent, ["2010-06-01", "2010-06-02"]).class.should_not eql(::CouchRest::CastedArray)
+      property.cast(parent, ["2010-06-01", "2010-06-02"]).class.should_not eql(CouchRest::Model::CastedArray)
     end
 
     it "should raise and error if value is array when type is not" do
-      property = CouchRest::Property.new(:test, Date)
+      property = CouchRest::Model::Property.new(:test, Date)
       parent = mock("FooClass")
       lambda {
         cast = property.cast(parent, [Date.new(2010, 6, 1)])
@@ -825,13 +787,13 @@ describe "Property Class" do
 
 
     it "should set parent as casted_by object in CastedArray" do
-      property = CouchRest::Property.new(:test, [Object])
+      property = CouchRest::Model::Property.new(:test, [Object])
       parent = mock("FooObject")
       property.cast(parent, ["2010-06-01", "2010-06-02"]).casted_by.should eql(parent)     
     end
 
     it "should set casted_by on new value" do
-      property = CouchRest::Property.new(:test, CatToy)
+      property = CouchRest::Model::Property.new(:test, CatToy)
       parent = mock("CatObject")
       cast = property.cast(parent, {:name => 'catnip'})
       cast.casted_by.should eql(parent)

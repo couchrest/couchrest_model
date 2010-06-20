@@ -1,16 +1,13 @@
 
 class CatToy < Hash
-  include ::CouchRest::CastedModel
-  include ::CouchRest::Validation
+  include ::CouchRest::Model::CastedModel
 
   property :name
 
   validates_presence_of :name
 end
 
-class Cat < CouchRest::ExtendedDocument
-  include ::CouchRest::Validation
-
+class Cat < CouchRest::Model::Base
   # Set the default database to use
   use_database DB
 

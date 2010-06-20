@@ -1,7 +1,4 @@
-class Invoice < CouchRest::ExtendedDocument  
-  # Include the validation module to get access to the validation methods
-  include CouchRest::Validation
-  
+class Invoice < CouchRest::Model::Base
   # Set the default database to use
   use_database DB
 

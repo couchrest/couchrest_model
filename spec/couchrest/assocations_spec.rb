@@ -1,21 +1,21 @@
 # encoding: utf-8
 require File.expand_path('../../spec_helper', __FILE__)
 
-class Client < CouchRest::ExtendedDocument
+class Client < CouchRest::Model::Base
   use_database DB
 
   property :name
   property :tax_code
 end
 
-class SaleEntry < CouchRest::ExtendedDocument
+class SaleEntry < CouchRest::Model::Base
   use_database DB
 
   property :description
   property :price
 end
 
-class SaleInvoice < CouchRest::ExtendedDocument  
+class SaleInvoice < CouchRest::Model::Base  
   use_database DB
 
   belongs_to :client
@@ -64,7 +64,7 @@ describe "Assocations" do
 
     it "should raise error if class name does not exist" do
       lambda {
-        class TestBadAssoc < CouchRest::ExtendedDocument
+        class TestBadAssoc < CouchRest::Model::Base
           belongs_to :test_bad_item
         end
       }.should raise_error
@@ -99,7 +99,7 @@ describe "Assocations" do
     it "should create an associated property and collection proxy" do
       @invoice.respond_to?('entry_ids')
       @invoice.respond_to?('entry_ids=')
-      @invoice.entries.class.should eql(::CouchRest::CollectionProxy)
+      @invoice.entries.class.should eql(::CouchRest::CollectionOfProxy)
     end
 
     it "should allow replacement of objects" do

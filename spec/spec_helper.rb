@@ -1,7 +1,7 @@
 require "rubygems"
 require "spec" # Satisfies Autotest and anyone else not using the Rake tasks
 
-require File.join(File.dirname(__FILE__), '..','lib','couchrest_extended_document')
+require File.join(File.dirname(__FILE__), '..','lib','couchrest_model')
 # check the following file to see how to use the spec'd features.
 
 unless defined?(FIXTURE_PATH)
@@ -9,14 +9,13 @@ unless defined?(FIXTURE_PATH)
   SCRATCH_PATH = File.join(File.dirname(__FILE__), '/tmp')
 
   COUCHHOST = "http://127.0.0.1:5984"
-  TESTDB    = 'couchrest-test'
-  REPLICATIONDB = 'couchrest-test-replication'
+  TESTDB    = 'couchrest-model-test'
   TEST_SERVER    = CouchRest.new
   TEST_SERVER.default_database = TESTDB
   DB = TEST_SERVER.database(TESTDB)
 end
 
-class Basic < CouchRest::ExtendedDocument
+class Basic < CouchRest::Model::Base
   use_database TEST_SERVER.default_database
 end
 
