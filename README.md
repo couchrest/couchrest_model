@@ -196,6 +196,47 @@ anonymous classes:
 
 Using this method of anonymous classes will *only* create arrays of objects.
 
+
+## Assocations
+
+Two types at the moment:
+
+    belongs_to :person
+
+    collection_of :tags
+
+TODO: Document properly!
+
+
+
+## Validations
+
+CouchRest Model automatically includes the new ActiveModel validations, so they should work just as the traditional Rails
+validations. For more details, please see the ActiveModel::Validations documentation.
+
+CouchRest Model adds the possibility to check the uniqueness of attributes using the @validates_uniqueness_of@ class method, for example:
+
+    class Person < CouchRest::Model::Base
+      property :title, String
+     
+      validates_uniqueness_of :title
+    end
+
+The uniqueness validation creates a new view for the attribute or uses one that already exists.
+Given that the uniqueness check performs a request to the database, it is also possible
+to include a +:proxy+ parameter. This allows you to
+call a method on the document and provide an alternate proxy object.
+
+Examples:
+
+    # Same as not including proxy:
+    validates_uniqueness_of :title, :proxy => 'class'
+    
+    # Person#company.people provides a proxy object for people
+    validates_uniqueness_of :title, :proxy => 'company.people'
+
+
+
 ## Notable Issues
 
 CouchRest Model uses active_support for some of its internals. Ensure you have a stable active support gem installed 

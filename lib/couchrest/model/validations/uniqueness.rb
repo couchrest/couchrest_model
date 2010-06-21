@@ -20,7 +20,7 @@ module CouchRest
           end
 
           # Determine the base of the search
-          base = options[:proxy].nil? ? @klass : document.send(options[:proxy])
+          base = options[:proxy].nil? ? @klass : document.instance_eval(options[:proxy])
 
           docs = base.view("by_#{attribute}", :key => value, :limit => 2, :include_docs => false)['rows']
           return if docs.empty?

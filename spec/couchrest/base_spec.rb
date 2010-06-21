@@ -429,7 +429,7 @@ describe "Model Base" do
     end
   end
 
-  describe "searching the contents of an extended document" do
+  describe "searching the contents of a model" do
     before :each do
       @db = reset_test_db!
 

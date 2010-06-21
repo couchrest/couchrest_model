@@ -34,6 +34,16 @@ describe "Validations" do
       @obj.should be_valid
     end
 
+    context "with a pre-defined view" do
+      it "should no try to create new view" do
+        @obj = @objs[1]
+        @obj.class.should_not_receive('view_by')
+        @obj.class.should_receive('has_view?').and_return(true)
+        @obj.class.should_receive('view').and_return({'rows' => [ ]})
+        @obj.valid?
+      end
+    end
+ 
     context "with a proxy parameter" do
       it "should be used" do
         @obj = @objs.first
@@ -43,16 +53,7 @@ describe "Validations" do
       end
     end
 
-    context "with a pre-defined view" do
-      it "should no try to create new view" do
-        @obj = @objs.first
-        @obj.class.should_not_receive('view_by')
-        @obj.class.should_receive('has_view?').and_return(true)
-        @obj.class.should_receive('view').and_return({'rows' => [ ]})
-        @obj.valid?
-      end
-    end
-  
+ 
   end
 
 end
