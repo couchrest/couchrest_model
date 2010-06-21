@@ -242,6 +242,32 @@ Examples:
     validates_uniqueness_of :title, :proxy => 'company.people'
 
 
+A really interesting use of +:proxy+ and +:view+ together could be where
+you'd like to ensure the ID is unique between several types of document. For example:
+
+    class Product < CouchRest::Model::Base
+      property :code
+
+      validates_uniqueness_of :code, :view => 'by_product_code'
+
+      view_by :product_code, :map => "
+        function(doc) {
+          if (doc['couchrest-type'] == 'Product' || doc['couchrest-type'] == 'Project') {
+            emit(doc['code']);
+          }
+        }
+      "
+    end
+
+    class Project < CouchRest::Model::Base
+      property :code
+
+      validates_uniqueness_of :code, :view => 'by_product_code', :proxy => 'Product'
+    end
+
+Pretty cool!
+
+
 
 ## Notable Issues
 
