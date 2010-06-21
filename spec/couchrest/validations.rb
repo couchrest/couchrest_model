@@ -34,8 +34,23 @@ describe "Validations" do
       @obj.should be_valid
     end
 
+    it "should allow own view to be specified" do
+      # validates_uniqueness_of :code, :view => 'all'
+      WithUniqueValidationView.create(:title => 'title 1', :code => '1234')
+      @obj = WithUniqueValidationView.new(:title => 'title 5', :code => '1234')
+      @obj.should_not be_valid
+    end
+
+    it "should raise an error if specified view does not exist" do
+      WithUniqueValidationView.validates_uniqueness_of :title, :view => 'fooobar'
+      @obj = WithUniqueValidationView.new(:title => 'title 2', :code => '12345')
+      lambda {
+        @obj.valid?
+      }.should raise_error
+    end
+
     context "with a pre-defined view" do
-      it "should no try to create new view" do
+      it "should not try to create new view" do
         @obj = @objs[1]
         @obj.class.should_not_receive('view_by')
         @obj.class.should_receive('has_view?').and_return(true)
@@ -46,9 +61,8 @@ describe "Validations" do
  
     context "with a proxy parameter" do
       it "should be used" do
-        @obj = @objs.first
+        @obj = WithUniqueValidationProxy.new(:title => 'test 6')
         proxy = @obj.should_receive('proxy').and_return(@obj.class)
-        @obj.class.validates_uniqueness_of :title, :proxy => 'proxy'
         @obj.valid?.should be_true
       end
     end

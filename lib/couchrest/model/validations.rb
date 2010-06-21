@@ -40,10 +40,17 @@ module CouchRest
         #     validates_uniqueness_of :title
         #   end
         #
-        # Asside from the standard options, a +:proxy+ parameter is also accepted if you would 
+        # Asside from the standard options, you can specify the name of the view you'd like
+        # to use for the search inside the +:view+ option. The following example would search
+        # for the code in side the +all+ view, useful for when +unique_id+ is used and you'd
+        # like to check before receiving a RestClient Conflict error:
+        #
+        #   validates_uniqueness_of :code, :view => 'all'
+        #
+        # A +:proxy+ parameter is also accepted if you would 
         # like to call a method on the document on which the view should be performed.
         #
-        # Examples:
+        # For Example:
         #
         #   # Same as not including proxy:
         #   validates_uniqueness_of :title, :proxy => 'class'

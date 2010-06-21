@@ -116,10 +116,24 @@ end
 
 class WithUniqueValidation < CouchRest::Model::Base
   use_database DB
-
+  property :title
+  validates_uniqueness_of :title
+end
+class WithUniqueValidationProxy < CouchRest::Model::Base
+  use_database DB
+  property :title
+  validates_uniqueness_of :title, :proxy => 'proxy'
+end
+class WithUniqueValidationView < CouchRest::Model::Base
+  use_database DB
+  attr_accessor :code
+  unique_id :code
+  def code
+    self["_id"] ||= @code
+  end
   property :title
 
-  validates_uniqueness_of :title
+  validates_uniqueness_of :code, :view => 'all'
 end
 
 

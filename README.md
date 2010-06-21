@@ -222,9 +222,15 @@ CouchRest Model adds the possibility to check the uniqueness of attributes using
       validates_uniqueness_of :title
     end
 
-The uniqueness validation creates a new view for the attribute or uses one that already exists.
+The uniqueness validation creates a new view for the attribute or uses one that already exists. You can
+specify a different view using the +:view+ option, useful for when the @unique_id@ is specified and
+you'd like to avoid the typical RestClient Conflict error:
+
+    unique_id :code
+    validates_uniqueness_of :code, :view => 'all'
+
 Given that the uniqueness check performs a request to the database, it is also possible
-to include a +:proxy+ parameter. This allows you to
+to include a @:proxy@ parameter. This allows you to
 call a method on the document and provide an alternate proxy object.
 
 Examples:
