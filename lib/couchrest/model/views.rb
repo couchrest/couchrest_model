@@ -92,6 +92,7 @@ module CouchRest
 
         # Dispatches to any named view.
         def view(name, query={}, &block)
+          query = query.dup # Modifications made on copy!
           db = query.delete(:database) || database
           refresh_design_doc(db)
           query[:raw] = true if query[:reduce]        

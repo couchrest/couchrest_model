@@ -13,7 +13,22 @@ describe "Model views" do
     property :professor
     view_by :title
   end
-  
+ 
+
+  describe "ClassMethods" do
+    # NOTE! Add more unit tests!
+
+    describe "#view" do
+    
+      it "should not alter original query" do
+        options = { :database => DB }
+        view = Article.view('by_date', options)
+        options[:database].should_not be_nil
+      end
+
+    end
+  end
+
   describe "a model with simple views and a default param" do
     before(:all) do
       Article.all.map{|a| a.destroy(true)}
