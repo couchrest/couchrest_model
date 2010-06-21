@@ -14,6 +14,7 @@
   * Moved Callbacks to ActiveModel
   * Removed support for properties defined using a string for the type instead of a class
   * Validation always included
+  * Uniqueness validation now available
 
 
 == 1.0.0.beta6
