@@ -114,4 +114,12 @@ class WithAfterInitializeMethod < CouchRest::Model::Base
 
 end
 
+class WithUniqueValidation < CouchRest::Model::Base
+  use_database DB
+
+  property :title
+
+  validates_uniqueness_of :title
+end
+
 
