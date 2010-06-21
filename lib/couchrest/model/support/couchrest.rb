@@ -3,10 +3,10 @@ module CouchRest
 
   class Database
 
-    alias :delete_old! :delete!
+    alias :delete_orig! :delete!
     def delete!
       clear_model_fresh_cache
-      delete_old!
+      delete_orig!
     end
 
     # If the database is deleted, ensure that the design docs will be refreshed.
