@@ -109,7 +109,7 @@ module CouchRest
           base = options[:proxy] || options[:class_name]
           class_eval <<-EOS, __FILE__, __LINE__ + 1
             def #{attrib}
-              @#{attrib} ||= #{base}.get(self.#{options[:foreign_key]})
+              @#{attrib} ||= #{options[:foreign_key]}.nil? ? nil : #{base}.get(self.#{options[:foreign_key]})
             end
           EOS
         end

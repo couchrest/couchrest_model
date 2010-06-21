@@ -62,6 +62,12 @@ describe "Assocations" do
       @invoice.client_id.should be_nil
     end
 
+    it "should not try to search for association if foreign_key is nil" do
+      @invoice.client_id = nil
+      Client.should_not_receive(:get)
+      @invoice.client
+    end
+
     it "should raise error if class name does not exist" do
       lambda {
         class TestBadAssoc < CouchRest::Model::Base
