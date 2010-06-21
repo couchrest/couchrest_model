@@ -13,6 +13,7 @@
   * Moved Validation to ActiveModel
   * Moved Callbacks to ActiveModel
   * Removed support for properties defined using a string for the type instead of a class
+  * Validation always included
 
 
 == 1.0.0.beta6
