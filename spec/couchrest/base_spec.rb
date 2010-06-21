@@ -39,7 +39,60 @@ describe "Model Base" do
       @obj.should == { 'couchrest-type' => 'Basic' }
     end
   end
-  
+ 
+  describe "ActiveModel compatability" do
+
+    before(:each) do 
+      @obj = Basic.new(nil)
+    end
+
+    describe "#to_key" do
+      context "when the document is new" do
+        it "returns nil" do
+          @obj.to_key.should be_nil
+        end
+      end
+
+      context "when the document is not new" do
+        it "returns id" do
+          @obj.save
+          @obj.to_key.should eql(@obj['_id'])
+        end
+      end
+    end
+
+    describe "#to_param" do
+      context "when the document is new" do
+        it "returns nil" do
+          @obj.to_param.should be_nil
+        end
+      end
+
+      context "when the document is not new" do
+        it "returns id" do
+          @obj.save
+          @obj.to_param.should eql(@obj['_id'])
+        end
+      end
+    end
+
+    describe "#persisted?" do
+      context "when the document is new" do
+        it "returns false" do
+          @obj.persisted?.should == false
+        end
+      end
+
+      context "when the document is not new" do
+        it "returns id" do
+          @obj.save
+          @obj.persisted?.should == true 
+        end
+      end
+    end
+
+
+  end
   
   describe "update attributes without saving" do
     before(:each) do

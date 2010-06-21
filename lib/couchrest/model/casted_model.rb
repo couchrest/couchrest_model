@@ -40,6 +40,19 @@ module CouchRest::Model
       @casted_by.nil? ? true : @casted_by.new?
     end
     alias :new_record? :new?
+
+    def persisted?
+      !new?
+    end
+
+    # The to_param method is needed for rails to generate resourceful routes.
+    # In your controller, remember that it's actually the id of the document.
+    def id
+      return nil if base_doc.nil?
+      base_doc.id
+    end
+    alias :to_key :id
+    alias :to_param :id
     
     # Sets the attributes from a hash
     def update_attributes_without_saving(hash)
@@ -51,6 +64,5 @@ module CouchRest::Model
       end
     end
     alias :attributes= :update_attributes_without_saving
-    
   end
 end

@@ -54,7 +54,7 @@ module CouchRest
         end
         after_initialize if respond_to?(:after_initialize)
       end
-      
+     
       
       # Temp solution to make the view_by methods available
       def self.method_missing(m, *args, &block)
@@ -85,9 +85,24 @@ module CouchRest
         !@casted_by
       end
       
-      # for compatibility with old-school frameworks
+      ## Compatibility with ActiveSupport and older frameworks
+  
+      # Hack so that CouchRest::Document, which descends from Hash,
+      # doesn't appear to Rails routing as a Hash of options
+      def is_a?(klass)
+        return false if klass == Hash
+        super
+      end
+      alias :kind_of? :is_a?
+
+      def persisted?
+        !new?
+      end
+
       alias :new_record? :new?
       alias :new_document? :new?
+      alias :to_key :id
+      alias :to_param :id
     end    
   end
 end

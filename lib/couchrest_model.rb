@@ -46,11 +46,11 @@ require "couchrest/model/associations"
 
 # Monkey patches applied to couchrest
 require "couchrest/model/support/couchrest"
+require "couchrest/model/support/hash"
 
 # Base libraries
 require "couchrest/model/casted_model"
 require "couchrest/model/base"
 
 # Add rails support *after* everything has loaded
-require "couchrest/model/support/rails" if defined?(Rails)
 
