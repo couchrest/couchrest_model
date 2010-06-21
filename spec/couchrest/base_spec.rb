@@ -40,7 +40,7 @@ describe "Model Base" do
     end
   end
  
-  describe "ActiveModel compatability" do
+  describe "ActiveModel compatability Basic" do
 
     before(:each) do 
       @obj = Basic.new(nil)
@@ -54,9 +54,9 @@ describe "Model Base" do
       end
 
       context "when the document is not new" do
-        it "returns id" do
+        it "returns id in an array" do
           @obj.save
-          @obj.to_key.should eql(@obj['_id'])
+          @obj.to_key.should eql([@obj['_id']])
         end
       end
     end
@@ -88,6 +88,13 @@ describe "Model Base" do
           @obj.save
           @obj.persisted?.should == true 
         end
+      end
+    end
+
+    describe "#model_name" do
+      it "returns the name of the model" do
+        @obj.class.model_name.should eql('Basic')
+        WithDefaultValues.model_name.human.should eql("With default values")
       end
     end
 

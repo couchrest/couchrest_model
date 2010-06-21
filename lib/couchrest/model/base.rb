@@ -98,11 +98,14 @@ module CouchRest
       def persisted?
         !new?
       end
+      
+      def to_key
+        new? ? nil : [id] 
+      end
 
+      alias :to_param :id
       alias :new_record? :new?
       alias :new_document? :new?
-      alias :to_key :id
-      alias :to_param :id
     end    
   end
 end
