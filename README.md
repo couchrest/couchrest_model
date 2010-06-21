@@ -292,13 +292,10 @@ help with migrations.
 
 ### Rails 3.0
 
-In your environment.rb file require the gem as follows:
+In your Gemfile require the gem with a simple line:
 
-    Rails::Initializer.run do |config|
-      ....
-      config.gem "couchrest_model"
-      ....
-    end
+    gem "couchrest_model"
+
 
 ## Testing
 
