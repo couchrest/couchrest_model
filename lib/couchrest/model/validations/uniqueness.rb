@@ -16,14 +16,13 @@ module CouchRest
 
         def validate_each(document, attribute, value)
           view_name = options[:view].nil? ? "by_#{attribute}" : options[:view]
+          # Determine the base of the search
+          base = options[:proxy].nil? ? @klass : document.instance_eval(options[:proxy])
 
-          unless @klass.has_view?(view_name)
+          if base.respond_to?(:has_view?) && !base.has_view?(view_name)
             raise "View #{document.class.name}.#{options[:view]} does not exist!" unless options[:view].nil?
             @klass.view_by attribute
           end
-
-          # Determine the base of the search
-          base = options[:proxy].nil? ? @klass : document.instance_eval(options[:proxy])
 
           docs = base.view(view_name, :key => value, :limit => 2, :include_docs => false)['rows']
           return if docs.empty?

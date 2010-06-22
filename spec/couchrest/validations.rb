@@ -57,6 +57,7 @@ describe "Validations" do
         @obj.class.should_receive('view').and_return({'rows' => [ ]})
         @obj.valid?
       end
+
     end
  
     context "with a proxy parameter" do
@@ -65,6 +66,17 @@ describe "Validations" do
         proxy = @obj.should_receive('proxy').and_return(@obj.class)
         @obj.valid?.should be_true
       end
+
+      it "should allow specific view" do
+        @obj = WithUniqueValidationProxy.new(:title => 'test 7')
+        @obj.class.should_not_receive('view_by')
+        proxy = mock('Proxy')
+        @obj.should_receive('proxy').and_return(proxy)
+        proxy.should_receive('has_view?').and_return(true)
+        proxy.should_receive('view').and_return({'rows' => [ ]})
+        @obj.valid?
+      end
+
     end
 
  
