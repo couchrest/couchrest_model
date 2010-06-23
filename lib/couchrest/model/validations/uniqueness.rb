@@ -1,4 +1,4 @@
-# encoding: urf-8
+# encoding: utf-8
 
 module CouchRest
   module Model

@@ -16,6 +16,9 @@
   * Validation always included
   * Uniqueness validation now available
 
+* Minor enhancements
+  * Removed support for auto_validate! and :length on properties
+
 
 == 1.0.0.beta6
 
