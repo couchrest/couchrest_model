@@ -57,7 +57,7 @@ with a property, but a property may not have any attributes associated if none h
 
 In its simplest form, a property
 will only create a getter and setter passing all attribute data directly to the database. Assuming the attribute
-provided responds to +to_json+, there will not be any problems saving it, but when loading the 
+provided responds to `to_json`, there will not be any problems saving it, but when loading the 
 data back it will either be a string, number, array, or hash:
 
     class Cat < CouchRest::Model::Base
@@ -110,7 +110,7 @@ Adding the +:default+ option will ensure the attribute always has a value.
 
 Defining a property as read-only will mean that its value is set only when read from the
 database and that it will not have a setter method. You can however update a read-only
-attribute using the +write_attribute+ method:
+attribute using the `write_attribute` method:
 
     class Cat < CouchRest::Model::Base
       property :name, String
@@ -145,7 +145,7 @@ By default, the array will be ready to use from the moment the object as been in
     @cat.nicknames == ['Buffy']
 
 When anything other than a string is set as the class of a property, the array will be converted
-into special wrapper called a CastedArray. If the child objects respond to the 'casted_by' method
+into special wrapper called a CastedArray. If the child objects respond to the `casted_by` method
 (such as those created with CastedModel, below) it will contain a reference to the parent.
 
 ## Casted Models
@@ -214,7 +214,7 @@ TODO: Document properly!
 CouchRest Model automatically includes the new ActiveModel validations, so they should work just as the traditional Rails
 validations. For more details, please see the ActiveModel::Validations documentation.
 
-CouchRest Model adds the possibility to check the uniqueness of attributes using the @validates_uniqueness_of@ class method, for example:
+CouchRest Model adds the possibility to check the uniqueness of attributes using the `validates_uniqueness_of` class method, for example:
 
     class Person < CouchRest::Model::Base
       property :title, String
@@ -223,7 +223,7 @@ CouchRest Model adds the possibility to check the uniqueness of attributes using
     end
 
 The uniqueness validation creates a new view for the attribute or uses one that already exists. You can
-specify a different view using the +:view+ option, useful for when the @unique_id@ is specified and
+specify a different view using the `:view` option, useful for when the `unique_id` is specified and
 you'd like to avoid the typical RestClient Conflict error:
 
     unique_id :code
