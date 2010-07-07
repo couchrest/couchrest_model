@@ -30,6 +30,7 @@ begin
     gemspec.add_dependency("mime-types", ">= 1.15")
     gemspec.add_dependency("activesupport", ">= 2.3.5")
     gemspec.add_dependency("activemodel", ">= 3.0.0.beta4")
+    gemspec.add_dependency("tzinfo", ">= 0.3.22")
     gemspec.version = CouchRest::Model::VERSION
     gemspec.date = "2008-11-22"
     gemspec.require_path = "lib"
