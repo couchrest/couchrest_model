@@ -312,7 +312,7 @@ Check the wiki for documentation and examples [http://wiki.github.com/couchrest/
 
 ## Contact
 
-Please post bugs, suggestions and patches to the bug tracker at [http://github.com/couchrest/couchrest/issues](http://github.com/couchrest/couchrest_model/issues).
+Please post bugs, suggestions and patches to the bug tracker at [http://github.com/couchrest/couchrest_model/issues](http://github.com/couchrest/couchrest_model/issues).
 
 Follow us on Twitter: [http://twitter.com/couchrest](http://twitter.com/couchrest)
 
