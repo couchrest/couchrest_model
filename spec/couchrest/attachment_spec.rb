@@ -30,6 +30,13 @@ describe "Model attachments" do
       @obj.delete_attachment(@attachment_name)
       @obj.has_attachment?(@attachment_name).should be_false
     end
+    
+    it 'should return false if an attachment has been removed and reloaded' do
+      @obj.delete_attachment(@attachment_name)
+      reloaded_obj = Basic.get(@obj.id)
+      reloaded_obj.has_attachment?(@attachment_name).should be_false
+    end
+    
   end
 
   describe "creating an attachment" do
