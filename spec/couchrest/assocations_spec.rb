@@ -1,31 +1,6 @@
 # encoding: utf-8
 require File.expand_path('../../spec_helper', __FILE__)
-
-class Client < CouchRest::Model::Base
-  use_database DB
-
-  property :name
-  property :tax_code
-end
-
-class SaleEntry < CouchRest::Model::Base
-  use_database DB
-
-  property :description
-  property :price
-end
-
-class SaleInvoice < CouchRest::Model::Base  
-  use_database DB
-
-  belongs_to :client
-  belongs_to :alternate_client, :class_name => 'Client', :foreign_key => 'alt_client_id'
-
-  collection_of :entries, :class_name => 'SaleEntry'
-
-  property :date, Date
-  property :price, Integer 
-end
+require File.join(FIXTURE_PATH, 'more', 'sale_invoice')
 
 
 describe "Assocations" do
@@ -159,7 +134,7 @@ describe "Assocations" do
     end
 
     describe "proxy" do
-
+      
       it "should ensure new entries to proxy are matched" do
         @invoice.entries << @entries.first
         @invoice.entry_ids.first.should eql(@entries.first.id)
@@ -202,12 +177,17 @@ describe "Assocations" do
         @invoice.entries.first.should eql(@entries[1])
         @invoice.entry_ids.first.should eql(@entries[1].id)
       end
-
+      
+      it "should save all entries when invoice is saved" do
+        SaleEntry.find_by_description('test entry').should be_nil
+        entry = SaleEntry.new(:description => 'test entry', :price => 500)
+        @invoice.entries << entry
+        @invoice.save.should be_true
+        SaleEntry.find_by_description('test entry').should_not be_nil
+      end
 
     end
-  
 
   end
 
 end
-

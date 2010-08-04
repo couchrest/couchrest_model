@@ -2,7 +2,7 @@ module CouchRest
   module Model
     module Associations
 
-      # Basic support for relationships between ExtendedDocuments
+      # Basic support for relationships between CouchRest::Model::Base
       
       def self.included(base)
         base.extend(ClassMethods)
@@ -175,14 +175,17 @@ module CouchRest
       end
       super(array)
     end
+    
     def << obj
       casted_by[property.to_s] << obj.id
       super(obj)
     end
+    
     def push(obj)
       casted_by[property.to_s].push obj.id
       super(obj)
     end
+    
     def unshift(obj)
       casted_by[property.to_s].unshift obj.id
       super(obj)
@@ -197,6 +200,7 @@ module CouchRest
       casted_by[property.to_s].pop
       super
     end
+    
     def shift
       casted_by[property.to_s].shift
       super
