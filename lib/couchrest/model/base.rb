@@ -39,7 +39,7 @@ module CouchRest
       attr_accessor :casted_by
       
 
-      # Instantiate a new ExtendedDocument by preparing all properties
+      # Instantiate a new CouchRest::Model::Base by preparing all properties
       # using the provided document hash.
       #
       # Options supported:
