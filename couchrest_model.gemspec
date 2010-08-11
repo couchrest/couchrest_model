@@ -22,7 +22,6 @@ Gem::Specification.new do |s|
      "README.md",
      "Rakefile",
      "THANKS.md",
-     "examples/model/example.rb",
      "history.txt",
      "lib/couchrest/model.rb",
      "lib/couchrest/model/associations.rb",
@@ -86,9 +85,7 @@ Gem::Specification.new do |s|
      "spec/fixtures/views/test_view/test-map.js",
      "spec/fixtures/views/test_view/test-reduce.js",
      "spec/spec.opts",
-     "spec/spec_helper.rb",
-     "utils/remap.rb",
-     "utils/subset.rb"
+     "spec/spec_helper.rb"
   ]
   s.homepage = %q{http://github.com/couchrest/couchrest_model}
   s.rdoc_options = ["--charset=UTF-8"]
@@ -123,8 +120,7 @@ Gem::Specification.new do |s|
      "spec/fixtures/more/cat.rb",
      "spec/fixtures/more/client.rb",
      "spec/fixtures/more/sale_entry.rb",
-     "spec/fixtures/more/course.rb",
-     "examples/model/example.rb"
+     "spec/fixtures/more/course.rb"
   ]
 
   if s.respond_to? :specification_version then

@@ -3,6 +3,7 @@
 * Major enhancements
 
 * Minor enhancements
+  * Raise error on adding objects to "collection_of" without an id
 
 == CouchRest Model 1.0.0.beta7
 
