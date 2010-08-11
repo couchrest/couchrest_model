@@ -13,7 +13,24 @@ CouchRest Model only supports CouchDB 0.10.0 or newer.
 
 ## Install
 
-    $ sudo gem install couchrest_model
+### From Gem
+
+CouchRest Model depends on Rails 3's ActiveModel which has not yet been released. You'll need to add
+`--pre` to the end of the gem install until the dependencies are stable:
+
+    $ sudo gem install couchrest_model --pre
+
+### Bundler
+
+If you're using bundler, just define a line similar to the following in your project's Gemfile:
+
+    gem 'couchrest_model'
+
+You might also consider using the latest git repository. All tests should pass in the master code branch
+but no guarantees!
+
+    gem 'couchrest_model', :git => 'git://github.com/couchrest/couchrest_model.git'
+
    
 ## General Usage 
 

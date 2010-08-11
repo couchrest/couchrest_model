@@ -26,7 +26,7 @@ begin
     gemspec.extra_rdoc_files = %w( README.md LICENSE THANKS.md )
     gemspec.files = %w( LICENSE README.md Rakefile THANKS.md history.txt couchrest.gemspec) + Dir["{examples,lib,spec,utils}/**/*"] - Dir["spec/tmp"]
     gemspec.has_rdoc = true
-    gemspec.add_dependency("couchrest", ">= 1.0.0.beta")
+    gemspec.add_dependency("couchrest", ">= 1.0.0")
     gemspec.add_dependency("mime-types", ">= 1.15")
     gemspec.add_dependency("activesupport", ">= 2.3.5")
     gemspec.add_dependency("activemodel", ">= 3.0.0.beta4")
