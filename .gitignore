@@ -2,3 +2,6 @@
 html/*
 pkg
 *.swp
+Gemfile*
+.rvmrc
+.bundle
