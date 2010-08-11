@@ -23,13 +23,13 @@ describe "Model Attributes" do
       user.name.should == "will"
       user.phone.should == "555-5555"
     end
-    
+
     it "should recreate from the database properly" do
       user = NoProtection.new
       user.name = "will"
       user.phone = "555-5555"
       user.save!
-      
+
       user = NoProtection.get(user.id)
       user.name.should == "will"
       user.phone.should == "555-5555"
@@ -50,7 +50,7 @@ describe "Model Attributes" do
     end
 
     it "should protect non-accessible properties set through new" do
-      user = WithAccessible.new(:name => "will", :admin => true) 
+      user = WithAccessible.new(:name => "will", :admin => true)
 
       user.name.should == "will"
       user.admin.should == false
@@ -79,7 +79,7 @@ describe "Model Attributes" do
     end
 
     it "should protect non-accessible properties set through new" do
-      user = WithProtected.new(:name => "will", :admin => true) 
+      user = WithProtected.new(:name => "will", :admin => true)
 
       user.name.should == "will"
       user.admin.should == false
@@ -94,15 +94,22 @@ describe "Model Attributes" do
     end
   end
 
-  describe "protected flag" do
-    class WithBoth < CouchRest::Model::Base
+  describe "Model Base", "mixing protected and accessible flags" do
+    class WithBothAndUnspecified < CouchRest::Model::Base
       use_database TEST_SERVER.default_database
       property :name, :accessible => true
       property :admin, :default => false, :protected => true
+      property :phone, :default => 'unset phone number'
     end
 
-    it "should raise an error when both are set" do
-      lambda { WithBoth.new }.should raise_error 
+    it { expect { WithBothAndUnspecified.new }.to_not raise_error }
+
+    it 'should assume that any unspecified property is protected by default' do
+      user = WithBothAndUnspecified.new(:name => 'will', :admin => true, :phone => '555-1234')
+
+      user.name.should == 'will'
+      user.admin.should == false
+      user.phone.should == 'unset phone number'
     end
   end
 
@@ -113,7 +120,7 @@ describe "Model Attributes" do
       property :admin, :default => false, :protected => true
       view_by :name
     end
-    
+
     before(:each) do
       @user = WithProtected.new
       @user.name = "will"
@@ -128,12 +135,12 @@ describe "Model Attributes" do
 
     it "Base#get should not strip protected attributes" do
       reloaded = WithProtected.get( @user.id )
-      verify_attrs reloaded 
+      verify_attrs reloaded
     end
 
     it "Base#get! should not strip protected attributes" do
       reloaded = WithProtected.get!( @user.id )
-      verify_attrs reloaded 
+      verify_attrs reloaded
     end
 
     it "Base#all should not strip protected attributes" do
@@ -141,13 +148,13 @@ describe "Model Attributes" do
       docs = WithProtected.all(:key => @user.id)
       docs.size.should == 1
       reloaded = docs.first
-      verify_attrs reloaded 
+      verify_attrs reloaded
     end
 
     it "views should not strip protected attributes" do
       docs = WithProtected.by_name(:startkey => "will", :endkey => "will")
       reloaded = docs.first
-      verify_attrs reloaded 
+      verify_attrs reloaded
     end
   end
 end
