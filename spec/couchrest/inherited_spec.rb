@@ -21,14 +21,14 @@ begin
   class ExtendedChild < ExtendedParent
   end
 
-  describe "Using chained inheritance without CouchRest::ExtendedDocument" do
+  describe "Using chained inheritance without CouchRest::Model::Base" do
     it "should preserve inheritable attributes" do
       PlainParent.foo.should == :bar
       PlainChild.foo.should == :bar
     end
   end
 
-  describe "Using chained inheritance with CouchRest::ExtendedDocument" do
+  describe "Using chained inheritance with CouchRest::Model::Base" do
     it "should preserve inheritable attributes" do
       ExtendedParent.foo.should == :bar
       ExtendedChild.foo.should == :bar

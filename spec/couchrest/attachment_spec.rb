@@ -30,6 +30,13 @@ describe "Model attachments" do
       @obj.delete_attachment(@attachment_name)
       @obj.has_attachment?(@attachment_name).should be_false
     end
+    
+    it 'should return false if an attachment has been removed and reloaded' do
+      @obj.delete_attachment(@attachment_name)
+      reloaded_obj = Basic.get(@obj.id)
+      reloaded_obj.has_attachment?(@attachment_name).should be_false
+    end
+    
   end
 
   describe "creating an attachment" do
@@ -46,14 +53,14 @@ describe "Model attachments" do
       @obj.create_attachment(:file => @file_ext, :name => @attachment_name)
       @obj.save.should be_true
       reloaded_obj = Basic.get(@obj.id)
-      reloaded_obj['_attachments'][@attachment_name].should_not be_nil
+      reloaded_obj.attachments[@attachment_name].should_not be_nil
     end
   
     it "should create an attachment from file without an extension" do
       @obj.create_attachment(:file => @file_no_ext, :name => @attachment_name)
       @obj.save.should be_true
       reloaded_obj = Basic.get(@obj.id)
-      reloaded_obj['_attachments'][@attachment_name].should_not be_nil
+      reloaded_obj.attachments[@attachment_name].should_not be_nil
     end
   
     it 'should raise ArgumentError if :file is missing' do
@@ -66,19 +73,19 @@ describe "Model attachments" do
   
     it 'should set the content-type if passed' do
       @obj.create_attachment(:file => @file_ext, :name => @attachment_name, :content_type => @content_type)
-      @obj['_attachments'][@attachment_name]['content_type'].should == @content_type
+      @obj.attachments[@attachment_name]['content_type'].should == @content_type
     end
 
     it "should detect the content-type automatically" do
       @obj.create_attachment(:file => File.open(FIXTURE_PATH + '/attachments/couchdb.png'), :name => "couchdb.png")
-      @obj['_attachments']['couchdb.png']['content_type'].should == "image/png" 
+      @obj.attachments['couchdb.png']['content_type'].should == "image/png" 
     end
 
     it "should use name to detect the content-type automatically if no file" do
       file = File.open(FIXTURE_PATH + '/attachments/couchdb.png')
       file.stub!(:path).and_return("badfilname")
       @obj.create_attachment(:file => File.open(FIXTURE_PATH + '/attachments/couchdb.png'), :name => "couchdb.png")
-      @obj['_attachments']['couchdb.png']['content_type'].should == "image/png" 
+      @obj.attachments['couchdb.png']['content_type'].should == "image/png" 
     end
 
   end
@@ -113,7 +120,7 @@ describe "Model attachments" do
       file = File.open(FIXTURE_PATH + '/attachments/README')
       @file.should_not == file
       @obj.update_attachment(:file => file, :name => @attachment_name, :content_type => @content_type)
-      @obj['_attachments'][@attachment_name]['content_type'].should == @content_type
+      @obj.attachments[@attachment_name]['content_type'].should == @content_type
     end
   
     it 'should delete an attachment that exists' do
@@ -143,6 +150,27 @@ describe "Model attachments" do
     it 'should return the attachment URI' do
       @obj.attachment_uri(@attachment_name).should == "#{Basic.database.uri}/#{@obj.id}/#{@attachment_name}"
     end
-    
+  end
+
+  describe "#attachments" do
+    before(:each) do
+      @obj = Basic.new
+      @file = File.open(FIXTURE_PATH + '/attachments/test.html')
+      @attachment_name = 'my_attachment'
+      @obj.create_attachment(:file => @file, :name => @attachment_name)
+      @obj.save.should be_true
+    end
+  
+    it 'should return an empty Hash when document does not have any attachment' do
+      new_obj = Basic.new
+      new_obj.save.should be_true
+      new_obj.attachments.should == {}
+    end
+  
+    it 'should return a Hash with all attachments' do
+      @file.rewind
+      @obj.attachments.should == { @attachment_name =>{ "data" => "PCFET0NUWVBFIGh0bWw+CjxodG1sPgogIDxoZWFkPgogICAgPHRpdGxlPlRlc3Q8L3RpdGxlPgogIDwvaGVhZD4KICA8Ym9keT4KICAgIDxwPgogICAgICBUZXN0CiAgICA8L3A+CiAgPC9ib2R5Pgo8L2h0bWw+Cg==", "content_type" => "text/html"}}
+    end
+  
   end
 end

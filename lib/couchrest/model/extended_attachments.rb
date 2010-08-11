@@ -7,10 +7,14 @@ module CouchRest
       def create_attachment(args={})
         raise ArgumentError unless args[:file] && args[:name]
         return if has_attachment?(args[:name])
-        self['_attachments'] ||= {}
         set_attachment_attr(args)
       rescue ArgumentError => e
         raise ArgumentError, 'You must specify :file and :name'
+      end
+      
+      # return all attachments
+      def attachments
+        self['_attachments'] ||= {}
       end
 
       # reads the data from an attachment
@@ -30,13 +34,13 @@ module CouchRest
 
       # deletes a file attachment from the current doc
       def delete_attachment(attachment_name)
-        return unless self['_attachments']
-        self['_attachments'].delete attachment_name
+        return unless attachments
+        attachments.delete attachment_name
       end
 
       # returns true if attachment_name exists
       def has_attachment?(attachment_name)
-        !!(self['_attachments'] && self['_attachments'][attachment_name] && !self['_attachments'][attachment_name].empty?)
+        !!(attachments && attachments[attachment_name] && !attachments[attachment_name].empty?)
       end
 
       # returns URL to fetch the attachment from
@@ -62,7 +66,7 @@ module CouchRest
         def set_attachment_attr(args)
           content_type = args[:content_type] ? args[:content_type] : get_mime_type(args[:file].path)
           content_type ||= (get_mime_type(args[:name]) || 'text/plain')
-          self['_attachments'][args[:name]] = {
+          attachments[args[:name]] = {
             'content_type' => content_type,
             'data'         => args[:file].read
           }
