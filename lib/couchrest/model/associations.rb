@@ -171,27 +171,32 @@ module CouchRest
       (array ||= []).compact!
       casted_by[property.to_s] = [] # replace the original array!
       array.compact.each do |obj|
+        check_obj(obj)
         casted_by[property.to_s] << obj.id
       end
       super(array)
     end
     
     def << obj
+      check_obj(obj)
       casted_by[property.to_s] << obj.id
       super(obj)
     end
     
     def push(obj)
+      check_obj(obj)
       casted_by[property.to_s].push obj.id
       super(obj)
     end
     
     def unshift(obj)
+      check_obj(obj)
       casted_by[property.to_s].unshift obj.id
       super(obj)
     end
 
     def []= index, obj
+      check_obj(obj)
       casted_by[property.to_s][index] = obj.id
       super(index, obj)
     end
@@ -205,6 +210,13 @@ module CouchRest
       casted_by[property.to_s].shift
       super
     end
+
+    protected
+
+    def check_obj(obj)
+      raise "Object cannot be added to #{casted_by.class.to_s}##{property.to_s} collection unless saved" if obj.new?
+    end
+
   end
 
 

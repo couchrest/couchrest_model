@@ -178,12 +178,15 @@ describe "Assocations" do
         @invoice.entry_ids.first.should eql(@entries[1].id)
       end
       
-      it "should save all entries when invoice is saved" do
+      it "should raise error when adding un-persisted entries" do
         SaleEntry.find_by_description('test entry').should be_nil
         entry = SaleEntry.new(:description => 'test entry', :price => 500)
-        @invoice.entries << entry
-        @invoice.save.should be_true
-        SaleEntry.find_by_description('test entry').should_not be_nil
+        lambda {
+          @invoice.entries << entry
+        }.should raise_error
+        # In the future maybe?
+        # @invoice.save.should be_true
+        # SaleEntry.find_by_description('test entry').should_not be_nil
       end
 
     end
