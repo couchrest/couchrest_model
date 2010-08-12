@@ -2,9 +2,9 @@
 module CouchRest
   module Model
     module Properties
-      
+
       class IncludeError < StandardError; end
-      
+
       def self.included(base)
         base.class_eval <<-EOS, __FILE__, __LINE__ + 1
             extlib_inheritable_accessor(:properties) unless self.respond_to?(:properties)
@@ -23,12 +23,12 @@ module CouchRest
       end
 
       def read_attribute(property)
-        self[property.to_s]
+        prop = find_property!(property)
+        self[prop.to_s]
       end
 
       def write_attribute(property, value)
-        prop = property.is_a?(Property) ? property : self.class.properties.detect {|p| p.to_s == property.to_s}
-        raise "Missing property definition for #{property.to_s}" unless prop
+        prop = find_property!(property)
         self[prop.to_s] = prop.cast(self, value)
       end
 
@@ -39,9 +39,16 @@ module CouchRest
           write_attribute(property, property.default_value)
         end
       end
-     
+
+      private
+      def find_property!(property)
+        prop = property.is_a?(Property) ? property : self.class.properties.detect {|p| p.to_s == property.to_s}
+        raise ArgumentError, "Missing property definition for #{property.to_s}" unless prop
+        prop
+      end
+
       module ClassMethods
-        
+
         def property(name, *options, &block)
           opts = { }
           type = options.shift
@@ -64,16 +71,16 @@ module CouchRest
           class_eval <<-EOS, __FILE__, __LINE__
             property(:updated_at, Time, :read_only => true, :protected => true, :auto_validation => false)
             property(:created_at, Time, :read_only => true, :protected => true, :auto_validation => false)
-            
+
             set_callback :save, :before do |object|
               write_attribute('updated_at', Time.now)
               write_attribute('created_at', Time.now) if object.new?
             end
           EOS
         end
-        
+
         protected
-        
+
           # This is not a thread safe operation, if you have to set new properties at runtime
           # make sure a mutex is used.
           def define_property(name, options={}, &block)
@@ -87,7 +94,7 @@ module CouchRest
               type = [type] # inject as an array
             end
             property = Property.new(name, type, options)
-            create_property_getter(property) 
+            create_property_getter(property)
             create_property_setter(property) unless property.read_only == true
             if property.type_class.respond_to?(:validates_casted_model)
               validates_casted_model property.name
@@ -95,7 +102,7 @@ module CouchRest
             properties << property
             property
           end
-          
+
           # defines the getter for the property (and optional aliases)
           def create_property_getter(property)
             # meth = property.name
@@ -136,9 +143,9 @@ module CouchRest
               EOS
             end
           end
-          
+
       end # module ClassMethods
-      
+
     end
   end
 end
