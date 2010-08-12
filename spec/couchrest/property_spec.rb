@@ -11,36 +11,36 @@ require File.join(FIXTURE_PATH, 'more', 'course')
 
 
 describe "Model properties" do
-  
+
   before(:each) do
     reset_test_db!
     @card = Card.new(:first_name => "matt")
   end
-  
+
   it "should be accessible from the object" do
     @card.properties.should be_an_instance_of(Array)
     @card.properties.map{|p| p.name}.should include("first_name")
   end
-  
+
   it "should let you access a property value (getter)" do
     @card.first_name.should == "matt"
   end
-  
+
   it "should let you set a property value (setter)" do
     @card.last_name = "Aimonetti"
     @card.last_name.should == "Aimonetti"
   end
-  
+
   it "should not let you set a property value if it's read only" do
     lambda{@card.read_only_value = "test"}.should raise_error
   end
-  
+
   it "should let you use an alias for an attribute" do
     @card.last_name = "Aimonetti"
     @card.family_name.should == "Aimonetti"
     @card.family_name.should == @card.last_name
   end
-  
+
   it "should let you use an alias for a casted attribute" do
     @card.cast_alias = Person.new(:name => ["Aimonetti"])
     @card.cast_alias.name.should == ["Aimonetti"]
@@ -50,7 +50,7 @@ describe "Model properties" do
     card.calias.name.should == ["Aimonetti"]
   end
 
-  
+
   it "should be auto timestamped" do
     @card.created_at.should be_nil
     @card.updated_at.should be_nil
@@ -59,45 +59,57 @@ describe "Model properties" do
     @card.updated_at.should_not be_nil
   end
 
-  it "should let you use read_attribute method" do
-    @card.last_name = "Aimonetti"
-    @card.read_attribute(:last_name).should eql('Aimonetti')
-    @card.read_attribute('last_name').should eql('Aimonetti')
-    last_name_prop = @card.properties.find{|p| p.name == 'last_name'}
-    @card.read_attribute(last_name_prop).should eql('Aimonetti')
+  describe '#read_attribute' do
+    it "should let you use read_attribute method" do
+      @card.last_name = "Aimonetti"
+      @card.read_attribute(:last_name).should eql('Aimonetti')
+      @card.read_attribute('last_name').should eql('Aimonetti')
+      last_name_prop = @card.properties.find{|p| p.name == 'last_name'}
+      @card.read_attribute(last_name_prop).should eql('Aimonetti')
+    end
+
+    it 'should raise an error if the property does not exist' do
+      expect { @card.read_attribute(:this_property_should_not_exist) }.to raise_error(ArgumentError)
+    end
   end
 
-  it "should let you use write_attribute method" do
-    @card.write_attribute(:last_name, 'Aimonetti 1')
-    @card.last_name.should eql('Aimonetti 1')
-    @card.write_attribute('last_name', 'Aimonetti 2')
-    @card.last_name.should eql('Aimonetti 2')
-    last_name_prop = @card.properties.find{|p| p.name == 'last_name'}
-    @card.write_attribute(last_name_prop, 'Aimonetti 3')
-    @card.last_name.should eql('Aimonetti 3')
+  describe '#write_attribute' do
+    it "should let you use write_attribute method" do
+      @card.write_attribute(:last_name, 'Aimonetti 1')
+      @card.last_name.should eql('Aimonetti 1')
+      @card.write_attribute('last_name', 'Aimonetti 2')
+      @card.last_name.should eql('Aimonetti 2')
+      last_name_prop = @card.properties.find{|p| p.name == 'last_name'}
+      @card.write_attribute(last_name_prop, 'Aimonetti 3')
+      @card.last_name.should eql('Aimonetti 3')
+    end
+
+    it 'should raise an error if the property does not exist' do
+      expect { @card.write_attribute(:this_property_should_not_exist, 823) }.to raise_error(ArgumentError)
+    end
+
+    it "should let you use write_attribute on readonly properties" do
+      lambda {
+        @card.read_only_value = "foo"
+      }.should raise_error
+      @card.write_attribute(:read_only_value, "foo")
+      @card.read_only_value.should == 'foo'
+    end
+
+    it "should cast via write_attribute" do
+      @card.write_attribute(:cast_alias, {:name => ["Sam", "Lown"]})
+      @card.cast_alias.class.should eql(Person)
+      @card.cast_alias.name.last.should eql("Lown")
+    end
+
+    it "should not cast via write_attribute if property not casted" do
+      @card.write_attribute(:first_name, {:name => "Sam"})
+      @card.first_name.class.should eql(Hash)
+      @card.first_name[:name].should eql("Sam")
+    end
   end
 
-  it "should let you use write_attribute on readonly properties" do
-    lambda {
-      @card.read_only_value = "foo"
-    }.should raise_error
-    @card.write_attribute(:read_only_value, "foo")
-    @card.read_only_value.should == 'foo'
-  end
 
-  it "should cast via write_attribute" do
-    @card.write_attribute(:cast_alias, {:name => ["Sam", "Lown"]})
-    @card.cast_alias.class.should eql(Person)
-    @card.cast_alias.name.last.should eql("Lown")
-  end
-
-  it "should not cast via write_attribute if property not casted" do
-    @card.write_attribute(:first_name, {:name => "Sam"})
-    @card.first_name.class.should eql(Hash)
-    @card.first_name[:name].should eql("Sam")
-  end
-
-  
   describe "mass assignment protection" do
 
     it "should not store protected attribute using mass assignment" do
@@ -120,12 +132,12 @@ describe "Model properties" do
     end
 
   end
-  
+
   describe "validation" do
     before(:each) do
       @invoice = Invoice.new(:client_name => "matt", :employee_name => "Chris", :location => "San Diego, CA")
     end
-    
+
     it "should be able to be validated" do
       @card.valid?.should == true
     end
@@ -136,7 +148,7 @@ describe "Model properties" do
       @card.errors.should_not be_empty
       @card.errors[:first_name].should == ["can't be blank"]
     end
-    
+
     it "should let you look up errors for a field by a string name" do
       @card.first_name = nil
       @card.should_not be_valid
@@ -150,13 +162,13 @@ describe "Model properties" do
       @invoice.errors[:client_name].should == ["can't be blank"]
       @invoice.errors[:employee_name].should_not be_empty
     end
-    
+
     it "should let you set an error message" do
       @invoice.location = nil
       @invoice.valid?
       @invoice.errors[:location].should == ["Hey stupid!, you forgot the location"]
     end
-    
+
     it "should validate before saving" do
       @invoice.location = nil
       @invoice.should_not be_valid
@@ -164,7 +176,7 @@ describe "Model properties" do
       @invoice.should be_new
     end
   end
-  
+
   describe "casting" do
     before(:each) do
       @course = Course.new(:title => 'Relaxation')
@@ -188,14 +200,14 @@ describe "Model properties" do
         @course['started_on'].should be_an_instance_of(Date)
       end
     end
-    
+
     describe "when type primitive is a String" do
       it "keeps string value unchanged" do
         value = "1.0"
         @course.title = value
         @course['title'].should equal(value)
       end
-      
+
       it "it casts to string representation of the value" do
         @course.title = 1.0
         @course['title'].should eql("1.0")
@@ -584,7 +596,7 @@ describe "Model properties" do
         @course['klass'].should eql('NoClass')
       end
     end
-    
+
     describe 'when type primitive is a Boolean' do
 
       [ true, 'true', 'TRUE', '1', 1, 't', 'T' ].each do |value|
@@ -609,7 +621,7 @@ describe "Model properties" do
       end
 
       it "should respond to requests with ? modifier" do
-        @course.active = nil 
+        @course.active = nil
         @course.active?.should be_false
         @course.active = false
         @course.active?.should be_false
@@ -618,7 +630,7 @@ describe "Model properties" do
       end
 
       it "should respond to requests with ? modifier on TrueClass" do
-        @course.very_active = nil 
+        @course.very_active = nil
         @course.very_active?.should be_false
         @course.very_active = false
         @course.very_active?.should be_false
@@ -631,7 +643,7 @@ describe "Model properties" do
 end
 
 describe "properties of array of casted models" do
-  
+
   before(:each) do
     @course = Course.new :title => 'Test Course'
   end
@@ -691,13 +703,13 @@ describe "a casted model retrieved from the database" do
     @cat.save
     @cat = Cat.get(@cat.id)
   end
-  
+
   describe "as a casted property" do
     it "should already be casted_by its parent" do
       @cat.favorite_toy.casted_by.should === @cat
     end
   end
-  
+
   describe "from a casted collection" do
     it "should already be casted_by its parent" do
       @cat.toys[0].casted_by.should === @cat
@@ -789,7 +801,7 @@ describe "Property Class" do
     it "should set parent as casted_by object in CastedArray" do
       property = CouchRest::Model::Property.new(:test, [Object])
       parent = mock("FooObject")
-      property.cast(parent, ["2010-06-01", "2010-06-02"]).casted_by.should eql(parent)     
+      property.cast(parent, ["2010-06-01", "2010-06-02"]).casted_by.should eql(parent)
     end
 
     it "should set casted_by on new value" do
