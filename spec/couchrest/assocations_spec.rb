@@ -8,7 +8,7 @@ describe "Assocations" do
   describe "of type belongs to" do
 
     before :each do
-      @invoice = SaleInvoice.create(:price => "sam", :price => 2000)
+      @invoice = SaleInvoice.create(:price => 2000)
       @client = Client.create(:name => "Sam Lown")
     end
 
@@ -69,7 +69,7 @@ describe "Assocations" do
   describe "of type collection_of" do
 
     before(:each) do
-      @invoice = SaleInvoice.create(:price => "sam", :price => 2000)
+      @invoice = SaleInvoice.create(:price => 2000)
       @entries = [
         SaleEntry.create(:description => 'test line 1', :price => 500),
         SaleEntry.create(:description => 'test line 2', :price => 500),
@@ -96,7 +96,7 @@ describe "Assocations" do
       @invoice.entries.length.should eql(3)
       @invoice.entries.first.should eql(@entries.first)
     end
-    
+
     it "should replace collection if ids replaced" do
       @invoice.entry_ids = @entries.collect{|i| i.id}
       @invoice.entries.length.should eql(3) # load once
@@ -110,7 +110,7 @@ describe "Assocations" do
       @invoice.entry_ids << @entries[2].id
       @invoice.entry_ids.length.should eql(3)
       @invoice.entries.length.should eql(2) # cached!
-      @invoice.entries(true).length.should eql(3) 
+      @invoice.entries(true).length.should eql(3)
     end
 
     it "should empty arrays when nil collection provided" do
@@ -134,7 +134,7 @@ describe "Assocations" do
     end
 
     describe "proxy" do
-      
+
       it "should ensure new entries to proxy are matched" do
         @invoice.entries << @entries.first
         @invoice.entry_ids.first.should eql(@entries.first.id)
@@ -177,7 +177,7 @@ describe "Assocations" do
         @invoice.entries.first.should eql(@entries[1])
         @invoice.entry_ids.first.should eql(@entries[1].id)
       end
-      
+
       it "should raise error when adding un-persisted entries" do
         SaleEntry.find_by_description('test entry').should be_nil
         entry = SaleEntry.new(:description => 'test entry', :price => 500)
