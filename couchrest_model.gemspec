@@ -84,7 +84,6 @@ Gem::Specification.new do |s|
      "spec/fixtures/views/test_view/only-map.js",
      "spec/fixtures/views/test_view/test-map.js",
      "spec/fixtures/views/test_view/test-reduce.js",
-     "spec/spec.opts",
      "spec/spec_helper.rb"
   ]
   s.homepage = %q{http://github.com/couchrest/couchrest_model}
@@ -130,23 +129,23 @@ Gem::Specification.new do |s|
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<couchrest>, [">= 1.0.0"])
       s.add_runtime_dependency(%q<mime-types>, [">= 1.15"])
-      s.add_runtime_dependency(%q<activesupport>, [">= 2.3.5"])
-      s.add_runtime_dependency(%q<activemodel>, [">= 3.0.0.beta4"])
+      s.add_runtime_dependency(%q<activesupport>, [">= 3.0.0.rc"])
+      s.add_runtime_dependency(%q<activemodel>, [">= 3.0.0.rc"])
       s.add_runtime_dependency(%q<tzinfo>, [">= 0.3.22"])
       s.add_development_dependency(%q<rspec>, [">= 2.0.0.beta.19"])
     else
       s.add_dependency(%q<couchrest>, [">= 1.0.0"])
       s.add_dependency(%q<mime-types>, [">= 1.15"])
-      s.add_dependency(%q<activesupport>, [">= 2.3.5"])
-      s.add_dependency(%q<activemodel>, [">= 3.0.0.beta4"])
+      s.add_dependency(%q<activesupport>, [">= 3.0.0.rc"])
+      s.add_dependency(%q<activemodel>, [">= 3.0.0.rc"])
       s.add_dependency(%q<tzinfo>, [">= 0.3.22"])
       s.add_dependency(%q<rspec>, [">= 2.0.0.beta.19"])
     end
   else
     s.add_dependency(%q<couchrest>, [">= 1.0.0"])
     s.add_dependency(%q<mime-types>, [">= 1.15"])
-    s.add_dependency(%q<activesupport>, [">= 2.3.5"])
-    s.add_dependency(%q<activemodel>, [">= 3.0.0.beta4"])
+    s.add_dependency(%q<activesupport>, [">= 3.0.0.rc"])
+    s.add_dependency(%q<activemodel>, [">= 3.0.0.rc"])
     s.add_dependency(%q<tzinfo>, [">= 0.3.22"])
     s.add_dependency(%q<rspec>, [">= 2.0.0.beta.19"])
   end
