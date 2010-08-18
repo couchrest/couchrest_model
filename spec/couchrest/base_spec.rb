@@ -210,7 +210,7 @@ describe "Model Base" do
   
   describe "a doc with template values (CR::Model spec)" do
     before(:all) do
-      WithTemplateAndUniqueID.all.map{|o| o.destroy(true)}
+      WithTemplateAndUniqueID.all.map{|o| o.destroy}
       WithTemplateAndUniqueID.database.bulk_delete
       @tmpl = WithTemplateAndUniqueID.new
       @tmpl2 = WithTemplateAndUniqueID.new(:preset => 'not_value', 'important-field' => '1')
@@ -233,7 +233,7 @@ describe "Model Base" do
   describe "finding all instances of a model" do
     before(:all) do
       WithTemplateAndUniqueID.req_design_doc_refresh
-      WithTemplateAndUniqueID.all.map{|o| o.destroy(true)}
+      WithTemplateAndUniqueID.all.map{|o| o.destroy}
       WithTemplateAndUniqueID.database.bulk_delete
       WithTemplateAndUniqueID.new('important-field' => '1').save
       WithTemplateAndUniqueID.new('important-field' => '2').save

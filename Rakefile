@@ -5,7 +5,8 @@ $LOAD_PATH.unshift File.expand_path("../lib", __FILE__)
 require 'couchrest_model'
 
 begin
-  require 'spec/rake/spectask'
+  require 'rspec'
+  require 'rspec/core/rake_task'
 rescue LoadError
   puts <<-EOS
 To use rspec for testing you must install rspec gem:
@@ -28,8 +29,8 @@ begin
     gemspec.has_rdoc = true
     gemspec.add_dependency("couchrest", ">= 1.0.0")
     gemspec.add_dependency("mime-types", ">= 1.15")
-    gemspec.add_dependency("activesupport", ">= 2.3.5")
-    gemspec.add_dependency("activemodel", ">= 3.0.0.beta4")
+    gemspec.add_dependency("activesupport", ">= 3.0.0.rc")
+    gemspec.add_dependency("activemodel", ">= 3.0.0.rc")
     gemspec.add_dependency("tzinfo", ">= 0.3.22")
     gemspec.add_development_dependency('rspec', '>= 2.0.0.beta.19')
     gemspec.version = CouchRest::Model::VERSION
@@ -41,15 +42,15 @@ rescue LoadError
 end
 
 desc "Run all specs"
-Spec::Rake::SpecTask.new('spec') do |t|
-	t.spec_opts = ["--color"]
-	t.spec_files = FileList['spec/**/*_spec.rb']
+Rspec::Core::RakeTask.new(:spec) do |spec|
+	spec.spec_opts = ["--color"]
+	spec.pattern = 'spec/**/*_spec.rb'
 end
 
 desc "Print specdocs"
-Spec::Rake::SpecTask.new(:doc) do |t|
-	t.spec_opts = ["--format", "specdoc"]
-	t.spec_files = FileList['spec/*_spec.rb']
+Rspec::Core::RakeTask.new(:doc) do |spec|
+	spec.spec_opts = ["--format", "specdoc"]
+	spec.pattern = 'spec/*_spec.rb'
 end
 
 desc "Generate the rdoc"

@@ -1,13 +1,13 @@
-gem 'couchrest', ">= 1.0.0.beta"
+gem 'couchrest', ">= 1.0.0"
 require 'couchrest'
 
 gem "tzinfo", ">= 0.3.22"
 
-gem "activesupport", ">= 2.3.5"
+gem "activesupport", ">= 3.0.0.rc"
 require 'active_support/core_ext'
 require 'active_support/json'
 
-gem "activemodel", ">= 3.0.0.beta4"
+gem "activemodel", ">= 3.0.0.rc"
 require 'active_model'
 require "active_model/callbacks"
 require "active_model/conversion"
