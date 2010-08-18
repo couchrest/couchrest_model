@@ -1,5 +1,5 @@
 require "rubygems"
-require "spec" # Satisfies Autotest and anyone else not using the Rake tasks
+require "rspec" # Satisfies Autotest and anyone else not using the Rake tasks
 
 require File.join(File.dirname(__FILE__), '..','lib','couchrest_model')
 # check the following file to see how to use the spec'd features.
@@ -24,7 +24,7 @@ def reset_test_db!
   DB
 end
 
-Spec::Runner.configure do |config|
+RSpec.configure do |config|
   config.before(:all) { reset_test_db! }
   
   config.after(:all) do

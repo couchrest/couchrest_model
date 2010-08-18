@@ -571,6 +571,16 @@ describe "Model properties" do
           @course['ends_at'].min.should   eql(t.min)
           @course['ends_at'].sec.should   eql(t.sec)
         end
+        it 'parses the string without offset' do
+          t = Time.now
+          @course.ends_at = t.strftime("%Y-%m-%d %H:%M:%S")
+          @course['ends_at'].year.should  eql(t.year)
+          @course['ends_at'].month.should eql(t.month)
+          @course['ends_at'].day.should   eql(t.day)
+          @course['ends_at'].hour.should  eql(t.hour)
+          @course['ends_at'].min.should   eql(t.min)
+          @course['ends_at'].sec.should   eql(t.sec)
+        end
       end
 
       it 'does not typecast non-time values' do

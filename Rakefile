@@ -31,6 +31,7 @@ begin
     gemspec.add_dependency("activesupport", ">= 2.3.5")
     gemspec.add_dependency("activemodel", ">= 3.0.0.beta4")
     gemspec.add_dependency("tzinfo", ">= 0.3.22")
+    gemspec.add_development_dependency('rspec', '>= 2.0.0.beta.19')
     gemspec.version = CouchRest::Model::VERSION
     gemspec.date = Time.now.strftime("%Y-%m-%d")
     gemspec.require_path = "lib"

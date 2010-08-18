@@ -5,6 +5,8 @@
 * Minor enhancements
   * Raise error on adding objects to "collection_of" without an id
   * Allow mixing of protected and accessible properties. Any unspecified properties are now assumed to be protected by default
+  * Parsing times without zone
+  * Using latest rspec (2.0.0.beta.19)
 
 == CouchRest Model 1.0.0.beta7
 
