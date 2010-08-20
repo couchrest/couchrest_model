@@ -54,7 +54,7 @@ module CouchRest
 
         attributes.reject! do |property_name, property_value|
           protected_names.include?(property_name.to_s)
-        end
+        end if attributes
 
         attributes || {}
       end
