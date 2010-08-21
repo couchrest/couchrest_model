@@ -90,62 +90,62 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://github.com/couchrest/couchrest_model}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.6}
+  s.rubygems_version = %q{1.3.7}
   s.summary = %q{Extends the CouchRest Document for advanced modelling.}
   s.test_files = [
-    "spec/spec_helper.rb",
-     "spec/couchrest/property_spec.rb",
-     "spec/couchrest/casted_spec.rb",
-     "spec/couchrest/subclass_spec.rb",
-     "spec/couchrest/persistence_spec.rb",
-     "spec/couchrest/casted_model_spec.rb",
+    "spec/couchrest/assocations_spec.rb",
+     "spec/couchrest/attachment_spec.rb",
      "spec/couchrest/attribute_protection_spec.rb",
-     "spec/couchrest/assocations_spec.rb",
+     "spec/couchrest/base_spec.rb",
+     "spec/couchrest/casted_model_spec.rb",
+     "spec/couchrest/casted_spec.rb",
+     "spec/couchrest/class_proxy_spec.rb",
+     "spec/couchrest/inherited_spec.rb",
+     "spec/couchrest/persistence_spec.rb",
+     "spec/couchrest/property_spec.rb",
+     "spec/couchrest/subclass_spec.rb",
      "spec/couchrest/validations.rb",
      "spec/couchrest/view_spec.rb",
-     "spec/couchrest/inherited_spec.rb",
-     "spec/couchrest/attachment_spec.rb",
-     "spec/couchrest/class_proxy_spec.rb",
-     "spec/couchrest/base_spec.rb",
      "spec/fixtures/base.rb",
-     "spec/fixtures/more/card.rb",
-     "spec/fixtures/more/event.rb",
-     "spec/fixtures/more/user.rb",
-     "spec/fixtures/more/sale_invoice.rb",
      "spec/fixtures/more/article.rb",
-     "spec/fixtures/more/service.rb",
+     "spec/fixtures/more/card.rb",
+     "spec/fixtures/more/cat.rb",
+     "spec/fixtures/more/client.rb",
+     "spec/fixtures/more/course.rb",
+     "spec/fixtures/more/event.rb",
      "spec/fixtures/more/invoice.rb",
      "spec/fixtures/more/person.rb",
      "spec/fixtures/more/question.rb",
-     "spec/fixtures/more/cat.rb",
-     "spec/fixtures/more/client.rb",
      "spec/fixtures/more/sale_entry.rb",
-     "spec/fixtures/more/course.rb"
+     "spec/fixtures/more/sale_invoice.rb",
+     "spec/fixtures/more/service.rb",
+     "spec/fixtures/more/user.rb",
+     "spec/spec_helper.rb"
   ]
 
   if s.respond_to? :specification_version then
     current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
     s.specification_version = 3
 
-    if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<couchrest>, [">= 1.0.0"])
-      s.add_runtime_dependency(%q<mime-types>, [">= 1.15"])
-      s.add_runtime_dependency(%q<activesupport>, [">= 2.3.5"])
-      s.add_runtime_dependency(%q<activemodel>, [">= 3.0.0.beta4"])
-      s.add_runtime_dependency(%q<tzinfo>, [">= 0.3.22"])
+    if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
+      s.add_runtime_dependency(%q<couchrest>, ["~> 1.0.0"])
+      s.add_runtime_dependency(%q<mime-types>, ["~> 1.15"])
+      s.add_runtime_dependency(%q<activesupport>, ["~> 2.3.5"])
+      s.add_runtime_dependency(%q<activemodel>, ["~> 3.0.0.beta4"])
+      s.add_runtime_dependency(%q<tzinfo>, ["~> 0.3.22"])
     else
-      s.add_dependency(%q<couchrest>, [">= 1.0.0"])
-      s.add_dependency(%q<mime-types>, [">= 1.15"])
-      s.add_dependency(%q<activesupport>, [">= 2.3.5"])
-      s.add_dependency(%q<activemodel>, [">= 3.0.0.beta4"])
-      s.add_dependency(%q<tzinfo>, [">= 0.3.22"])
+      s.add_dependency(%q<couchrest>, ["~> 1.0.0"])
+      s.add_dependency(%q<mime-types>, ["~> 1.15"])
+      s.add_dependency(%q<activesupport>, ["~> 2.3.5"])
+      s.add_dependency(%q<activemodel>, ["~> 3.0.0.beta4"])
+      s.add_dependency(%q<tzinfo>, ["~> 0.3.22"])
     end
   else
-    s.add_dependency(%q<couchrest>, [">= 1.0.0"])
-    s.add_dependency(%q<mime-types>, [">= 1.15"])
-    s.add_dependency(%q<activesupport>, [">= 2.3.5"])
-    s.add_dependency(%q<activemodel>, [">= 3.0.0.beta4"])
-    s.add_dependency(%q<tzinfo>, [">= 0.3.22"])
+    s.add_dependency(%q<couchrest>, ["~> 1.0.0"])
+    s.add_dependency(%q<mime-types>, ["~> 1.15"])
+    s.add_dependency(%q<activesupport>, ["~> 2.3.5"])
+    s.add_dependency(%q<activemodel>, ["~> 3.0.0.beta4"])
+    s.add_dependency(%q<tzinfo>, ["~> 0.3.22"])
   end
 end
 
