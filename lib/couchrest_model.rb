@@ -3,6 +3,8 @@ require 'couchrest'
 
 gem "tzinfo", ">= 0.3.22"
 
+gem 'railties', ">= 3.0.0.rc"
+
 gem "activesupport", ">= 2.3.5"
 require 'active_support/core_ext'
 require 'active_support/json'
@@ -57,3 +59,4 @@ require "couchrest/model/base"
 
 # Add rails support *after* everything has loaded
 
+require "couchrest/railtie"

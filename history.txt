@@ -1,6 +1,7 @@
-== Next Version
+== CouchRest Model 1.0.0.beta8
 
 * Major enhancements
+	* * Added model generator
 
 * Minor enhancements
   * Raise error on adding objects to "collection_of" without an id

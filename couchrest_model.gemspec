@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{couchrest_model}
-  s.version = "1.0.0.beta7"
+  s.version = "1.0.0.beta8"
 
   s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
   s.authors = ["J. Chris Anderson", "Matt Aimonetti", "Marcos Tapajos", "Will Leinweber", "Sam Lown"]
-  s.date = %q{2010-08-11}
+  s.date = %q{2010-08-23}
   s.description = %q{CouchRest Model provides aditional features to the standard CouchRest Document class such as properties, view designs, associations, callbacks, typecasting and validations.}
   s.email = %q{jchris@apache.org}
   s.extra_rdoc_files = [
@@ -48,7 +48,11 @@ Gem::Specification.new do |s|
      "lib/couchrest/model/validations/locale/en.yml",
      "lib/couchrest/model/validations/uniqueness.rb",
      "lib/couchrest/model/views.rb",
+     "lib/couchrest/railtie.rb",
      "lib/couchrest_model.rb",
+     "lib/rails/generators/couchrest_model.rb",
+     "lib/rails/generators/couchrest_model/model/model_generator.rb",
+     "lib/rails/generators/couchrest_model/model/templates/model.rb",
      "spec/couchrest/assocations_spec.rb",
      "spec/couchrest/attachment_spec.rb",
      "spec/couchrest/attribute_protection_spec.rb",
@@ -133,12 +137,14 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<activesupport>, ["~> 2.3.5"])
       s.add_runtime_dependency(%q<activemodel>, ["~> 3.0.0.beta4"])
       s.add_runtime_dependency(%q<tzinfo>, ["~> 0.3.22"])
+      s.add_runtime_dependency(%q<railties>, [">= 3.0.0.rc"])
     else
       s.add_dependency(%q<couchrest>, ["~> 1.0.0"])
       s.add_dependency(%q<mime-types>, ["~> 1.15"])
       s.add_dependency(%q<activesupport>, ["~> 2.3.5"])
       s.add_dependency(%q<activemodel>, ["~> 3.0.0.beta4"])
       s.add_dependency(%q<tzinfo>, ["~> 0.3.22"])
+      s.add_dependency(%q<railties>, [">= 3.0.0.rc"])
     end
   else
     s.add_dependency(%q<couchrest>, ["~> 1.0.0"])
@@ -146,6 +152,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<activesupport>, ["~> 2.3.5"])
     s.add_dependency(%q<activemodel>, ["~> 3.0.0.beta4"])
     s.add_dependency(%q<tzinfo>, ["~> 0.3.22"])
+    s.add_dependency(%q<railties>, [">= 3.0.0.rc"])
   end
 end
 
