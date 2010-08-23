@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
   s.authors = ["J. Chris Anderson", "Matt Aimonetti", "Marcos Tapajos", "Will Leinweber", "Sam Lown"]
-  s.date = %q{2010-08-18}
+  s.date = %q{2010-08-23}
   s.description = %q{CouchRest Model provides aditional features to the standard CouchRest Document class such as properties, view designs, associations, callbacks, typecasting and validations.}
   s.email = %q{jchris@apache.org}
   s.extra_rdoc_files = [
@@ -127,27 +127,27 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<couchrest>, [">= 1.0.0"])
-      s.add_runtime_dependency(%q<mime-types>, [">= 1.15"])
-      s.add_runtime_dependency(%q<activesupport>, [">= 3.0.0.rc"])
-      s.add_runtime_dependency(%q<activemodel>, [">= 3.0.0.rc"])
-      s.add_runtime_dependency(%q<tzinfo>, [">= 0.3.22"])
-      s.add_development_dependency(%q<rspec>, [">= 2.0.0.beta.19"])
+      s.add_runtime_dependency(%q<couchrest>, ["~> 1.0.0"])
+      s.add_runtime_dependency(%q<mime-types>, ["~> 1.15"])
+      s.add_runtime_dependency(%q<activesupport>, ["~> 3.0.0.rc"])
+      s.add_runtime_dependency(%q<activemodel>, ["~> 3.0.0.rc"])
+      s.add_runtime_dependency(%q<tzinfo>, ["~> 0.3.22"])
+      s.add_development_dependency(%q<rspec>, ["~> 2.0.0.beta.19"])
     else
-      s.add_dependency(%q<couchrest>, [">= 1.0.0"])
-      s.add_dependency(%q<mime-types>, [">= 1.15"])
-      s.add_dependency(%q<activesupport>, [">= 3.0.0.rc"])
-      s.add_dependency(%q<activemodel>, [">= 3.0.0.rc"])
-      s.add_dependency(%q<tzinfo>, [">= 0.3.22"])
-      s.add_dependency(%q<rspec>, [">= 2.0.0.beta.19"])
+      s.add_dependency(%q<couchrest>, ["~> 1.0.0"])
+      s.add_dependency(%q<mime-types>, ["~> 1.15"])
+      s.add_dependency(%q<activesupport>, ["~> 3.0.0.rc"])
+      s.add_dependency(%q<activemodel>, ["~> 3.0.0.rc"])
+      s.add_dependency(%q<tzinfo>, ["~> 0.3.22"])
+      s.add_dependency(%q<rspec>, ["~> 2.0.0.beta.19"])
     end
   else
-    s.add_dependency(%q<couchrest>, [">= 1.0.0"])
-    s.add_dependency(%q<mime-types>, [">= 1.15"])
-    s.add_dependency(%q<activesupport>, [">= 3.0.0.rc"])
-    s.add_dependency(%q<activemodel>, [">= 3.0.0.rc"])
-    s.add_dependency(%q<tzinfo>, [">= 0.3.22"])
-    s.add_dependency(%q<rspec>, [">= 2.0.0.beta.19"])
+    s.add_dependency(%q<couchrest>, ["~> 1.0.0"])
+    s.add_dependency(%q<mime-types>, ["~> 1.15"])
+    s.add_dependency(%q<activesupport>, ["~> 3.0.0.rc"])
+    s.add_dependency(%q<activemodel>, ["~> 3.0.0.rc"])
+    s.add_dependency(%q<tzinfo>, ["~> 0.3.22"])
+    s.add_dependency(%q<rspec>, ["~> 2.0.0.beta.19"])
   end
 end
 
