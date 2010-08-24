@@ -43,6 +43,8 @@ describe "Model Attributes" do
       property :admin, :default => false
     end
 
+    it { expect { WithAccessible.new(nil) }.to_not raise_error }
+
     it "should recognize accessible properties" do
       props = WithAccessible.accessible_properties.map { |prop| prop.name}
       props.should include("name")
@@ -71,6 +73,8 @@ describe "Model Attributes" do
       property :name
       property :admin, :default => false, :protected => true
     end
+
+    it { expect { WithProtected.new(nil) }.to_not raise_error }
 
     it "should recognize protected properties" do
       props = WithProtected.protected_properties.map { |prop| prop.name}

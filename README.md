@@ -31,7 +31,12 @@ but no guarantees!
 
     gem 'couchrest_model', :git => 'git://github.com/couchrest/couchrest_model.git'
 
-   
+## Generators
+
+### Model
+
+		$ rails generate model person --orm=couchrest_model
+			   
 ## General Usage 
 
     require 'couchrest_model'

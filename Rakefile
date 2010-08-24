@@ -29,9 +29,9 @@ begin
     gemspec.has_rdoc = true
     gemspec.add_dependency("couchrest", "~> 1.0.0")
     gemspec.add_dependency("mime-types", "~> 1.15")
-    gemspec.add_dependency("activesupport", "~> 3.0.0.rc")
     gemspec.add_dependency("activemodel", "~> 3.0.0.rc")
     gemspec.add_dependency("tzinfo", "~> 0.3.22")
+    gemspec.add_dependency('railties', "~> 3.0.0.rc")
     gemspec.add_development_dependency('rspec', '~> 2.0.0.beta.19')
     gemspec.version = CouchRest::Model::VERSION
     gemspec.date = Time.now.strftime("%Y-%m-%d")
