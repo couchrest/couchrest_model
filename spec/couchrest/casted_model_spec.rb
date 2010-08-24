@@ -134,6 +134,11 @@ describe CouchRest::Model::CastedModel do
     it "should cast its own attributes" do
       @casted_obj.casted_attribute.should be_instance_of(WithCastedModelMixin)
     end
+
+    it "should raise an error if save or update_attributes called" do
+      expect { @casted_obj.casted_attribute.save }.to raise_error(NoMethodError)
+      expect { @casted_obj.casted_attribute.update_attributes(:name => "Fubar") }.to raise_error(NoMethodError)
+    end
   end
   
   describe "casted as an array of a different type" do
@@ -180,10 +185,6 @@ describe CouchRest::Model::CastedModel do
       @question.a.should == "To seek the Holy Grail"
     end
 
-    it "should raise an error if save or update_attributes called" do
-      expect { @question.save }.to raise_error
-      expect { @question.update_attributes(:q => "Fubar?") }.to raise_error
-    end
   end
   
   describe "saved document with casted models" do
