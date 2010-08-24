@@ -29,13 +29,6 @@ module CouchRest
       end
       alias :attributes= :update_attributes_without_saving
 
-      # Takes a hash as argument, and applies the values by using writer methods
-      # for each key. Raises a NoMethodError if the corresponding methods are
-      # missing. In case of error, no attributes are changed.
-      def update_attributes(hash)
-        update_attributes_without_saving hash
-        save
-      end
 
       private
 

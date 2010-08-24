@@ -179,6 +179,11 @@ describe CouchRest::Model::CastedModel do
       @question.q.should == "What is your quest?"
       @question.a.should == "To seek the Holy Grail"
     end
+
+    it "should raise an error if save or update_attributes called" do
+      expect { @question.save }.to raise_error
+      expect { @question.update_attributes(:q => "Fubar?") }.to raise_error
+    end
   end
   
   describe "saved document with casted models" do

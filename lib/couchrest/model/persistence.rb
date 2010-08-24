@@ -62,6 +62,20 @@ module CouchRest
         end
       end
 
+      # Update the document's attributes and save. For example:
+      #
+      #   doc.update_attributes :name => "Fred"
+      # 
+      # Is the equivilent of doing the following:
+      #
+      #   doc.attributes = { :name => "Fred" }
+      #   doc.save
+      #
+      def update_attributes(hash)
+        update_attributes_without_saving hash
+        save
+      end
+
     protected
 
       def perform_validations(options = {})
