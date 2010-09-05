@@ -70,6 +70,7 @@ module CouchRest
         # id<String, Integer>:: Document ID
         # db<Database>:: optional option to pass a custom database to use
         def get!(id, db = database)
+          raise "Missing or empty document ID" if id.to_s.empty?
           doc = db.get id
           create_from_database(doc)
         end

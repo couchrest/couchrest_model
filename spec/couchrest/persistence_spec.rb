@@ -282,11 +282,17 @@ describe "Model Persistence" do
       foundart = Article.get 'matt aimonetti'
       foundart.should be_nil
     end                     
+    it "should return nil if a blank id is requested" do
+      Article.get("").should be_nil
+    end
     it "should raise an error if `get!` is used and the document doesn't exist" do
-       lambda{foundart = Article.get!('matt aimonetti')}.should raise_error
+      expect{ Article.get!('matt aimonetti') }.to raise_error
+    end
+    it "should raise an error if `get!` is requested with a blank id" do
+      expect{ Article.get!("") }.to raise_error
     end
     it "should raise an error if `find!` is used and the document doesn't exist" do
-       lambda{foundart = Article.find!('matt aimonetti')}.should raise_error
+      expect{ Article.find!('matt aimonetti') }.to raise_error
     end
   end
 

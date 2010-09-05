@@ -1,3 +1,10 @@
+== Next Version
+
+* Major enhancements
+
+* Minor enhancements
+  * Fixing find("") issue (thanks epochwolf)
+
 == CouchRest Model 1.0.0.beta8
 
 * Major enhancements
