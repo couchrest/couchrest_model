@@ -33,7 +33,7 @@ module CouchRest::Model
           data.keys.sort.each do |k|
             value << data[k]
           end
-        elsif value.class != Array
+        elsif !value.is_a?(Array)
           raise "Expecting an array or keyed hash for property #{parent.class.name}##{self.name}"
         end
         arr = value.collect { |data| cast_value(parent, data) }
@@ -72,12 +72,12 @@ module CouchRest::Model
       def parse_type(type)
         if type.nil?
           @casted = false
-          @type = nil 
+          @type = nil
           @type_class = nil
         else
           base = type.is_a?(Array) ? type.first : type
           base = Object if base.nil?
-          raise "Defining a property type as a #{type.class.name.humanize} is not supported in CouchRest Model!" if base.class != Class 
+          raise "Defining a property type as a #{type.class.name.humanize} is not supported in CouchRest Model!" if base.class != Class
           @type_class = base
           @type = type
         end
