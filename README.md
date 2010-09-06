@@ -177,14 +177,14 @@ documents and retrieve them using the CastedModel module. Simply include the mod
 a Hash (or other model that responds to the [] and []= methods) and set any properties
 you'd like to use. For example:
 
-    class CatToy << Hash
+    class CatToy < Hash
       include CouchRest::Model::CastedModel
 
       property :name, String
       property :purchased, Date
     end
 
-    class Cat << CouchRest::Model::Base
+    class Cat < CouchRest::Model::Base
       property :name, String
       property :toys, [CatToy]
     end
@@ -203,7 +203,7 @@ Ruby will bring up a missing constant error. To avoid this, or if you have a rea
 you'd like to model, the latest version of CouchRest Model (> 1.0.0) supports creating
 anonymous classes:
 
-    class Cat << CouchRest::Model::Base
+    class Cat < CouchRest::Model::Base
       property :name, String
 
       property :toys do |toy|
