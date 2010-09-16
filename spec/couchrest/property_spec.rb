@@ -9,6 +9,20 @@ require File.join(FIXTURE_PATH, 'more', 'event')
 require File.join(FIXTURE_PATH, 'more', 'user')
 require File.join(FIXTURE_PATH, 'more', 'course')
 
+describe 'Attributes' do
+  class AttrDoc < CouchRest::Model::Base
+    property :one
+    property :two
+  end
+
+  it '.attributes should have an array of attribute names' do
+   AttrDoc.attributes.should =~ ['two', 'one']
+  end
+
+  it '#attributes should have an array of attribute names' do
+   AttrDoc.new.attributes.should =~ ['two', 'one']
+  end
+end
 
 describe "Model properties" do
 
