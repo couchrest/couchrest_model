@@ -88,6 +88,13 @@ describe "Model properties" do
       expect { @card.write_attribute(:this_property_should_not_exist, 823) }.to raise_error(ArgumentError)
     end
 
+    it 'should not raise an error if the property does not exist and dynamic properties are allowed' do
+      @card.class.allow_dynamic_properties = true
+      expect { @card.write_attribute(:this_property_should_not_exist, 823) }.to_not raise_error(ArgumentError)
+      @card.class.allow_dynamic_properties = false
+    end
+
+
     it "should let you use write_attribute on readonly properties" do
       lambda {
         @card.read_only_value = "foo"

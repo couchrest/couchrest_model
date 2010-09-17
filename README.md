@@ -71,11 +71,14 @@ but no guarantees!
 
 ## Properties
 
-Only attributes with a property definition will be stored be CouchRest Model (as opposed
-to a normal CouchRest Document which will store everything). To help prevent confusion, 
-a property should be considered as the definition of an attribute. An attribute must be associated
-with a property, but a property may not have any attributes associated if none have been set.
+A property is the definition of an attribute, it describes what the attribute is called, how it should
+be type casted, if at all, and other options such as the default value. These replace your typical 
+`add_column` methods typically found in migrations.
 
+By default only attributes with a property definition will be stored in CouchRest Model, as opposed
+to a normal CouchRest Document which will store everything. This however can be disabled using the 
+`allow_dynamic_properties` configuration option either for all of CouchRest Model, or for specific
+models. See the configuration section for more details.
 
 In its simplest form, a property
 will only create a getter and setter passing all attribute data directly to the database. Assuming the attribute
@@ -289,6 +292,28 @@ you'd like to ensure the ID is unique between several types of document. For exa
 
 Pretty cool!
 
+
+## Configuration
+
+CouchRest Model supports a few configuration options. These can be set either for the whole Model code
+base or for a specific model of your chosing. To configure globally, provide something similar to the 
+following in your projects loading code:
+
+    CouchRestModel::Model::Base.configure do |config|
+      config.allow_dynamic_properties = true
+      config.model_type_key = 'couchrest-type'
+    end
+
+To set for a specific model:
+
+   class Cat < CouchRest::Model::Base
+     allow_dynamic_properties true
+   end
+
+Options currently avilable are:
+
+ * `allow_dynamic_properties` - false by default, when true properties do not need to be defined to be stored, although they will have no accessors.
+ * `model_type_key` - 'model' by default, useful for migrating from an older CouchRest ExtendedDocument when the default used to be 'couchrest-type'.
 
 
 ## Notable Issues

@@ -29,7 +29,7 @@ module CouchRest
 
       def write_attribute(property, value)
         prop = find_property!(property)
-        self[prop.to_s] = prop.cast(self, value)
+        self[prop.to_s] = prop.is_a?(String) ? value : prop.cast(self, value)
       end
 
       def apply_all_property_defaults
@@ -41,10 +41,11 @@ module CouchRest
       end
 
       private
+
       def find_property!(property)
         prop = property.is_a?(Property) ? property : self.class.properties.detect {|p| p.to_s == property.to_s}
-        raise ArgumentError, "Missing property definition for #{property.to_s}" unless prop
-        prop
+        raise ArgumentError, "Missing property definition for #{property.to_s}" unless allow_dynamic_properties or !prop.nil?
+        prop || property
       end
 
       module ClassMethods

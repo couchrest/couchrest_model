@@ -4,6 +4,7 @@ module CouchRest::Model
     extend ActiveSupport::Concern
 
     included do
+      include CouchRest::Model::Configuration
       include CouchRest::Model::AttributeProtection
       include CouchRest::Model::Attributes
       include CouchRest::Model::Callbacks
