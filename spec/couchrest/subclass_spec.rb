@@ -92,8 +92,8 @@ describe "Subclassing a Model" do
     OnlineCourse.design_doc['views'].keys.should_not include('by_title')
   end
   
-  it "should have an all view with a guard clause for couchrest-type == subclass name in the map function" do
-    OnlineCourse.design_doc['views']['all']['map'].should =~ /if \(doc\['couchrest-type'\] == 'OnlineCourse'\)/
+  it "should have an all view with a guard clause for model == subclass name in the map function" do
+    OnlineCourse.design_doc['views']['all']['map'].should =~ /if \(doc\['model'\] == 'OnlineCourse'\)/
   end
 end
 

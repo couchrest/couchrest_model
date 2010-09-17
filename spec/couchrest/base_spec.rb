@@ -36,7 +36,7 @@ describe "Model Base" do
 
     it "should not failed on a nil value in argument" do
       @obj = Basic.new(nil)
-      @obj.should == { 'couchrest-type' => 'Basic' }
+      @obj.should_not be_nil
     end
   end
  

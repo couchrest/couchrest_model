@@ -150,7 +150,7 @@ describe "Model Attributes" do
     it "Base#all should not strip protected attributes" do
       # all creates a CollectionProxy
       docs = WithProtected.all(:key => @user.id)
-      docs.size.should == 1
+      docs.length.should == 1
       reloaded = docs.first
       verify_attrs reloaded
     end

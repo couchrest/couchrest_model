@@ -4,6 +4,7 @@ module CouchRest
 
       extend ActiveModel::Naming
 
+      include CouchRest::Model::Configuration
       include CouchRest::Model::Persistence
       include CouchRest::Model::Callbacks
       include CouchRest::Model::DocumentQueries    
@@ -37,7 +38,7 @@ module CouchRest
       
       # Accessors
       attr_accessor :casted_by
-      
+
 
       # Instantiate a new CouchRest::Model::Base by preparing all properties
       # using the provided document hash.
@@ -50,7 +51,7 @@ module CouchRest
         prepare_all_attributes(doc, options)
         super(doc)
         unless self['_id'] && self['_rev']
-          self['couchrest-type'] = self.class.to_s
+          self[self.model_type_key] = self.class.to_s
         end
         after_initialize if respond_to?(:after_initialize)
       end

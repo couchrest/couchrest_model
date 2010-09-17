@@ -1,6 +1,8 @@
 == Next Version
 
 * Major enhancements
+  * IMPORTANT: Model's class name key changed from 'couchrest-type' to 'model'
+  * Support for configuration module and "model_type_key" option for overriding model's type key
 
 * Minor enhancements
   * Fixing find("") issue (thanks epochwolf)

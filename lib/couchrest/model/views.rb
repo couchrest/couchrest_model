@@ -23,7 +23,7 @@ module CouchRest
         #     view_by :tags,                                                
         #       :map =>                                                     
         #         "function(doc) {                                          
-        #           if (doc['couchrest-type'] == 'Post' && doc.tags) {                   
+        #           if (doc['model'] == 'Post' && doc.tags) {                   
         #             doc.tags.forEach(function(tag){                       
         #               emit(doc.tag, 1);                                   
         #             });                                                   
@@ -39,7 +39,7 @@ module CouchRest
         # function:
         #  
         #   function(doc) {
-        #     if (doc['couchrest-type'] == 'Post' && doc.date) {
+        #     if (doc['model'] == 'Post' && doc.date) {
         #       emit(doc.date, null);
         #     }
         #   }
@@ -77,7 +77,7 @@ module CouchRest
           ducktype = opts.delete(:ducktype)
           unless ducktype || opts[:map]
             opts[:guards] ||= []
-            opts[:guards].push "(doc['couchrest-type'] == '#{self.to_s}')"
+            opts[:guards].push "(doc['#{model_type_key}'] == '#{self.to_s}')"
           end
           keys.push opts
           design_doc.view_by(*keys)

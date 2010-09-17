@@ -25,7 +25,7 @@ describe "Model Persistence" do
     end
 
     it "should instantialize document of different type" do
-      doc = Article.create_from_database({'_id' => 'testitem2', '_rev' => 123, 'couchrest-type' => 'WithTemplateAndUniqueID', 'name' => 'my test'})
+      doc = Article.create_from_database({'_id' => 'testitem2', '_rev' => 123, Article.model_type_key => 'WithTemplateAndUniqueID', 'name' => 'my test'})
       doc.class.should eql(WithTemplateAndUniqueID)
     end
 
@@ -114,7 +114,7 @@ describe "Model Persistence" do
     end
     
     it "should set the type" do
-      @sobj['couchrest-type'].should == 'Basic'
+      @sobj[@sobj.model_type_key].should == 'Basic'
     end
 
     it "should accept true or false on save for validation" do

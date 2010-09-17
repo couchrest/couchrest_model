@@ -97,7 +97,7 @@ module CouchRest
         # ==== Returns
         #  a document instance
         def create_from_database(doc = {})
-          base = (doc['couchrest-type'].blank? || doc['couchrest-type'] == self.to_s) ? self : doc['couchrest-type'].constantize
+          base = (doc[model_type_key].blank? || doc[model_type_key] == self.to_s) ? self : doc[model_type_key].constantize
           base.new(doc, :directly_set_attributes => true)      
         end
 
