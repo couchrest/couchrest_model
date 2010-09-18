@@ -46,7 +46,6 @@ require "couchrest/model/extended_attachments"
 require "couchrest/model/class_proxy"
 require "couchrest/model/collection"
 require "couchrest/model/attribute_protection"
-require "couchrest/model/attributes"
 require "couchrest/model/associations"
 require "couchrest/model/configuration"
 

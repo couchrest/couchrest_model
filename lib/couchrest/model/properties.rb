@@ -2,16 +2,12 @@
 module CouchRest
   module Model
     module Properties
+      extend ActiveSupport::Concern
 
-      class IncludeError < StandardError; end
-
-      def self.included(base)
-        base.class_eval <<-EOS, __FILE__, __LINE__ + 1
-            extlib_inheritable_accessor(:properties) unless self.respond_to?(:properties)
-            self.properties ||= []
-        EOS
-        base.extend(ClassMethods)
-        raise CouchRest::Mixins::Properties::IncludeError, "You can only mixin Properties in a class responding to [] and []=, if you tried to mixin CastedModel, make sure your class inherits from Hash or responds to the proper methods" unless (base.new.respond_to?(:[]) && base.new.respond_to?(:[]=))
+      included do
+        extlib_inheritable_accessor(:properties) unless self.respond_to?(:properties)
+        self.properties ||= []
+        raise "You can only mixin Properties in a class responding to [] and []=, if you tried to mixin CastedModel, make sure your class inherits from Hash or responds to the proper methods" unless (method_defined?(:[]) && method_defined?(:[]=))
       end
 
       # Returns the Class properties
@@ -22,16 +18,36 @@ module CouchRest
         self.class.properties
       end
 
+      # Read the casted value of an attribute defined with a property.
+      #
+      # ==== Returns
+      # Object:: the casted attibutes value.
       def read_attribute(property)
-        prop = find_property!(property)
-        self[prop.to_s]
+        self[find_property!(property).to_s]
       end
 
+      # Store a casted value in the current instance of an attribute defined
+      # with a property.
       def write_attribute(property, value)
         prop = find_property!(property)
         self[prop.to_s] = prop.is_a?(String) ? value : prop.cast(self, value)
       end
 
+      # Takes a hash as argument, and applies the values by using writer methods
+      # for each key. It doesn't save the document at the end. Raises a NoMethodError if the corresponding methods are
+      # missing. In case of error, no attributes are changed.    
+      def update_attributes_without_saving(hash)
+        # Remove any protected and update all the rest. Any attributes
+        # which do not have a property will simply be ignored.
+        attrs = remove_protected_attributes(hash)
+        directly_set_attributes(attrs)
+      end
+      alias :attributes= :update_attributes_without_saving
+
+
+      private
+      # The following methods should be accessable by the Model::Base Class, but not by anything else!
+      
       def apply_all_property_defaults
         return if self.respond_to?(:new?) && (new? == false)
         # TODO: cache the default object
@@ -40,13 +56,47 @@ module CouchRest
         end
       end
 
-      private
+      def prepare_all_attributes(doc = {}, options = {})
+        apply_all_property_defaults
+        if options[:directly_set_attributes]
+          directly_set_read_only_attributes(doc)          
+        else
+          remove_protected_attributes(doc)
+        end
+        directly_set_attributes(doc) unless doc.nil?
+      end
 
       def find_property!(property)
         prop = property.is_a?(Property) ? property : self.class.properties.detect {|p| p.to_s == property.to_s}
-        raise ArgumentError, "Missing property definition for #{property.to_s}" unless allow_dynamic_properties or !prop.nil?
-        prop || property
+        raise ArgumentError, "Missing property definition for #{property.to_s}" if prop.nil?
+        prop
       end
+
+      def directly_set_attributes(hash)
+        hash.each do |attribute_name, attribute_value|
+          if self.respond_to?("#{attribute_name}=")
+            self.send("#{attribute_name}=", hash.delete(attribute_name))
+          elsif mass_assign_any_attribute # config option
+            self[attribute_name] = attribute_value
+          end
+        end
+      end
+
+      def directly_set_read_only_attributes(hash)
+        property_list = self.properties.map{|p| p.name}
+        hash.each do |attribute_name, attribute_value|
+          next if self.respond_to?("#{attribute_name}=")
+          if property_list.include?(attribute_name)
+            write_attribute(attribute_name, hash.delete(attribute_name))
+          end
+        end
+      end
+      
+      def set_attributes(hash)
+        attrs = remove_protected_attributes(hash)
+        directly_set_attributes(attrs)
+      end
+
 
       module ClassMethods
 

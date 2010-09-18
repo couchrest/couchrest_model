@@ -88,12 +88,6 @@ describe "Model properties" do
       expect { @card.write_attribute(:this_property_should_not_exist, 823) }.to raise_error(ArgumentError)
     end
 
-    it 'should not raise an error if the property does not exist and dynamic properties are allowed' do
-      @card.class.allow_dynamic_properties = true
-      expect { @card.write_attribute(:this_property_should_not_exist, 823) }.to_not raise_error(ArgumentError)
-      @card.class.allow_dynamic_properties = false
-    end
-
 
     it "should let you use write_attribute on readonly properties" do
       lambda {
@@ -113,6 +107,34 @@ describe "Model properties" do
       @card.write_attribute(:first_name, {:name => "Sam"})
       @card.first_name.class.should eql(Hash)
       @card.first_name[:name].should eql("Sam")
+    end
+  end
+
+  describe "mass updating attributes without property" do
+    
+    describe "when mass_assign_any_attribute false" do
+      
+      it "should not allow them to be set" do
+        @card.attributes = {:test => 'fooobar'}
+        @card['test'].should be_nil
+      end
+
+    end
+
+    describe "when mass_assign_any_attribute true" do
+      before(:each) do
+        # dup Card class so that no other tests are effected
+        card_class = Card.dup
+        card_class.class_eval do
+          mass_assign_any_attribute true
+        end
+        @card = card_class.new(:first_name => 'Sam')
+      end
+
+      it 'should allow them to be updated' do
+        @card.attributes = {:test => 'fooobar'}
+        @card['test'].should eql('fooobar')
+      end
     end
   end
 

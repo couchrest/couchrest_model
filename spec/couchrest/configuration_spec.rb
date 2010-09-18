@@ -73,9 +73,7 @@ describe CouchRest::Model::Base do
 
     it "should be possible to override on class using configure method" do
       Cat.instance_eval do
-        configure do |config|
-          config.model_type_key = 'cat-type'
-        end
+        model_type_key 'cat-type'
       end
       CouchRest::Model::Base.model_type_key.should eql(@default_model_key)
       Cat.model_type_key.should eql('cat-type')

@@ -14,7 +14,6 @@ module CouchRest
       include CouchRest::Model::ClassProxy
       include CouchRest::Model::Collection
       include CouchRest::Model::AttributeProtection
-      include CouchRest::Model::Attributes
       include CouchRest::Model::Associations
       include CouchRest::Model::Validations
 

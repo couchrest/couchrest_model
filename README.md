@@ -72,18 +72,16 @@ but no guarantees!
 ## Properties
 
 A property is the definition of an attribute, it describes what the attribute is called, how it should
-be type casted, if at all, and other options such as the default value. These replace your typical 
-`add_column` methods typically found in migrations.
+be type casted and other options such as the default value. These replace your typical 
+`add_column` methods typically found in relational database migrations.
 
-By default only attributes with a property definition will be stored in CouchRest Model, as opposed
-to a normal CouchRest Document which will store everything. This however can be disabled using the 
-`allow_dynamic_properties` configuration option either for all of CouchRest Model, or for specific
-models. See the configuration section for more details.
+Attributes with a property definition will have setter and getter methods defined for them. Any other attibute
+you'd like to set can be done using the regular CouchRest Document, in the same way you'd update a Hash.
 
-In its simplest form, a property
-will only create a getter and setter passing all attribute data directly to the database. Assuming the attribute
-provided responds to `to_json`, there will not be any problems saving it, but when loading the 
-data back it will either be a string, number, array, or hash:
+Properties allow for type casting. Simply provide a Class along with the property definition and CouchRest Model
+will convert any value provided to the property into a new instance of the Class.
+
+Here are a few examples of the way properties are used:
 
     class Cat < CouchRest::Model::Base
       property :name
@@ -150,6 +148,20 @@ attribute using the `write_attribute` method:
     @cat = Cat.new(:name => "Felix")
     @cat.fall_off_balcony!
     @cat.lives    # Now 8!
+
+Mass assigning attributes is also possible in a similar fashion to ActiveRecord:
+
+    @cat.attributes = {:name => "Felix"}
+    @cat.save
+
+Is the same as:
+
+    @cat.update_attributes(:name => "Felix")
+
+Attributes without a property definition however will not be updated this way, this is useful to
+provent useless data being passed from an HTML form for example. However, if you would like truely
+dynamic attributes, the `mass_assign_any_attribute` configuration option when set to true will 
+store everything you put into the `Base#attributes=` method.
 
 
 ## Property Arrays
@@ -300,19 +312,19 @@ base or for a specific model of your chosing. To configure globally, provide som
 following in your projects loading code:
 
     CouchRestModel::Model::Base.configure do |config|
-      config.allow_dynamic_properties = true
+      config.mass_assign_any_attribute = true
       config.model_type_key = 'couchrest-type'
     end
 
 To set for a specific model:
 
    class Cat < CouchRest::Model::Base
-     allow_dynamic_properties true
+     mass_assign_any_attribute true
    end
 
 Options currently avilable are:
 
- * `allow_dynamic_properties` - false by default, when true properties do not need to be defined to be stored, although they will have no accessors.
+ * `mass_assign_any_attribute` - false by default, when true any attribute may be updated via the update_attributes or attributes= methods.
  * `model_type_key` - 'model' by default, useful for migrating from an older CouchRest ExtendedDocument when the default used to be 'couchrest-type'.
 
 

@@ -1,6 +1,8 @@
 module CouchRest
   module Model
     module AttributeProtection
+      extend ActiveSupport::Concern
+
       # Attribute protection from mass assignment to CouchRest::Model properties
       #
       # Protected methods will be removed from

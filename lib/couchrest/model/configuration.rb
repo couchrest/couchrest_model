@@ -9,11 +9,11 @@ module CouchRest
 
       included do
         add_config :model_type_key
-        add_config :allow_dynamic_properties
+        add_config :mass_assign_any_attribute
         
         configure do |config|
           config.model_type_key = 'model'
-          config.allow_dynamic_properties = false
+          config.mass_assign_any_attribute = false
         end
       end
 
