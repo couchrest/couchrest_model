@@ -8,6 +8,13 @@
   * Fixing find("") issue (thanks epochwolf)
   * Altered protected attributes so that hash provided to #attributes= is not modified
 
+Notes:
+
+* 2010-10-22 @samlown:
+  * ActiveModel Attribute support was added but has now been removed due to major performance issues.
+  Until these have been resolved (if possible?!) they should not be included. See the
+  'active_model_attrs' if you'd like to test.
+
 == CouchRest Model 1.0.0.beta8
 
 * Major enhancements
