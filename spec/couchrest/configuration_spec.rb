@@ -62,20 +62,13 @@ describe CouchRest::Model::Base do
       @default_model_key = 'model'
     end
 
-    it "should set default configuration options on Model::Base" do
-      CouchRest::Model::Base.model_type_key.should eql(@default_model_key)
-    end
-
-    it "should provide options from instance" do
-      cat = Cat.new
-      cat.model_type_key.should eql(@default_model_key)
-    end
 
     it "should be possible to override on class using configure method" do
+      default_model_key = Cat.model_type_key
       Cat.instance_eval do
         model_type_key 'cat-type'
       end
-      CouchRest::Model::Base.model_type_key.should eql(@default_model_key)
+      CouchRest::Model::Base.model_type_key.should eql(default_model_key)
       Cat.model_type_key.should eql('cat-type')
       cat = Cat.new
       cat.model_type_key.should eql('cat-type')

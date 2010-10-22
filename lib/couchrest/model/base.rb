@@ -13,7 +13,7 @@ module CouchRest
       include CouchRest::Model::ExtendedAttachments
       include CouchRest::Model::ClassProxy
       include CouchRest::Model::Collection
-      include CouchRest::Model::AttributeProtection
+      include CouchRest::Model::PropertyProtection
       include CouchRest::Model::Associations
       include CouchRest::Model::Validations
 
@@ -47,7 +47,7 @@ module CouchRest
       # * :directly_set_attributes: true when data comes directly from database
       #
       def initialize(doc = {}, options = {})
-        prepare_all_attributes(doc, options)
+        doc = prepare_all_attributes(doc, options)
         super(doc)
         unless self['_id'] && self['_rev']
           self[self.model_type_key] = self.class.to_s

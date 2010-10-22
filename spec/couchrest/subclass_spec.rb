@@ -93,7 +93,7 @@ describe "Subclassing a Model" do
   end
   
   it "should have an all view with a guard clause for model == subclass name in the map function" do
-    OnlineCourse.design_doc['views']['all']['map'].should =~ /if \(doc\['model'\] == 'OnlineCourse'\)/
+    OnlineCourse.design_doc['views']['all']['map'].should =~ /if \(doc\['#{OnlineCourse.model_type_key}'\] == 'OnlineCourse'\)/
   end
 end
 

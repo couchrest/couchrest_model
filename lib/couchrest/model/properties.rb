@@ -61,7 +61,7 @@ module CouchRest
         if options[:directly_set_attributes]
           directly_set_read_only_attributes(doc)          
         else
-          remove_protected_attributes(doc)
+          doc = remove_protected_attributes(doc)
         end
         directly_set_attributes(doc) unless doc.nil?
       end
@@ -72,12 +72,18 @@ module CouchRest
         prop
       end
 
+      # Set all the attributes and return a hash with the attributes
+      # that have not been accepted.
       def directly_set_attributes(hash)
-        hash.each do |attribute_name, attribute_value|
+        hash.reject do |attribute_name, attribute_value|
           if self.respond_to?("#{attribute_name}=")
-            self.send("#{attribute_name}=", hash.delete(attribute_name))
+            self.send("#{attribute_name}=", attribute_value)
+            true
           elsif mass_assign_any_attribute # config option
             self[attribute_name] = attribute_value
+            true
+          else
+            false
           end
         end
       end

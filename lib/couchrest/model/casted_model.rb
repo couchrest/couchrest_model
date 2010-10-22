@@ -7,7 +7,7 @@ module CouchRest::Model
       include CouchRest::Model::Configuration
       include CouchRest::Model::Callbacks
       include CouchRest::Model::Properties
-      include CouchRest::Model::AttributeProtection
+      include CouchRest::Model::PropertyProtection
       include CouchRest::Model::Associations
       include CouchRest::Model::Validations
       attr_accessor :casted_by
