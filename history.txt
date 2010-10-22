@@ -1,12 +1,12 @@
 == Next Version
 
 * Major enhancements
-  * IMPORTANT: Model's class name key changed from 'couchrest-type' to 'model'
   * Support for configuration module and "model_type_key" option for overriding model's type key
   * Added "mass_assign_any_attribute" configuration option to allow setting anything via the attribute= method.
 
 * Minor enhancements
   * Fixing find("") issue (thanks epochwolf)
+  * Altered protected attributes so that hash provided to #attributes= is not modified
 
 == CouchRest Model 1.0.0.beta8
 
