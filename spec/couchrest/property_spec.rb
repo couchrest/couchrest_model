@@ -320,12 +320,28 @@ describe "Model properties" do
         @course['estimate'].should eql(-24.35)
       end
 
+      it 'return float of a number with commas instead of points for decimals' do
+        @course.estimate = '23,35'
+        @course['estimate'].should eql(23.35)
+      end
+
+      it "should handle numbers with commas and points" do
+        @course.estimate = '1,234.00'
+        @course.estimate.should eql(1234.00)
+      end
+
+      it "should handle a mis-match of commas and points and maintain the last one" do
+        @course.estimate = "1,232.434.123,323"
+        @course.estimate.should eql(1232434123.323)
+      end
+
       [ Object.new, true, '00.0', '0.', '-.0', 'string' ].each do |value|
         it "does not typecast non-numeric value #{value.inspect}" do
           @course.estimate = value
           @course['estimate'].should equal(value)
         end
       end
+
     end
 
     describe 'when type primitive is a Integer' do

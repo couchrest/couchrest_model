@@ -7,6 +7,7 @@
 * Minor enhancements
   * Fixing find("") issue (thanks epochwolf)
   * Altered protected attributes so that hash provided to #attributes= is not modified
+  * Altering typecasting for floats to better handle commas and points
 
 Notes:
 
