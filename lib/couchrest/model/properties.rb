@@ -23,6 +23,12 @@ module CouchRest
         self.class.properties
       end
 
+      def properties_with_values
+        props = {}
+        properties.each { |property| props[property.name] = read_attribute(property.name) }
+        props
+      end
+
       def apply_all_property_defaults
         return if self.respond_to?(:new?) && (new? == false)
         # TODO: cache the default object
@@ -105,3 +111,4 @@ module CouchRest
     end
   end
 end
+

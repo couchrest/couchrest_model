@@ -36,6 +36,11 @@ describe "Model properties" do
     @card.properties.map{|p| p.name}.should include("first_name")
   end
 
+  it "should list object properties with values" do
+    @card.properties_with_values.should be_an_instance_of(Hash)
+    @card.properties_with_values["first_name"].should == "matt"
+  end
+
   it "should let you access a property value (getter)" do
     @card.first_name.should == "matt"
   end
@@ -838,3 +843,4 @@ describe "Property Class" do
   end
 
 end
+
