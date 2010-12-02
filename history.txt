@@ -8,6 +8,7 @@
   * Fixing find("") issue (thanks epochwolf)
   * Altered protected attributes so that hash provided to #attributes= is not modified
   * Altering typecasting for floats to better handle commas and points
+  * Fixing the lame pagination bug where database url (and pass!!) were included in view requests (Thanks James Hayton)
 
 Notes:
 
