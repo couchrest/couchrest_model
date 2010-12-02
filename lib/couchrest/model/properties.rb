@@ -1,5 +1,4 @@
 # encoding: utf-8
-require 'set'
 module CouchRest
   module Model
     module Properties
@@ -21,6 +20,16 @@ module CouchRest
       # Array:: the list of properties for model's class
       def properties
         self.class.properties
+      end
+
+      def read_attribute(property)
+        prop = find_property!(property)
+        self[prop.to_s]
+      end
+
+      def write_attribute(property, value)
+        prop = find_property!(property)
+        self[prop.to_s] = prop.cast(self, value)
       end
 
       def apply_all_property_defaults
@@ -85,7 +94,8 @@ module CouchRest
               type = [type] # inject as an array
             end
             property = Property.new(name, type, options)
-            create_property_alias(property) if property.alias
+            create_property_getter(property)
+            create_property_setter(property) unless property.read_only == true
             if property.type_class.respond_to?(:validates_casted_model)
               validates_casted_model property.name
             end
@@ -93,15 +103,49 @@ module CouchRest
             property
           end
 
-          def create_property_alias(property)
+          # defines the getter for the property (and optional aliases)
+          def create_property_getter(property)
+            # meth = property.name
             class_eval <<-EOS, __FILE__, __LINE__ + 1
-              def #{property.alias.to_s}
-                #{property.name}
+              def #{property.name}
+                read_attribute('#{property.name}')
               end
             EOS
+
+            if ['boolean', TrueClass.to_s.downcase].include?(property.type.to_s.downcase)
+              class_eval <<-EOS, __FILE__, __LINE__
+                def #{property.name}?
+                  value = read_attribute('#{property.name}')
+                  !(value.nil? || value == false)
+                end
+              EOS
+            end
+
+            if property.alias
+              class_eval <<-EOS, __FILE__, __LINE__ + 1
+                alias #{property.alias.to_sym} #{property.name.to_sym}
+              EOS
+            end
+          end
+
+          # defines the setter for the property (and optional aliases)
+          def create_property_setter(property)
+            property_name = property.name
+            class_eval <<-EOS
+              def #{property_name}=(value)
+                write_attribute('#{property_name}', value)
+              end
+            EOS
+
+            if property.alias
+              class_eval <<-EOS
+                alias #{property.alias.to_sym}= #{property_name.to_sym}=
+              EOS
+            end
           end
 
       end # module ClassMethods
+
     end
   end
 end

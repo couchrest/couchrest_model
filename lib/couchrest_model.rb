@@ -48,7 +48,6 @@ require "couchrest/model/collection"
 require "couchrest/model/attribute_protection"
 require "couchrest/model/attributes"
 require "couchrest/model/associations"
-require "couchrest/model/dirty"
 
 # Monkey patches applied to couchrest
 require "couchrest/model/support/couchrest"

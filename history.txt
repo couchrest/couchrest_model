@@ -1,8 +1,6 @@
 == Next Version
 
 * Major enhancements
-  * Dirty Tracking via ActiveModel
-  * ActiveModel Attribute Methods support
 
 * Minor enhancements
   * Fixing find("") issue (thanks epochwolf)

@@ -8,23 +8,23 @@ require File.join(FIXTURE_PATH, 'more', 'card')
 require File.join(FIXTURE_PATH, 'base')
 
 describe "Model Base" do
-
+  
   before(:each) do
     @obj = WithDefaultValues.new
   end
-
+  
   describe "instance database connection" do
     it "should use the default database" do
       @obj.database.name.should == 'couchrest-model-test'
     end
-
+    
     it "should override the default db" do
       @obj.database = TEST_SERVER.database!('couchrest-extendedmodel-test')
       @obj.database.name.should == 'couchrest-extendedmodel-test'
       @obj.database.delete!
     end
   end
-
+  
   describe "a new model" do
     it "should be a new document" do
       @obj = Basic.new
@@ -39,10 +39,10 @@ describe "Model Base" do
       @obj.should == { 'couchrest-type' => 'Basic' }
     end
   end
-
+ 
   describe "ActiveModel compatability Basic" do
 
-    before(:each) do
+    before(:each) do 
       @obj = Basic.new(nil)
     end
 
@@ -86,7 +86,7 @@ describe "Model Base" do
       context "when the document is not new" do
         it "returns id" do
           @obj.save
-          @obj.persisted?.should == true
+          @obj.persisted?.should == true 
         end
       end
     end
@@ -100,7 +100,7 @@ describe "Model Base" do
 
 
   end
-
+  
   describe "update attributes without saving" do
     before(:each) do
       a = Article.get "big-bad-danger" rescue nil
@@ -134,22 +134,22 @@ describe "Model Base" do
       @art.attributes = {'date' => Time.now, :title => "something else"}
       @art['title'].should == "something else"
     end
-
+    
     it "should not flip out if an attribute= method is missing and ignore it" do
       lambda {
         @art.update_attributes_without_saving('slug' => "new-slug", :title => "super danger")
       }.should_not raise_error
       @art.slug.should == "big-bad-danger"
     end
-
+    
     #it "should not change other attributes if there is an error" do
     #  lambda {
-    #    @art.update_attributes_without_saving('slug' => "new-slug", :title => "super danger")
+    #    @art.update_attributes_without_saving('slug' => "new-slug", :title => "super danger")        
     #  }.should raise_error
     #  @art['title'].should == "big bad danger"
     #end
   end
-
+  
   describe "update attributes" do
     before(:each) do
       a = Article.get "big-bad-danger" rescue nil
@@ -164,7 +164,7 @@ describe "Model Base" do
       loaded['title'].should == "super danger"
     end
   end
-
+  
   describe "with default" do
     it "should have the default value set at initalization" do
       @obj.preset.should == {:right => 10, :top_align => false}
@@ -173,23 +173,23 @@ describe "Model Base" do
     it "should have the default false value explicitly assigned" do
       @obj.default_false.should == false
     end
-
+    
     it "should automatically call a proc default at initialization" do
       @obj.set_by_proc.should be_an_instance_of(Time)
       @obj.set_by_proc.should == @obj.set_by_proc
       @obj.set_by_proc.should < Time.now
     end
-
+    
     it "should let you overwrite the default values" do
       obj = WithDefaultValues.new(:preset => 'test')
       obj.preset = 'test'
     end
-
+    
     it "should work with a default empty array" do
       obj = WithDefaultValues.new(:tags => ['spec'])
       obj.tags.should == ['spec']
     end
-
+    
     it "should set default value of read-only property" do
       obj = WithDefaultValues.new
       obj.read_only_with_default.should == 'generic'
@@ -207,7 +207,7 @@ describe "Model Base" do
       obj.tags.should == ['spec']
     end
   end
-
+  
   describe "a doc with template values (CR::Model spec)" do
     before(:all) do
       WithTemplateAndUniqueID.all.map{|o| o.destroy}
@@ -228,8 +228,8 @@ describe "Model Base" do
       tmpl2_reloaded.preset.should == 'not_value'
     end
   end
-
-
+  
+  
   describe "finding all instances of a model" do
     before(:all) do
       WithTemplateAndUniqueID.req_design_doc_refresh
@@ -246,32 +246,32 @@ describe "Model Base" do
       d['views']['all']['map'].should include('WithTemplateAndUniqueID')
     end
     it "should find all" do
-      rs = WithTemplateAndUniqueID.all
+      rs = WithTemplateAndUniqueID.all 
       rs.length.should == 4
     end
   end
-
+  
   describe "counting all instances of a model" do
     before(:each) do
       @db = reset_test_db!
       WithTemplateAndUniqueID.req_design_doc_refresh
     end
-
+    
     it ".count should return 0 if there are no docuemtns" do
       WithTemplateAndUniqueID.count.should == 0
     end
-
+    
     it ".count should return the number of documents" do
       WithTemplateAndUniqueID.new('important-field' => '1').save
       WithTemplateAndUniqueID.new('important-field' => '2').save
       WithTemplateAndUniqueID.new('important-field' => '3').save
-
+      
       WithTemplateAndUniqueID.count.should == 3
     end
   end
-
+  
   describe "finding the first instance of a model" do
-    before(:each) do
+    before(:each) do      
       @db = reset_test_db!
       # WithTemplateAndUniqueID.req_design_doc_refresh # Removed by Sam Lown, design doc should be loaded automatically
       WithTemplateAndUniqueID.new('important-field' => '1').save
@@ -309,7 +309,7 @@ describe "Model Base" do
       WithTemplateAndUniqueID.design_doc['_rev'].should eql(rev)
     end
   end
-
+  
   describe "getting a model with a subobject field" do
     before(:all) do
       course_doc = {
@@ -332,7 +332,7 @@ describe "Model Base" do
       @course['ends_at'].should == Time.parse("2008/12/19 13:00:00 +0800")
     end
   end
-
+  
   describe "timestamping" do
     before(:each) do
       oldart = Article.get "saving-this" rescue nil
@@ -340,7 +340,7 @@ describe "Model Base" do
       @art = Article.new(:title => "Saving this")
       @art.save
     end
-
+    
     it "should define the updated_at and created_at getters and set the values" do
       @obj.save
       obj = WithDefaultValues.get(@obj.id)
@@ -349,15 +349,15 @@ describe "Model Base" do
       obj.updated_at.should be_an_instance_of(Time)
       obj.created_at.to_s.should == @obj.updated_at.to_s
     end
-
+    
     it "should not change created_at on update" do
-      2.times do
+      2.times do 
         lambda do
           @art.save
         end.should_not change(@art, :created_at)
       end
     end
-
+     
     it "should set the time on create" do
       (Time.now - @art.created_at).should < 2
       foundart = Article.get @art.id
@@ -368,7 +368,7 @@ describe "Model Base" do
       @art.created_at.should < @art.updated_at
     end
   end
-
+  
   describe "getter and setter methods" do
     it "should try to call the arg= method before setting :arg in the hash" do
       @doc = WithGetterAndSetterMethods.new(:arg => "foo")
@@ -384,41 +384,41 @@ describe "Model Base" do
       @doc['some_value'].should eql('value')
     end
   end
-
+  
   describe "recursive validation on a model" do
     before :each do
       reset_test_db!
       @cat = Cat.new(:name => 'Sockington')
     end
-
+    
     it "should not save if a nested casted model is invalid" do
       @cat.favorite_toy = CatToy.new
       @cat.should_not be_valid
       @cat.save.should be_false
       lambda{@cat.save!}.should raise_error
     end
-
+    
     it "should save when nested casted model is valid" do
       @cat.favorite_toy = CatToy.new(:name => 'Squeaky')
       @cat.should be_valid
       @cat.save.should be_true
       lambda{@cat.save!}.should_not raise_error
     end
-
+    
     it "should not save when nested collection contains an invalid casted model" do
       @cat.toys = [CatToy.new(:name => 'Feather'), CatToy.new]
       @cat.should_not be_valid
       @cat.save.should be_false
       lambda{@cat.save!}.should raise_error
     end
-
+    
     it "should save when nested collection contains valid casted models" do
       @cat.toys = [CatToy.new(:name => 'feather'), CatToy.new(:name => 'ball-o-twine')]
       @cat.should be_valid
       @cat.save.should be_true
       lambda{@cat.save!}.should_not raise_error
     end
-
+    
     it "should not fail if the nested casted model doesn't have validation" do
       Cat.property :trainer, Person
       Cat.validates_presence_of :name
