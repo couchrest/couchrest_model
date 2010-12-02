@@ -1,1 +1,1 @@
-require File.join(File.dirname(__FILE__),'lib', 'couchrest', 'extended_document')
+require File.join(File.dirname(__FILE__),'lib', 'couchrest', 'model')
