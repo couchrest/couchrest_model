@@ -351,7 +351,7 @@ CouchRest Model supports a few configuration options. These can be set either fo
 base or for a specific model of your chosing. To configure globally, provide something similar to the 
 following in your projects loading code:
 
-    CouchRestModel::Model::Base.configure do |config|
+    CouchRest::Model::Base.configure do |config|
       config.mass_assign_any_attribute = true
       config.model_type_key = 'couchrest-type'
     end
