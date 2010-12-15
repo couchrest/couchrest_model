@@ -382,13 +382,6 @@ The CouchRest companion rails project [http://github.com/hpoydar/couchrest-rails
 CouchRest Model and the original CouchRest ExtendedDocument do not share the same namespace, as such you should not have any problems using them both at the same time. This might help with migrations.
 
 
-### Rails 3.0
-
-In your Gemfile require the gem with a simple line:
-
-    gem "couchrest_model"
-
-
 ## Testing
 
 The most complete documentation is the spec/ directory. To validate your CouchRest install, from the project root directory run `rake`, or `autotest` (requires RSpec and optionally ZenTest for autotest support).
