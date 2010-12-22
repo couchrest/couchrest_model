@@ -184,6 +184,14 @@ describe "Model Base" do
       obj = WithDefaultValues.new(:preset => 'test')
       obj.preset = 'test'
     end
+
+    it "should keep default values for new instances" do
+      obj = WithDefaultValues.new
+      obj.preset[:alpha] = 123
+      obj.preset.should == {:right => 10, :top_align => false, :alpha => 123}
+      another = WithDefaultValues.new
+      another.preset.should == {:right => 10, :top_align => false}
+    end
     
     it "should work with a default empty array" do
       obj = WithDefaultValues.new(:tags => ['spec'])

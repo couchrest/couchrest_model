@@ -58,8 +58,8 @@ module CouchRest::Model
       if default.class == Proc
         default.call
       else
-        # Marshal.load(Marshal.dump(default)) # Removed as there are no failing tests and caused mutex errors
-        default
+        # TODO identify cause of mutex errors
+        Marshal.load(Marshal.dump(default))
       end
     end
 
