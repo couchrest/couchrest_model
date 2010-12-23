@@ -34,6 +34,12 @@ describe "Model Attributes" do
       user.name.should == "will"
       user.phone.should == "555-5555"
     end
+
+    it "should provide a list of all properties as accessible" do
+      user = NoProtection.new(:name => "will", :phone => "555-5555")
+      user.accessible_properties.length.should eql(2)
+      user.protected_properties.should be_empty
+    end
   end
 
   describe "Model Base", "accessible flag" do
@@ -64,6 +70,12 @@ describe "Model Attributes" do
 
       user.name.should == "will"
       user.admin.should == false
+    end
+    
+    it "should provide correct accessible and protected property lists" do
+      user = WithAccessible.new(:name => 'will', :admin => true)
+      user.accessible_properties.map{|p| p.to_s}.should eql(['name'])
+      user.protected_properties.map{|p| p.to_s}.should eql(['admin'])
     end
   end
 
@@ -96,6 +108,21 @@ describe "Model Attributes" do
       user.name.should == "will"
       user.admin.should == false
     end
+
+    it "should not modify the provided attribute hash" do
+      user = WithProtected.new
+      attrs = {:name => "will", :admin => true}
+      user.attributes = attrs
+      attrs[:admin].should be_true
+      attrs[:name].should eql('will')
+    end
+
+    it "should provide correct accessible and protected property lists" do
+      user = WithProtected.new(:name => 'will', :admin => true)
+      user.accessible_properties.map{|p| p.to_s}.should eql(['name'])
+      user.protected_properties.map{|p| p.to_s}.should eql(['admin'])
+    end
+
   end
 
   describe "Model Base", "mixing protected and accessible flags" do
@@ -115,6 +142,7 @@ describe "Model Attributes" do
       user.admin.should == false
       user.phone.should == 'unset phone number'
     end
+
   end
 
   describe "from database" do
@@ -150,7 +178,7 @@ describe "Model Attributes" do
     it "Base#all should not strip protected attributes" do
       # all creates a CollectionProxy
       docs = WithProtected.all(:key => @user.id)
-      docs.size.should == 1
+      docs.length.should == 1
       reloaded = docs.first
       verify_attrs reloaded
     end

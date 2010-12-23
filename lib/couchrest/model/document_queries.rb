@@ -8,21 +8,21 @@ module CouchRest
       
       module ClassMethods
         
-        # Load all documents that have the "couchrest-type" field equal to the
+        # Load all documents that have the model_type_key's field equal to the
         # name of the current class. Take the standard set of
         # CouchRest::Database#view options.
         def all(opts = {}, &block)
           view(:all, opts, &block)
         end
         
-        # Returns the number of documents that have the "couchrest-type" field
+        # Returns the number of documents that have the model_type_key's field
         # equal to the name of the current class. Takes the standard set of 
         # CouchRest::Database#view options
         def count(opts = {}, &block)
           all({:raw => true, :limit => 0}.merge(opts), &block)['total_rows']
         end
         
-        # Load the first document that have the "couchrest-type" field equal to
+        # Load the first document that have the model_type_key's field equal to
         # the name of the current class.
         #
         # ==== Returns

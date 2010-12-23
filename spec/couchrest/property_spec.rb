@@ -9,20 +9,6 @@ require File.join(FIXTURE_PATH, 'more', 'event')
 require File.join(FIXTURE_PATH, 'more', 'user')
 require File.join(FIXTURE_PATH, 'more', 'course')
 
-describe 'Attributes' do
-  class AttrDoc < CouchRest::Model::Base
-    property :one
-    property :two
-  end
-
-  it '.attributes should have an array of attribute names' do
-   AttrDoc.attributes.should =~ ['two', 'one']
-  end
-
-  it '#attributes should have an array of attribute names' do
-   AttrDoc.new.attributes.should =~ ['two', 'one']
-  end
-end
 
 describe "Model properties" do
 
@@ -107,6 +93,7 @@ describe "Model properties" do
       expect { @card.write_attribute(:this_property_should_not_exist, 823) }.to raise_error(ArgumentError)
     end
 
+
     it "should let you use write_attribute on readonly properties" do
       lambda {
         @card.read_only_value = "foo"
@@ -125,6 +112,34 @@ describe "Model properties" do
       @card.write_attribute(:first_name, {:name => "Sam"})
       @card.first_name.class.should eql(Hash)
       @card.first_name[:name].should eql("Sam")
+    end
+  end
+
+  describe "mass updating attributes without property" do
+    
+    describe "when mass_assign_any_attribute false" do
+      
+      it "should not allow them to be set" do
+        @card.attributes = {:test => 'fooobar'}
+        @card['test'].should be_nil
+      end
+
+    end
+
+    describe "when mass_assign_any_attribute true" do
+      before(:each) do
+        # dup Card class so that no other tests are effected
+        card_class = Card.dup
+        card_class.class_eval do
+          mass_assign_any_attribute true
+        end
+        @card = card_class.new(:first_name => 'Sam')
+      end
+
+      it 'should allow them to be updated' do
+        @card.attributes = {:test => 'fooobar'}
+        @card['test'].should eql('fooobar')
+      end
     end
   end
 
@@ -310,12 +325,28 @@ describe "Model properties" do
         @course['estimate'].should eql(-24.35)
       end
 
+      it 'return float of a number with commas instead of points for decimals' do
+        @course.estimate = '23,35'
+        @course['estimate'].should eql(23.35)
+      end
+
+      it "should handle numbers with commas and points" do
+        @course.estimate = '1,234.00'
+        @course.estimate.should eql(1234.00)
+      end
+
+      it "should handle a mis-match of commas and points and maintain the last one" do
+        @course.estimate = "1,232.434.123,323"
+        @course.estimate.should eql(1232434123.323)
+      end
+
       [ Object.new, true, '00.0', '0.', '-.0', 'string' ].each do |value|
         it "does not typecast non-numeric value #{value.inspect}" do
           @course.estimate = value
           @course['estimate'].should equal(value)
         end
       end
+
     end
 
     describe 'when type primitive is a Integer' do

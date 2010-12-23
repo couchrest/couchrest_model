@@ -31,7 +31,7 @@ module CouchRest
             "views" => {
               'all' => {
                 'map' => "function(doc) {
-                  if (doc['couchrest-type'] == '#{self.to_s}') {
+                  if (doc['#{self.model_type_key}'] == '#{self.to_s}') {
                     emit(doc['_id'],1);
                   }
                 }"

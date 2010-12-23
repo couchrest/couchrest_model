@@ -1,7 +1,9 @@
 module CouchRest
   module Model
-    module AttributeProtection
-      # Attribute protection from mass assignment to CouchRest::Model properties
+    module PropertyProtection
+      extend ActiveSupport::Concern
+
+      # Property protection from mass assignment to CouchRest::Model properties
       #
       # Protected methods will be removed from
       #  * new
@@ -20,7 +22,7 @@ module CouchRest
       #
       #  3) Mix and match, and assume all unspecified properties are protected.
       #    property :name,  :accessible => true
-      #    property :admin, :protected  => true
+      #    property :admin, :protected  => true # ignored
       #    property :phone                      # this will be automatically protected
       #
       #  Note: the timestamps! method protectes the created_at and updated_at properties
@@ -32,11 +34,16 @@ module CouchRest
 
       module ClassMethods
         def accessible_properties
-          properties.select { |prop| prop.options[:accessible] }
+          props = properties.select { |prop| prop.options[:accessible] }
+          if props.empty?
+            props = properties.select { |prop| !prop.options[:protected] }
+          end
+          props
         end
 
         def protected_properties
-          properties.select { |prop| prop.options[:protected] }
+          accessibles = accessible_properties
+          properties.reject { |prop| accessibles.include?(prop) }
         end
       end
 
@@ -48,28 +55,17 @@ module CouchRest
         self.class.protected_properties
       end
 
+      # Return a new copy of the attributes hash with protected attributes
+      # removed.
       def remove_protected_attributes(attributes)
-        protected_names = properties_to_remove_from_mass_assignment.map { |prop| prop.name }
-        return attributes if protected_names.empty?
+        protected_names = protected_properties.map { |prop| prop.name }
+        return attributes if protected_names.empty? or attributes.nil?
 
-        attributes.reject! do |property_name, property_value|
+        attributes.reject do |property_name, property_value|
           protected_names.include?(property_name.to_s)
-        end if attributes
-
-        attributes || {}
-      end
-
-      private
-
-      def properties_to_remove_from_mass_assignment
-        to_remove = protected_properties
-
-        unless accessible_properties.empty?
-          to_remove += properties.reject { |prop| prop.options[:accessible] }
         end
-
-        to_remove
       end
+
     end
   end
 end

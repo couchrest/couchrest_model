@@ -9,16 +9,13 @@ for validations and callbacks.
 If your project is still running Rails 2.3, you'll have to continue using ExtendedDocument as 
 it is not possible to load ActiveModel into programs that do not use ActiveSupport 3.0.
 
-CouchRest Model only supports CouchDB 0.10.0 or newer.
+CouchRest Model is only tested on CouchDB 1.0.0 or newer.
 
 ## Install
 
-### From Gem
+### Gem
 
-CouchRest Model depends on Rails 3's ActiveModel which has not yet been released. You'll need to add
-`--pre` to the end of the gem install until the dependencies are stable:
-
-    $ sudo gem install couchrest_model --pre
+    $ sudo gem install couchrest_model
 
 ### Bundler
 
@@ -71,16 +68,14 @@ but no guarantees!
 
 ## Properties
 
-Only attributes with a property definition will be stored be CouchRest Model (as opposed
-to a normal CouchRest Document which will store everything). To help prevent confusion, 
-a property should be considered as the definition of an attribute. An attribute must be associated
-with a property, but a property may not have any attributes associated if none have been set.
+A property is the definition of an attribute, it describes what the attribute is called, how it should
+be type casted and other options such as the default value. These replace your typical 
+`add_column` methods found in relational database migrations.
 
+Attributes with a property definition will have setter and getter methods defined for them. Any other attibute
+can be set in the same way you'd update a Hash, this funcionality is inherited from CouchRest Documents.
 
-In its simplest form, a property
-will only create a getter and setter passing all attribute data directly to the database. Assuming the attribute
-provided responds to `to_json`, there will not be any problems saving it, but when loading the 
-data back it will either be a string, number, array, or hash:
+Here are a few examples of the way properties are used:
 
     class Cat < CouchRest::Model::Base
       property :name
@@ -105,8 +100,7 @@ Properties create getters and setters similar to the following:
       write_attribute('name', value)
     end
 
-Properties can also have a type which 
-will be used for casting data retrieved from CouchDB when the attribute is set:
+Properties can also have a type which will be used for casting data retrieved from CouchDB when the attribute is set:
 
     class Cat < CouchRest::Model::Base
       property :name, String
@@ -120,7 +114,7 @@ will be used for casting data retrieved from CouchDB when the attribute is set:
     @cat.last_fed_at < 20.minutes.ago   # True!
 
 
-Booleans or TrueClass will also create a getter with question mark at the end:
+Boolean or TrueClass types will create a getter with question mark at the end:
 
     class Cat < CouchRest::Model::Base
       property :awake, TrueClass, :default => true
@@ -130,9 +124,8 @@ Booleans or TrueClass will also create a getter with question mark at the end:
 
 Adding the +:default+ option will ensure the attribute always has a value.
 
-Defining a property as read-only will mean that its value is set only when read from the
-database and that it will not have a setter method. You can however update a read-only
-attribute using the `write_attribute` method:
+A read-only property will only have a getter method, and its value is set when the document
+is read from the database. You can however update a read-only attribute using the `write_attribute` method:
 
     class Cat < CouchRest::Model::Base
       property :name, String
@@ -148,10 +141,23 @@ attribute using the `write_attribute` method:
     @cat.fall_off_balcony!
     @cat.lives    # Now 8!
 
+Mass assigning attributes is also possible in a similar fashion to ActiveRecord:
+
+    @cat.attributes = { :name => "Felix" }
+    @cat.save
+
+Is the same as:
+
+    @cat.update_attributes(:name => "Felix")
+
+By default, attributes without a property will not be updated via the `#attributes=` method. This provents useless data being passed to database, for example from an HTML form. However, if you would like truely
+dynamic attributes, the `mass_assign_any_attribute` configuration option when set to true will 
+store everything you put into the `Base#attributes=` method.
+
 
 ## Property Arrays
 
-An attribute may also contain an array of data. CouchRest Model handles this, along
+An attribute may contain an array of data. CouchRest Model handles this, along
 with casting, by defining the class of the child attributes inside an Array:
 
     class Cat < CouchRest::Model::Base
@@ -193,15 +199,14 @@ you'd like to use. For example:
     @cat.toys.first.class == CatToy
     @cat.toys.first.name == 'mouse'
 
-Additionally, any hashes sent to the property will automatically be converted:
+Any hashes sent to the property will automatically be converted:
 
     @cat.toys << {:name => 'catnip ball'}
     @cat.toys.last.is_a?(CatToy) # True!
 
-Of course, to use your own classes they *must* be defined before the parent uses them otherwise 
+To use your own classes they *must* be defined before the parent uses them otherwise 
 Ruby will bring up a missing constant error. To avoid this, or if you have a really simple array of data
-you'd like to model, the latest version of CouchRest Model (> 1.0.0) supports creating
-anonymous classes:
+you'd like to model, CouchRest Model supports creating anonymous classes:
 
     class Cat < CouchRest::Model::Base
       property :name, String
@@ -216,7 +221,7 @@ anonymous classes:
     @cat.toys.last.rating == 5
     @cat.toys.last.name == 'catnip ball'
 
-Using this method of anonymous classes will *only* create arrays of objects.
+Anonymous classes will *only* create arrays of objects.
 
 
 ## Assocations
@@ -227,14 +232,67 @@ Two types at the moment:
 
     collection_of :tags
 
-TODO: Document properly!
+This is a somewhat controvesial feature of CouchRest Model that some document database purists may fringe at. CouchDB does not yet povide many features to support relationships between documents but the fact of that matter is that its a very useful paradigm for modelling data systems.
 
+In the near future we hope to add support for a `has_many` relationship that takes of the _Linked Documents_ feature that arrived in CouchDB 0.11.
+
+### Belongs To
+
+Creates a property in the document with `_id` added to the end of the name of the foreign model with getter and setter methods to access the model. 
+
+Example:
+
+    class Cat < CouchRest::Model::Base
+      belongs_to :mother
+      property :name
+    end
+
+    kitty = Cat.new(:name => "Felix")
+    kitty.mother = Mother.find_by_name('Sophie')
+
+Providing a object to the setter, `mother` in the example will automagically update the `mother_id` attribute. Retrieving the data later is just as expected:
+
+    kitty = Cat.find_by_name "Felix"
+    kitty.mother.name == 'Sophie'
+
+Belongs_to accepts a few options to add a bit more felxibility:
+
+* `:class_name` - the camel case string name of the class used to load the model.
+* `:foreign_key` - the name of the property to use instead of the attribute name with `_id` on the end.
+* `:proxy` - a string that when evaluated provides a proxy model that responds to `#get`.
+
+The last option, `:proxy` is a feature currently in testing that allows objects to be loaded from a proxy class, such as `ClassProxy`. For example:
+
+    class Invoice < CouchRest::Model::Base
+      attr_accessor :company
+      belongs_to :project, :proxy => 'self.company.projects'
+    end
+
+A project instance in this scenario would need to be loaded by calling `#get(project_id)` on `self.company.projects` in the scope of an instance of the Invoice. We hope to document and work on this powerful feature in the near future.
+
+
+### Collection Of
+
+A collection_of relationship is much like belongs_to except that rather than just one foreign key, an array of foreign keys can be stored. This is one of the great features of a document database. This relationship uses a proxy object to automatically update two arrays; one containing the objects being used, and a second with the foreign keys used to the find them.
+
+The best example of this in use is with Labels:
+
+    class Invoice < CouchRest::Model::Base
+      collection_of :labels
+    end
+
+    invoice = Invoice.new
+    invoice.labels << Label.get('xyz')
+    invoice.labels << Label.get('abc')
+
+    invoice.labels.map{|l| l.name} # produces ['xyz', 'abc']
+
+See the belongs_to relationship for the options that can be used. Note that this isn't especially efficient, a `get` is performed for each model in the array. As with a has_many relationship, we hope to be able to take advantage of the Linked Documents feature to avoid multiple requests.
 
 
 ## Validations
 
-CouchRest Model automatically includes the new ActiveModel validations, so they should work just as the traditional Rails
-validations. For more details, please see the ActiveModel::Validations documentation.
+CouchRest Model automatically includes the new ActiveModel validations, so they should work just as the traditional Rails validations. For more details, please see the ActiveModel::Validations documentation.
 
 CouchRest Model adds the possibility to check the uniqueness of attributes using the `validates_uniqueness_of` class method, for example:
 
@@ -251,9 +309,7 @@ you'd like to avoid the typical RestClient Conflict error:
     unique_id :code
     validates_uniqueness_of :code, :view => 'all'
 
-Given that the uniqueness check performs a request to the database, it is also possible
-to include a @:proxy@ parameter. This allows you to
-call a method on the document and provide an alternate proxy object.
+Given that the uniqueness check performs a request to the database, it is also possible to include a `:proxy` parameter. This allows you to call a method on the document and provide an alternate proxy object.
 
 Examples:
 
@@ -264,8 +320,7 @@ Examples:
     validates_uniqueness_of :title, :proxy => 'company.people'
 
 
-A really interesting use of +:proxy+ and +:view+ together could be where
-you'd like to ensure the ID is unique between several types of document. For example:
+A really interesting use of `:proxy` and `:view` together could be where you'd like to ensure the ID is unique between several types of document. For example:
 
     class Product < CouchRest::Model::Base
       property :code
@@ -290,26 +345,41 @@ you'd like to ensure the ID is unique between several types of document. For exa
 Pretty cool!
 
 
+## Configuration
+
+CouchRest Model supports a few configuration options. These can be set either for the whole Model code
+base or for a specific model of your chosing. To configure globally, provide something similar to the 
+following in your projects loading code:
+
+    CouchRestModel::Model::Base.configure do |config|
+      config.mass_assign_any_attribute = true
+      config.model_type_key = 'couchrest-type'
+    end
+
+To set for a specific model:
+
+   class Cat < CouchRest::Model::Base
+     mass_assign_any_attribute true
+   end
+
+Options currently avilable are:
+
+ * `mass_assign_any_attribute` - false by default, when true any attribute may be updated via the update_attributes or attributes= methods.
+ * `model_type_key` - 'couchrest-type' by default, is the name of property that holds the class name of each CouchRest Model.
+
 
 ## Notable Issues
 
-CouchRest Model uses active_support for some of its internals. Ensure you have a stable active support gem installed 
-or at least 3.0.0.beta4.
+None at the moment...
 
-JSON gem versions 1.4.X are kown to cause problems with stack overflows and general badness. Version 1.2.4 appears to work fine.
 
 ## Ruby on Rails
 
 CouchRest Model is compatible with rails and provides some ActiveRecord-like methods.
 
-The CouchRest companion rails project 
-[http://github.com/hpoydar/couchrest-rails](http://github.com/hpoydar/couchrest-rails) is great
-for provided default connection details for your database. At the time of writting however it 
-does not provide explicit support for CouchRest Model.
+The CouchRest companion rails project [http://github.com/hpoydar/couchrest-rails](http://github.com/hpoydar/couchrest-rails) is great for providing default connection details for your database. At the time of writting however it does not provide explicit support for CouchRest Model.
 
-CouchRest Model and the original CouchRest ExtendedDocument do not share the same namespace, 
-as such you should not have any problems using them both at the same time. This might
-help with migrations.
+CouchRest Model and the original CouchRest ExtendedDocument do not share the same namespace, as such you should not have any problems using them both at the same time. This might help with migrations.
 
 
 ### Rails 3.0
@@ -321,9 +391,7 @@ In your Gemfile require the gem with a simple line:
 
 ## Testing
 
-The most complete documentation is the spec/ directory. To validate your
-CouchRest install, from the project root directory run `rake`, or `autotest`
-(requires RSpec and optionally ZenTest for autotest support).
+The most complete documentation is the spec/ directory. To validate your CouchRest install, from the project root directory run `rake`, or `autotest` (requires RSpec and optionally ZenTest for autotest support).
 
 ## Docs
 

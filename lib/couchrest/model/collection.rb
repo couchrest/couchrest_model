@@ -82,6 +82,7 @@ module CouchRest
               design_doc['views'][view_name.to_s] &&
               design_doc['views'][view_name.to_s]["couchrest-defaults"]) || {}
           view_options = default_view_options.merge(options)
+          view_options.delete(:database)
 
           [design_doc, view_name, view_options]
         end
@@ -94,6 +95,8 @@ module CouchRest
           raise ArgumentError, 'search_name is required' if search_name.nil?
 
           search_options = options.clone
+          search_options.delete(:database)
+
           [design_doc, search_name, search_options]
         end
 
