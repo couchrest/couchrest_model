@@ -284,6 +284,11 @@ describe CouchRest::Model::CastedModel do
         @toy2.errors.should be_empty
         @toy3.errors.should_not be_empty
       end
+
+      it "should not use dperecated ActiveModel options" do
+        ActiveSupport::Deprecation.should_not_receive(:warn)
+        @cat.should_not be_valid
+      end
     end
 
     describe "on a casted model property" do

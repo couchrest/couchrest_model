@@ -6,7 +6,7 @@ module CouchRest
         def validate_each(document, attribute, value)
           values = value.is_a?(Array) ? value : [value]
           return if values.collect {|doc| doc.nil? || doc.valid? }.all?
-          document.errors.add(attribute, :invalid, :default => options[:message], :value => value)
+          document.errors.add(attribute, :invalid, :message => options[:message], :value => value)
         end
       end
     end
