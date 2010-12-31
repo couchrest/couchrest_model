@@ -273,6 +273,12 @@ describe "Model views" do
       u = Unattached.first :database=>@db
       u.title.should =~ /\A...\z/
     end
+    
+    it "should get last" do
+      u = Unattached.last :database=>@db
+      u.title.should == "aaa"
+    end
+    
     it "should barf on all_design_doc_versions if no database given" do
       lambda{Unattached.all_design_doc_versions}.should raise_error
     end
