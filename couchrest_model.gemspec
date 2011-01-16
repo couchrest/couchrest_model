@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
     "README.md",
     "Rakefile",
     "THANKS.md",
+    "VERSION",
     "history.txt",
     "lib/couchrest/model.rb",
     "lib/couchrest/model/associations.rb",
