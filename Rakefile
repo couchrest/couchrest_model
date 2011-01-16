@@ -1,9 +1,6 @@
 require 'rake'
 require "rake/rdoctask"
-
-$LOAD_PATH.unshift File.expand_path("../lib", __FILE__)
-require 'couchrest_model'
-
+ 
 begin
   require 'rspec'
   require 'rspec/core/rake_task'
@@ -29,11 +26,10 @@ begin
     gemspec.has_rdoc = true
     gemspec.add_dependency("couchrest", "~> 1.0.1")
     gemspec.add_dependency("mime-types", "~> 1.15")
-    gemspec.add_dependency("activemodel", "~> 3.0.0.rc")
+    gemspec.add_dependency("activemodel", "~> 3.0.0")
     gemspec.add_dependency("tzinfo", "~> 0.3.22")
-    gemspec.add_dependency('railties', "~> 3.0.0.rc")
-    gemspec.add_development_dependency('rspec', '~> 2.0.0.beta.19')
-    gemspec.version = CouchRest::Model::VERSION
+    gemspec.add_dependency('railties', "~> 3.0.0")
+    gemspec.add_development_dependency('rspec', '>= 2.0.0')
     gemspec.date = Time.now.strftime("%Y-%m-%d")
     gemspec.require_path = "lib"
   end
@@ -43,13 +39,13 @@ end
 
 desc "Run all specs"
 Rspec::Core::RakeTask.new(:spec) do |spec|
-	spec.spec_opts = ["--color"]
+	spec.rspec_opts = ["--color"]
 	spec.pattern = 'spec/**/*_spec.rb'
 end
 
 desc "Print specdocs"
 Rspec::Core::RakeTask.new(:doc) do |spec|
-	spec.spec_opts = ["--format", "specdoc"]
+	spec.rspec_opts = ["--format", "specdoc"]
 	spec.pattern = 'spec/*_spec.rb'
 end
 
