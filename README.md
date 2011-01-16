@@ -33,6 +33,18 @@ but no guarantees!
 ### Model
 
 		$ rails generate model person --orm=couchrest_model
+
+## Useful links and extensions
+
+Try some of these gems that add extra funcionality to couchrest_model:
+
+* [memories](http://github.com/moonmaster9000/memories) - object versioning using attachments (Matt Parker)
+* [couch_publish](http://github.com/moonmaster9000/couch_publish) - versioned state machine for draft and published documents (Matt Parker)
+* [couch_photo](http://github.com/moonmaster9000/couch_photo) - attach images to documents with variations (Matt Parker)
+* [copycouch](http://github.com/moonmaster9000/copycouch) - single document replication on documents (Matt Parker)
+* [recloner](https://github.com/moonmaster9000/recloner) - clone documents easily (Matt Parker)
+
+If you have an extension that you'd us to add to this list, please get in touch!
 			   
 ## General Usage 
 
