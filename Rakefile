@@ -22,7 +22,7 @@ begin
     gemspec.homepage = "http://github.com/couchrest/couchrest_model"
     gemspec.authors = ["J. Chris Anderson", "Matt Aimonetti", "Marcos Tapajos", "Will Leinweber", "Sam Lown"]
     gemspec.extra_rdoc_files = %w( README.md LICENSE THANKS.md )
-    gemspec.files = %w( LICENSE README.md Rakefile THANKS.md history.txt couchrest.gemspec) + Dir["{examples,lib,spec}/**/*"] - Dir["spec/tmp"]
+    gemspec.files = %w( VERSION LICENSE README.md Rakefile THANKS.md history.txt couchrest.gemspec) + Dir["{examples,lib,spec}/**/*"] - Dir["spec/tmp"]
     gemspec.has_rdoc = true
     gemspec.add_dependency("couchrest", "~> 1.0.1")
     gemspec.add_dependency("mime-types", "~> 1.15")
