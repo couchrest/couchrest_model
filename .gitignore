@@ -6,3 +6,5 @@ Gemfile*
 .rvmrc
 .bundle
 couchdb.std*
+*.*~
+
