@@ -1,3 +1,6 @@
+require 'bundler'
+Bundler::GemHelper.install_tasks
+
 require 'rake'
 require "rake/rdoctask"
  
@@ -10,31 +13,6 @@ To use rspec for testing you must install rspec gem:
     gem install rspec
 EOS
   exit(0)
-end
-
-begin
-  require 'jeweler'
-  Jeweler::Tasks.new do |gemspec|
-    gemspec.name = "couchrest_model"
-    gemspec.summary = "Extends the CouchRest Document for advanced modelling."
-    gemspec.description = "CouchRest Model provides aditional features to the standard CouchRest Document class such as properties, view designs, associations, callbacks, typecasting and validations."
-    gemspec.email = "jchris@apache.org"
-    gemspec.homepage = "http://github.com/couchrest/couchrest_model"
-    gemspec.authors = ["J. Chris Anderson", "Matt Aimonetti", "Marcos Tapajos", "Will Leinweber", "Sam Lown"]
-    gemspec.extra_rdoc_files = %w( README.md LICENSE THANKS.md )
-    gemspec.files = %w( VERSION LICENSE README.md Rakefile THANKS.md history.txt couchrest.gemspec) + Dir["{examples,lib,spec}/**/*"] - Dir["spec/tmp"]
-    gemspec.has_rdoc = true
-    gemspec.add_dependency("couchrest", "~> 1.0.1")
-    gemspec.add_dependency("mime-types", "~> 1.15")
-    gemspec.add_dependency("activemodel", "~> 3.0.0")
-    gemspec.add_dependency("tzinfo", "~> 0.3.22")
-    gemspec.add_dependency('railties', "~> 3.0.0")
-    gemspec.add_development_dependency('rspec', '>= 2.0.0')
-    gemspec.date = Time.now.strftime("%Y-%m-%d")
-    gemspec.require_path = "lib"
-  end
-rescue LoadError
-  puts "Jeweler not available. Install it with: gem install jeweler"
 end
 
 desc "Run all specs"
