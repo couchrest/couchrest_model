@@ -1,4 +1,4 @@
-== Next Version
+== CouchRest Model 1.0.0
 
 * Major enhancements
   * Support for configuration module and "model_type_key" option for overriding model's type key
