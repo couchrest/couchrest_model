@@ -1,8 +1,3 @@
-require 'couchrest'
-
-require 'active_support/core_ext'
-require 'active_support/json'
-
 require 'active_model'
 require "active_model/callbacks"
 require "active_model/conversion"
@@ -14,6 +9,9 @@ require "active_model/translation"
 require "active_model/validator"
 require "active_model/validations"
 
+require 'active_support/core_ext'
+require 'active_support/json'
+
 require 'mime/types'
 require "enumerator"
 require "time"
@@ -21,6 +19,8 @@ require 'digest/md5'
 
 require 'bigdecimal' # used in typecast
 require 'bigdecimal/util' # used in typecast
+
+require 'couchrest'
 
 require 'couchrest/model'
 require 'couchrest/model/errors'
