@@ -2,7 +2,6 @@
 html/*
 pkg
 *.swp
-Gemfile*
 .rvmrc
 .bundle
 couchdb.std*

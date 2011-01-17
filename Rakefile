@@ -1,19 +1,12 @@
+require 'rubygems'
 require 'bundler'
 Bundler::GemHelper.install_tasks
 
 require 'rake'
 require "rake/rdoctask"
- 
-begin
-  require 'rspec'
-  require 'rspec/core/rake_task'
-rescue LoadError
-  puts <<-EOS
-To use rspec for testing you must install rspec gem:
-    gem install rspec
-EOS
-  exit(0)
-end
+
+require 'rspec'
+require 'rspec/core/rake_task'
 
 desc "Run all specs"
 Rspec::Core::RakeTask.new(:spec) do |spec|
