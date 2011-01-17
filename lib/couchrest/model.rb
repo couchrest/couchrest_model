@@ -3,7 +3,7 @@ module CouchRest
 
   module Model
 
-    VERSION = "1.0.0.beta8"
+    VERSION = File.read(File.expand_path('../../../VERSION', __FILE__)).strip
 
   end
 

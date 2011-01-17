@@ -18,6 +18,16 @@ module CouchRest
         self.class.properties
       end
 
+      # Returns the Class properties with their values
+      #
+      # ==== Returns
+      # Array:: the list of properties with their values
+      def properties_with_values
+        props = {}
+        properties.each { |property| props[property.name] = read_attribute(property.name) }
+        props
+      end
+
       # Read the casted value of an attribute defined with a property.
       #
       # ==== Returns
@@ -35,7 +45,7 @@ module CouchRest
 
       # Takes a hash as argument, and applies the values by using writer methods
       # for each key. It doesn't save the document at the end. Raises a NoMethodError if the corresponding methods are
-      # missing. In case of error, no attributes are changed.    
+      # missing. In case of error, no attributes are changed.
       def update_attributes_without_saving(hash)
         # Remove any protected and update all the rest. Any attributes
         # which do not have a property will simply be ignored.
@@ -47,7 +57,6 @@ module CouchRest
 
       private
       # The following methods should be accessable by the Model::Base Class, but not by anything else!
-      
       def apply_all_property_defaults
         return if self.respond_to?(:new?) && (new? == false)
         # TODO: cache the default object
@@ -59,7 +68,7 @@ module CouchRest
       def prepare_all_attributes(doc = {}, options = {})
         apply_all_property_defaults
         if options[:directly_set_attributes]
-          directly_set_read_only_attributes(doc)          
+          directly_set_read_only_attributes(doc)
         else
           doc = remove_protected_attributes(doc)
         end
@@ -97,7 +106,7 @@ module CouchRest
           end
         end
       end
-      
+
       def set_attributes(hash)
         attrs = remove_protected_attributes(hash)
         directly_set_attributes(attrs)
@@ -206,3 +215,4 @@ module CouchRest
     end
   end
 end
+

@@ -1,3 +1,4 @@
+require "bundler/setup"
 require "rubygems"
 require "rspec" # Satisfies Autotest and anyone else not using the Rake tasks
 

@@ -75,6 +75,12 @@ module CouchRest
           doc
         end
         
+        def last(opts = {})
+          doc = @klass.last({:database => @database}.merge(opts))
+          doc.database = @database if doc && doc.respond_to?(:database)
+          doc
+        end
+        
         def get(id)
           doc = @klass.get(id, @database)
           doc.database = @database if doc && doc.respond_to?(:database)

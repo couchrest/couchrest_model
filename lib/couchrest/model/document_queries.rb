@@ -38,6 +38,22 @@ module CouchRest
           first_instance.empty? ? nil : first_instance.first
         end
         
+        # Load the last document that have the model_type_key's field equal to
+        # the name of the current class.
+        # It's similar to method first, just adds :descending => true
+        #
+        # ==== Returns
+        # Object:: The last object instance available
+        # or
+        # Nil:: if no instances available
+        #
+        # ==== Parameters
+        # opts<Hash>::
+        # View options, see <tt>CouchRest::Database#view</tt> options for more info.
+        def last(opts = {})
+          first(opts.merge!(:descending => true))
+        end
+        
         # Load a document from the database by id
         # No exceptions will be raised if the document isn't found
         #
