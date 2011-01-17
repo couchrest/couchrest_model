@@ -28,6 +28,15 @@ but no guarantees!
 
     gem 'couchrest_model', :git => 'git://github.com/couchrest/couchrest_model.git'
 
+### Development
+
+CouchRest Model now comes with a Gemfile to help with development. If you want to make changes to the code, download a copy then run:
+
+    bundle install
+
+That should set everything up for `rake spec` to be run correctly. Update the couchrest_model.gemspec if your alterations
+use different gems.
+
 ## Generators
 
 ### Model
