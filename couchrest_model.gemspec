@@ -28,7 +28,6 @@ Gem::Specification.new do |s|
   s.add_dependency(%q<activemodel>, "~> 3.0.0")
   s.add_dependency(%q<tzinfo>, "~> 0.3.22")
   s.add_dependency(%q<railties>, "~> 3.0.0")
-  s.add_dependency(%q<rspec>, ">= 2.0.0")
   s.add_development_dependency(%q<rspec>, ">= 2.0.0")
   s.add_development_dependency(%q<rack-test>, ">= 0.5.7")
 end
