@@ -85,12 +85,12 @@ describe "Proxy Class" do
   end
   it "should get first" do
     u = @us.first
-    u.title.should =~ /\A...\z/
+    u.should == @us.all.first
   end
   
   it "should get last" do
     u = @us.last
-    u.title.should == "aaa"
+    u.should == @us.all.last
   end
   
   it "should set database on first retreived document" do
