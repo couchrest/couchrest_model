@@ -28,6 +28,12 @@ but no guarantees!
 
     gem 'couchrest_model', :git => 'git://github.com/couchrest/couchrest_model.git'
 
+### Setup
+
+There is currently no standard way for telling CouchRest Model how it should access your database, this is something we're still working on. For the time being, the easiest way is to set a COUCHDB_DATABASE global variable to an instance of CouchRest Database, and call `use_database COUCHDB_DATABASE` in each model.
+
+TODO: Add an example!
+
 ### Development
 
 CouchRest Model now comes with a Gemfile to help with development. If you want to make changes to the code, download a copy then run:
@@ -392,15 +398,6 @@ Options currently avilable are:
 ## Notable Issues
 
 None at the moment...
-
-
-## Ruby on Rails
-
-CouchRest Model is compatible with rails and provides some ActiveRecord-like methods.
-
-The CouchRest companion rails project [http://github.com/hpoydar/couchrest-rails](http://github.com/hpoydar/couchrest-rails) is great for providing default connection details for your database. At the time of writting however it does not provide explicit support for CouchRest Model.
-
-CouchRest Model and the original CouchRest ExtendedDocument do not share the same namespace, as such you should not have any problems using them both at the same time. This might help with migrations.
 
 
 ## Testing
