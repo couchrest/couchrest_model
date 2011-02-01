@@ -12,8 +12,7 @@ module CouchRest #:nodoc:
           :create,
           :destroy,
           :save,
-          :update,
-          :validate
+          :update
 
       end
 

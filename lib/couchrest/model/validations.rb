@@ -15,6 +15,7 @@ module CouchRest
       extend ActiveSupport::Concern
       included do
         include ActiveModel::Validations
+        include ActiveModel::Validations::Callbacks
       end
       
 
