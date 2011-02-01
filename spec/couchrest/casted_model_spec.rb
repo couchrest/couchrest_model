@@ -29,14 +29,16 @@ end
 class WithCastedCallBackModel < Hash
   include CouchRest::Model::CastedModel
   property :name
-  property :run_before_validate
-  property :run_after_validate
+  property :run_before_validation
+  property :run_after_validation
 
-  before_validate do |object|
-    object.run_before_validate = true
+  validates_presence_of :run_before_validation
+
+  before_validation do |object|
+    object.run_before_validation = true
   end
-  after_validate do |object|
-    object.run_after_validate = true
+  after_validation do |object|
+    object.run_after_validation = true
   end
 end
 
@@ -423,15 +425,15 @@ describe CouchRest::Model::CastedModel do
     end
 
     describe "validate" do
-      it "should run before_validate before validating" do
-        @model.run_before_validate.should be_nil
+      it "should run before_validation before validating" do
+        @model.run_before_validation.should be_nil
         @model.should be_valid
-        @model.run_before_validate.should be_true
+        @model.run_before_validation.should be_true
       end
-      it "should run after_validate after validating" do
-        @model.run_after_validate.should be_nil
+      it "should run after_validation after validating" do
+        @model.run_after_validation.should be_nil
         @model.should be_valid
-        @model.run_after_validate.should be_true
+        @model.run_after_validation.should be_true
       end
     end
   end

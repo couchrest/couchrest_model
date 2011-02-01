@@ -329,14 +329,14 @@ describe "Model Persistence" do
     
     describe "validation" do
       it "should run before_validation before validating" do
-        @doc.run_before_validate.should be_nil
+        @doc.run_before_validation.should be_nil
         @doc.should be_valid
-        @doc.run_before_validate.should be_true
+        @doc.run_before_validation.should be_true
       end
       it "should run after_validation after validating" do
-        @doc.run_after_validate.should be_nil
+        @doc.run_after_validation.should be_nil
         @doc.should be_valid
-        @doc.run_after_validate.should be_true
+        @doc.run_after_validation.should be_true
       end
     end
 

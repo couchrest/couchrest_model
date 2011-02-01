@@ -20,20 +20,22 @@ end
 class WithCallBacks < CouchRest::Model::Base
   use_database TEST_SERVER.default_database
   property :name
-  property :run_before_validate
-  property :run_after_validate
+  property :run_before_validation
+  property :run_after_validation
   property :run_before_save
   property :run_after_save
   property :run_before_create
   property :run_after_create
   property :run_before_update
   property :run_after_update
+
+  validates_presence_of :run_before_validation
   
-  before_validate do |object|
-    object.run_before_validate = true
+  before_validation do |object|
+    object.run_before_validation = true
   end
-  after_validate do |object| 
-    object.run_after_validate = true
+  after_validation do |object| 
+    object.run_after_validation = true
   end
   before_save do |object| 
     object.run_before_save = true
