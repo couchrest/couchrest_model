@@ -238,9 +238,9 @@ you'd like to model, CouchRest Model supports creating anonymous classes:
     class Cat < CouchRest::Model::Base
       property :name, String
 
-      property :toys do |toy|
-        toy.property :name, String
-        toy.property :rating, Integer
+      property :toys do
+        property :name, String
+        property :rating, Integer
       end
     end
 
@@ -248,7 +248,9 @@ you'd like to model, CouchRest Model supports creating anonymous classes:
     @cat.toys.last.rating == 5
     @cat.toys.last.name == 'catnip ball'
 
-Anonymous classes will *only* create arrays of objects.
+Anonymous classes will *only* create arrays of objects. If you're more of the traditional type, a block parameter
+can be provided allowing you to use this variable before each method call inside the anonymous class. This is useful
+if you need to access variables outside of the block.
 
 
 ## Assocations

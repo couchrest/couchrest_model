@@ -1,3 +1,8 @@
+== 1.0.1
+
+* Minor enhancements:
+  * A yield parameter in an anonymous casted model property block is no longer required (@samlown)
+
 == CouchRest Model 1.0.0
 
 * Major enhancements

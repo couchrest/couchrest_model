@@ -24,6 +24,9 @@ class DummyModel < CouchRest::Model::Base
   property :sub_models do |child|
     child.property :title
   end
+  property :param_free_sub_models do
+    property :title
+  end
 end
 
 class WithCastedCallBackModel < Hash
@@ -99,6 +102,14 @@ describe CouchRest::Model::CastedModel do
     it "should be updatable using a hash" do
       @obj.sub_models << {:title => 'test'}
       @obj.sub_models.first.title.should eql('test')
+    end
+    it "should be empty intitally (without params)" do
+      @obj.param_free_sub_models.should_not be_nil
+      @obj.param_free_sub_models.should be_empty
+    end
+    it "should be updatable using a hash (without params)" do
+      @obj.param_free_sub_models << {:title => 'test'}
+      @obj.param_free_sub_models.first.title.should eql('test')
     end
   end
 

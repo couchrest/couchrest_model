@@ -6,7 +6,6 @@ PATH
       couchrest (~> 1.0.1)
       mime-types (~> 1.15)
       railties (~> 3.0.0)
-      rspec (>= 2.0.0)
       tzinfo (~> 0.3.22)
 
 GEM

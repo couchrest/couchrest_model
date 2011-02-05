@@ -156,7 +156,11 @@ module CouchRest
               type = Class.new(Hash) do
                 include CastedModel
               end
-              type.class_eval { yield type }
+              if block.arity == 1 # Traditional, with options
+                type.class_eval { yield type }
+              else
+                type.instance_exec(&block)
+              end
               type = [type] # inject as an array
             end
             property = Property.new(name, type, options)
