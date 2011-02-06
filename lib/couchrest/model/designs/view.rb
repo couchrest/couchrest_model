@@ -394,7 +394,7 @@ module CouchRest
         # value, or the ["value"]["_id"] used for linked documents.
         def doc
           return model.create_from_database(self['doc']) if self['doc']
-          doc_id = (value && value['_id']) ? value['_id'] : self.id
+          doc_id = (value.is_a?(Hash) && value['_id']) ? value['_id'] : self.id
           model.get(doc_id)
         end
       end

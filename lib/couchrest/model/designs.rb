@@ -26,7 +26,7 @@ module CouchRest
           mapper.create_view_method(:all)
 
           mapper.instance_eval(&block)
-          
+
           req_design_doc_refresh
         end
 

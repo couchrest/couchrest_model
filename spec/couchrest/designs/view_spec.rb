@@ -530,7 +530,77 @@ describe "Design View" do
 
     end
   end
-  
+
+  describe "ViewRow" do
+
+    before :all do
+      @klass = CouchRest::Model::Designs::ViewRow
+    end
+
+    describe "intialize" do
+      it "should store reference to model" do
+        obj = @klass.new({}, "model")
+        obj.model.should eql('model')
+      end
+      it "should copy details from hash" do
+        obj = @klass.new({:foo => :bar, :test => :example}, "")
+        obj[:foo].should eql(:bar)
+        obj[:test].should eql(:example)
+      end
+    end
+
+    describe "running" do
+      before :each do
+      end
+
+      it "should provide id" do
+        obj = @klass.new({'id' => '123456'}, 'model')
+        obj.id.should eql('123456')
+      end
+
+      it "should provide key" do
+        obj = @klass.new({'key' => 'thekey'}, 'model')
+        obj.key.should eql('thekey')
+      end
+
+      it "should provide the value" do
+        obj = @klass.new({'value' => 'thevalue'}, 'model')
+        obj.value.should eql('thevalue')
+      end
+
+      it "should provide the raw document" do
+        obj = @klass.new({'doc' => 'thedoc'}, 'model')
+        obj.raw_doc.should eql('thedoc')
+      end
+
+      it "should instantiate a new document" do
+        hash = {'doc' => {'_id' => '12345', 'name' => 'sam'}}
+        obj = @klass.new(hash, DesignViewModel)
+        doc = mock('DesignViewModel')
+        obj.model.should_receive(:create_from_database).with(hash['doc']).and_return(doc)
+        obj.doc.should eql(doc)
+      end
+
+      it "should try to load from id if no document" do
+        hash = {'id' => '12345', 'value' => 5}
+        obj = @klass.new(hash, DesignViewModel)
+        doc = mock('DesignViewModel')
+        obj.model.should_receive(:get).with('12345').and_return(doc)
+        obj.doc.should eql(doc)
+      end
+
+      it "should try to load linked document if available" do
+        hash = {'id' => '12345', 'value' => {'_id' => '54321'}}
+        obj = @klass.new(hash, DesignViewModel)
+        doc = mock('DesignViewModel')
+        obj.model.should_receive(:get).with('54321').and_return(doc)
+        obj.doc.should eql(doc)
+      end
+
+    end
+   
+  end
+
 
   describe "scenarios" do
 
