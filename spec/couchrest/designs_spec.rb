@@ -11,21 +11,22 @@ describe "Design" do
   end
 
   describe ".design" do
-   
-    it "should instantiate a new DesignMapper" do
-      CouchRest::Model::Designs::DesignMapper.should_receive(:new).and_return(DesignModel)
-      DesignModel.design() { }
+
+    before :each do 
+      @mapper = mock('DesignMapper')
+      @mapper.stub!(:create_view_method)
     end
 
-    it "should instantiate a new DesignMapper with model" do
-      CouchRest::Model::Designs::DesignMapper.should_receive(:new).with(DesignModel).and_return(DesignModel)
+    it "should instantiate a new DesignMapper" do
+      CouchRest::Model::Designs::DesignMapper.should_receive(:new).with(DesignModel).and_return(@mapper)
+      @mapper.should_receive(:create_view_method).with(:all)
+      @mapper.should_receive(:instance_eval)
       DesignModel.design() { }
     end
 
     it "should allow methods to be called in mapper" do
-      model = mock('Foo')
-      model.should_receive(:foo)
-      CouchRest::Model::Designs::DesignMapper.stub!(:new).and_return(model)
+      @mapper.should_receive(:foo)
+      CouchRest::Model::Designs::DesignMapper.stub!(:new).and_return(@mapper)
       DesignModel.design { foo }
     end
 
@@ -64,10 +65,22 @@ describe "Design" do
         DesignModel.should respond_to(:test_view)
       end
 
-      it "should create a method that returns view instance" do
+      it "should create a method for view instance" do
         CouchRest::Model::Designs::View.stub!(:create)
-        @object.view('test_view')
+        @object.should_receive(:create_view_method).with('test')
+        @object.view('test')
+      end
+
+    end
+
+    describe "#create_view_method" do
+      before :each do
+        @object = @klass.new(DesignModel)
+      end
+
+      it "should create a method that returns view instance" do
         CouchRest::Model::Designs::View.should_receive(:new).with(DesignModel, {}, 'test_view').and_return(nil)
+        @object.create_view_method('test_view')
         DesignModel.test_view
       end
 

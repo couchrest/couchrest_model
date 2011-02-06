@@ -12,6 +12,7 @@ module CouchRest
       # a normal relational database are not possible. At least not yet!
       #
       class View
+        include Enumerable
 
         attr_accessor :model, :name, :query, :result
 
@@ -20,7 +21,7 @@ module CouchRest
           if parent.is_a?(Class) && parent < CouchRest::Model::Base
             raise "Name must be provided for view to be initialized" if name.nil?
             self.model    = parent
-            self.name     = name
+            self.name     = name.to_s
             # Default options:
             self.query    = { :reduce => false }
           elsif parent.is_a?(self.class)
@@ -37,33 +38,11 @@ module CouchRest
 
         # == View Execution Methods
         #
-        # Send a request to the CouchDB database using the current query values.
-
-        # Inmediatly send a request to the database for all documents provided by the query.
-        #
-        def all(&block)
-          include_docs.rows.map{|r| r.doc}
-        end
-
-        # Inmediatly send a request for the first result of the dataset.
-        # This will override any limit set in the view previously.
-        def first
-          limit(1).all.first
-        end
-
-
-        def info
-          
-        end
-
-        def offset
-          execute['offset']
-        end
-
-        def total_rows
-          execute['total_rows']
-        end
-
+        # Request to the CouchDB database using the current query values.
+       
+        # Return each row wrapped in a ViewRow object. Unlike the raw
+        # CouchDB request, this will provide an empty array if there
+        # are no results.
         def rows
           return @rows if @rows
           if execute && result['rows']
@@ -73,8 +52,99 @@ module CouchRest
           end
         end
 
+        # Fetch all the documents the view can access. If the view has
+        # not already been prepared for including documents in the query,
+        # it will be added automatically and reset any previously cached
+        # results.
+        def all
+          include_docs!
+          docs
+        end
+
+        # Provide all the documents from the view. If the view has not been
+        # prepared with the +include_docs+ option, each document will be 
+        # loaded individually.
+        def docs
+          @docs ||= rows.map{|r| r.doc}
+        end
+
+        # If another request has been made on the view, this will return 
+        # the first document in the set. If not, a new query object will be
+        # generated with a limit of 1 so that only the first document is 
+        # loaded.
+        def first
+          result ? all.first : limit(1).all.first
+        end
+
+        # Same as first but will order the view in descending order. This
+        # does not however reverse the search keys or the offset, so if you 
+        # are using a +startkey+ and +endkey+ you might end up with 
+        # unexpected results.
+        #
+        # If in doubt, don't use this method!
+        #
+        def last
+          result ? all.last : limit(1).descending.all.last
+        end
+
+        # Perform a count operation based on the current view. If the view
+        # can be reduced, the reduce will be performed and return the first
+        # value. This is okay for most simple queries, but may provide
+        # unexpected results if your reduce method does not calculate
+        # the total number of documents in a result set.
+        #
+        # Trying to use this method with the group option will raise an error.
+        #
+        # If no reduce function is defined, a query will be performed 
+        # to return the total number of rows, this is the equivalant of:
+        #
+        #    view.limit(0).total_rows
+        #
+        def count
+          raise "View#count cannot be used with group options" if query[:group]
+          if can_reduce?
+            row = reduce.rows.first
+            row.nil? ? 0 : row.value
+          else
+            limit(0).total_rows
+          end
+        end
+
+        # Run through each document provided by the +#all+ method.
+        # This is also used by the Enumerator mixin to provide all the standard
+        # ruby collection directly on the view.
+        def each(&block)
+          all.each(&block)
+        end
+
+        # Wrapper for the results offset. As per the CouchDB API,
+        # this may be nil if groups are used.
+        def offset
+          execute['offset']
+        end
+
+        # Wrapper for the total_rows value provided by the query. As per the
+        # CouchDB API, this may be nil if groups are used.
+        def total_rows
+          execute['total_rows']
+        end
+
+        # Convenience wrapper around the rows result set. This will provide
+        # and array of keys.
         def keys
           rows.map{|r| r.key}
+        end
+
+        # Convenience wrapper to provide all the values from the route
+        # set without having to go through +rows+.
+        def values
+          rows.map{|r| r.value}
+        end
+
+        # No yet implemented. Eventually this will provide a raw hash
+        # of the information CouchDB holds about the view.
+        def info
+          raise "Not yet implemented"
         end
 
 
@@ -85,6 +155,8 @@ module CouchRest
         # are combined in an incorrect fashion.
         #
        
+        # Specify the database the view should use. If not defined,
+        # an attempt will be made to load its value from the model.
         def database(value)
           update_query(:database => value)
         end
@@ -97,11 +169,11 @@ module CouchRest
           update_query(:key => value)
         end
 
-        # Find all index keys that start with the value provided. May or may not be used in
-        # conjunction with the +endkey+ option.
+        # Find all index keys that start with the value provided. May or may 
+        # not be used in conjunction with the +endkey+ option.
         #
-        # When the +#descending+ option is used (not the default), the start and end keys should
-        # be reversed.
+        # When the +#descending+ option is used (not the default), the start 
+        # and end keys should be reversed, as per the CouchDB API.
         #
         # Cannot be used if the key has been set.
         def startkey(value)
@@ -116,17 +188,19 @@ module CouchRest
           update_query(:startkey_docid => value.is_a?(String) ? value : value.id)
         end
 
-        # The opposite of +#startkey+, finds all index entries whose key is before the value specified.
+        # The opposite of +#startkey+, finds all index entries whose key is before
+        # the value specified.
         #
-        # See the +#startkey+ method for more details and the +#inclusive_end+ option.
+        # See the +#startkey+ method for more details and the +#inclusive_end+
+        # option.
         def endkey(value)
           raise "View#endkey cannot be used when key has been set" unless query[:key].nil?
           update_query(:endkey => value)
         end
 
         # The result set should end at the position of the provided document. 
-        # The value may be provided as an object that responds to the +#id+ call
-        # or a string.
+        # The value may be provided as an object that responds to the +#id+ 
+        # call or a string.
         def endkey_doc(value)
           update_query(:endkey_docid => value.is_a?(String) ? value : value.id)
         end
@@ -134,7 +208,8 @@ module CouchRest
 
         # The results should be provided in descending order.
         #
-        # Descending is false by default, this method will enable it and cannot be undone.
+        # Descending is false by default, this method will enable it and cannot
+        # be undone.
         def descending
           update_query(:descending => true)
         end
@@ -156,54 +231,77 @@ module CouchRest
 
         # Use the reduce function on the view. If none is available this method will fail. 
         def reduce
+          raise "Cannot reduce a view without a reduce method" unless can_reduce?
           update_query(:reduce => true)
         end
 
-        # Control whether the reduce function reduces to a set of distinct keys or to a single
-        # result row.
+        # Control whether the reduce function reduces to a set of distinct keys
+        # or to a single result row.
         #
-        # By default the value is false, and can only be set when the view's +#reduce+ option
-        # has been set.
+        # By default the value is false, and can only be set when the view's 
+        # +#reduce+ option has been set.
         def group
           raise "View#reduce must have been set before grouping is permitted" unless query[:reduce]
           update_query(:group => true)
         end
 
+        # Will set the level the grouping should be performed to. As per the 
+        # CouchDB API, it only makes sense when the index key is an array.
+        # 
+        # This will automatically set the group option.
         def group_level(value)
-          raise "View#reduce and View#group must have been set before group_level is called" unless query[:reduce] && query[:group]
-          update_query(:group_level => value.to_i)
+          group.update_query(:group_level => value.to_i)
         end
 
+        def include_docs
+          update_query.include_docs!
+        end
+
+        # Return any cached values to their nil state so that any queries
+        # requested later will have a fresh set of data.
+        def reset!
+          self.result = nil
+          @rows = nil
+          @docs = nil
+        end
 
         protected
+
+        def include_docs!
+          reset! if result && !include_docs?
+          query[:include_docs] = true
+          self
+        end
+
+        def include_docs?
+          !!query[:include_docs]
+        end
 
         def update_query(new_query = {})
           self.class.new(self, new_query)
         end
 
-        def database
-          query[:database] || model.database
+        def design_doc
+          model.design_doc
         end
 
-        # Used internally to ensure that docs are provided. Should not be used outside of 
-        # the view class under normal circumstances.
-        def include_docs
-          raise "Documents cannot be returned from a view that is prepared for a reduce" if query[:reduce]
-          query.delete(:reduce)
-          update_query(:include_docs => true)
+        def can_reduce?
+          !design_doc['views'][name]['reduce'].blank?
         end
         
-        def execute(&block)
+        
+        def execute
           return self.result if result
-          raise "Database must be defined in model or view!" if database.nil?
+          db = query[:database] || model.database
+          raise "Database must be defined in model or view!" if db.nil?
           retryable = true
           # Remove the reduce value if its not needed
-          query.delete(:reduce) if !query[:reduce] && model.design_doc['views'][name.to_s]['reduce'].blank?
+          query.delete(:reduce) unless can_reduce?
           begin
-            self.result = model.design_doc.view_on(database, name, query, &block)
+            self.result = model.design_doc.view_on(db, name, query)
           rescue RestClient::ResourceNotFound => e
             if retryable
-              model.save_design_doc(database)
+              model.save_design_doc(db)
               retryable = false
               retry
             else
@@ -248,19 +346,24 @@ module CouchRest
               emit = keys.length == 1 ? keys.first : "[#{keys.join(', ')}]"
               opts[:guards] += keys.map{|k| "(#{k} != null)"}
               opts[:map] = <<-EOF
-function(doc) {
-  if (#{opts[:guards].join(' && ')}) {
-    emit(#{emit}, null);
-  }
-}
-EOF
+                function(doc) {
+                  if (#{opts[:guards].join(' && ')}) {
+                    emit(#{emit}, 1);
+                  }
+                }
+              EOF
+              opts[:reduce] = <<-EOF
+                function(key, values, rereduce) {
+                  return sum(values);
+                }
+              EOF
             end
 
             model.design_doc['views'] ||= {}
-            model.design_doc['views'][name.to_s] = {
-              'map'    => opts[:map],
-              'reduce' => opts[:reduce]
-            }
+            view = model.design_doc['views'][name.to_s] = { }
+            view['map'] = opts[:map]
+            view['reduce'] = opts[:reduce] if opts[:reduce]
+            view
           end
 
         end

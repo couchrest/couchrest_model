@@ -23,8 +23,10 @@ module CouchRest
 
         def design(*args, &block)
           mapper = DesignMapper.new(self)
-          mapper.instance_eval(&block)
+          mapper.create_view_method(:all)
 
+          mapper.instance_eval(&block)
+          
           req_design_doc_refresh
         end
 
@@ -43,6 +45,10 @@ module CouchRest
         # View instance when requested.
         def view(name, opts = {})
           View.create(model, name, opts)
+          create_view_method(name)
+        end
+
+        def create_view_method(name)
           model.class_eval <<-EOS, __FILE__, __LINE__ + 1
             def self.#{name}(opts = {})
               CouchRest::Model::Designs::View.new(self, opts, '#{name}')
