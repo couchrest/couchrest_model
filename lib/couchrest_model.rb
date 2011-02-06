@@ -40,6 +40,8 @@ require "couchrest/model/class_proxy"
 require "couchrest/model/collection"
 require "couchrest/model/associations"
 require "couchrest/model/configuration"
+require "couchrest/model/design"
+require "couchrest/model/design/view"
 
 # Monkey patches applied to couchrest
 require "couchrest/model/support/couchrest"

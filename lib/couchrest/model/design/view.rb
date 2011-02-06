@@ -3,8 +3,6 @@ module CouchRest
     module Design
 
       #
-      # ### NOTE Work in progress! Not yet used! ###
-      #
       # A proxy class that allows view queries to be created using
       # chained method calls. After each call a new instance of the method
       # is created based on the original in a similar fashion to ruby's sequel 
@@ -13,26 +11,26 @@ module CouchRest
       # CouchDB views have inherent limitations, so joins and filters as used in 
       # a normal relational database are not possible. At least not yet!
       #
-      # 
-      #
       class View
 
-        attr_accessor :query, :design, :database, :name
+        attr_accessor :model, :name, :query, :result
 
         # Initialize a new View object. This method should not be called from outside CouchRest Model.
         def initialize(parent, new_query = {}, name = nil)
-          if parent.is_a? Base
+          if parent.is_a?(Class) && parent < CouchRest::Model::Base
             raise "Name must be provided for view to be initialized" if name.nil?
-            @name = name
-            @database = parent.database
-            @query = { :reduce => false }
-          elsif parent.is_a? View
-            @database = parent.database
-            @query = parent.query.dup
+            self.model    = parent
+            self.name     = name
+            # Default options:
+            self.query    = { :reduce => false }
+          elsif parent.is_a?(self.class)
+            self.model    = parent.model
+            self.name     = parent.name
+            self.query    = parent.query.dup
           else
             raise "View cannot be initialized without a parent Model or View"
           end
-          @query.update(new_query)
+          query.update(new_query)
           super
         end
 
@@ -44,31 +42,33 @@ module CouchRest
         # Inmediatly send a request to the database for all documents provided by the query.
         #
         def all(&block)
-          args = include_docs.query
-          
+          include_docs.execute(&block)
         end
 
         # Inmediatly send a request for the first result of the dataset. This will override 
         # any limit set in the view previously.
-        def first(&block)
-          args = limit(1).include_docs.query
-
+        def first
+          limit(1).include_docs.execute.first
         end
 
         def info
-
+          
         end
 
         def offset
-
+          execute['offset']
         end
 
         def total_rows
-
+          execute['total_rows']
         end
 
         def rows
+          @rows ||= execute['rows'].map{|v| ViewRow.new(v, model)}
+        end
 
+        def keys
+          execute['rows'].map{|r| r.key}
         end
 
 
@@ -78,7 +78,10 @@ module CouchRest
         # modified appropriatly. Errors will be raised if the methods
         # are combined in an incorrect fashion.
         #
-        
+       
+        def database(value)
+          update_query(:database => value)
+        end
 
         # Find all entries in the index whose key matches the value provided.
         #
@@ -104,7 +107,7 @@ module CouchRest
         # The value may be provided as an object that responds to the +#id+ call
         # or a string.
         def startkey_doc(value)
-          update_query(:startkey_docid => value.is_a?(String) ? value : value.id
+          update_query(:startkey_docid => value.is_a?(String) ? value : value.id)
         end
 
         # The opposite of +#startkey+, finds all index entries whose key is before the value specified.
@@ -119,7 +122,7 @@ module CouchRest
         # The value may be provided as an object that responds to the +#id+ call
         # or a string.
         def endkey_doc(value)
-          update_query(:endkey_docid => value.is_a?(String) ? value : value.id
+          update_query(:endkey_docid => value.is_a?(String) ? value : value.id)
         end
 
 
@@ -179,13 +182,88 @@ module CouchRest
           update_query(:include_docs => true)
         end
         
-        
         def execute(&block)
+          self.result ||= model.view(name, query, &block)
+        end
 
+        # Class Methods
+        class << self
+          
+          # Simplified view creation. A new view will be added to the 
+          # provided model's design document using the name and options.
+          #
+          # If the view name starts with "by_" and +:by+ is not provided in 
+          # the options, the new view's map method will be interpretted and
+          # generated automatically. For example:
+          #
+          #   View.create(Meeting, "by_date_and_name")
+          #
+          # Will create a view that searches by the date and name properties. 
+          # Explicity setting the attributes to use is possible using the 
+          # +:by+ option. For example:
+          #
+          #   View.create(Meeting, "by_date_and_name", :by => [:date, :firstname, :lastname])
+          #
+          # The view name is the same, but three keys would be used in the
+          # subsecuent index.
+          #
+          def create(model, name, opts = {})
+            views = model.design_doc['views'] ||= {}
+
+            unless opts[:map]
+              if opts[:by].nil? && name =~ /^by_(.+)/
+                opts[:by] = $1.split(/_and_/)
+              end
+              raise "View cannot be created without recognised name, :map or :by options" if opts[:by].nil?
+
+              opts[:guards] ||= []
+              opts[:guards].push "(doc['#{model.model_type_key}'] == '#{model.to_s}')"
+
+              keys = opts[:by].map{|o| "doc['#{o}']"}
+              emit = keys.length == 1 ? keys.first : "[#{keys.join(', ')}]"
+              opts[:map] =
+                "function(doc) {" +
+                "  if (#{opts[:guards].join(' && ')}) {" +
+                "    emit(#{emit}, null);" +
+                "  }" +
+                "}"
+            end
+
+            views[name.to_s] = {
+              :map => opts[:map],
+              :reduce => opts[:reduce] || false,
+            }
+          end
 
         end
 
       end
+
+      # A special wrapper class that provides easy access to the key
+      # fields in a result row.
+      class ViewRow < Hash
+        attr_accessor :model
+        def initialize(hash, model)
+          self.model = model
+          super(hash)
+        end
+        def id
+          ["id"]
+        end
+        def key
+          ["key"]
+        end
+        def value
+          ['value']
+        end
+        # Send a request for the linked document either using the "id" field's
+        # value, or the ["value"]["_id"] used for linked documents.
+        def doc
+          doc_id = value['_id'] || self.id
+          model.get(doc_id)
+        end
+      end
+
     end
   end
 end

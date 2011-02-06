@@ -22,18 +22,32 @@ module CouchRest
       module ClassMethods
 
         def design(*args, &block)
-        
+          mapper = DesignMapper.new(self)
+          mapper.instance_eval(&block)
 
+          req_design_doc_refresh
         end
 
       end
 
       # 
-      module DesignMethods
+      class DesignMapper
 
+        attr_accessor :model
 
-        def view(*args)
+        def initialize(model)
+          self.model = model
+        end
 
+        # Define a view and generate a method that will provide a new 
+        # View instance when requested.
+        def view(name, opts = {})
+          View.create(model, name, opts)
+          model.class_eval <<-EOS, __FILE__, __LINE__ + 1
+            def self.#{name}(opts = {})
+              CouchRest::Model::Design::View.new(self, opts, '#{name}')
+            end
+          EOS
         end
 
       end

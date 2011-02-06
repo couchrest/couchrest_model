@@ -16,6 +16,7 @@ module CouchRest
       include CouchRest::Model::PropertyProtection
       include CouchRest::Model::Associations
       include CouchRest::Model::Validations
+      include CouchRest::Model::Design
 
       def self.subclasses
         @subclasses ||= []
