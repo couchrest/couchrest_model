@@ -1,7 +1,9 @@
 require File.expand_path("../../../spec_helper", __FILE__)
 
 class DesignViewModel < CouchRest::Model::Base
+  use_database DB
   property :name
+  property :title
 
   design do
     view :by_name
@@ -11,7 +13,7 @@ end
 describe "Design View" do
 
   before :each do
-    @klass = CouchRest::Model::Design::View
+    @klass = CouchRest::Model::Designs::View
   end
 
   describe ".new" do
@@ -56,14 +58,28 @@ describe "Design View" do
 
   describe ".create" do
 
-    before :all do
+    before :each do
       @design_doc = {}
       DesignViewModel.stub!(:design_doc).and_return(@design_doc)
     end
 
     it "should add a basic view" do
-      @klass.create(DesignViewModel, 'test_view')
-      @design_doc['test_view'].should_not be_nil
+      @klass.create(DesignViewModel, 'test_view', :map => 'foo')
+      @design_doc['views']['test_view'].should_not be_nil
+    end
+
+    it "should auto generate mapping from name" do
+      lambda { @klass.create(DesignViewModel, 'by_title') }.should_not raise_error
+      str = @design_doc['views']['by_title']['map']
+      str.should include("((doc['couchrest-type'] == 'DesignViewModel') && (doc['title'] != null))")
+      str.should include("emit(doc['title'], null);")
+    end
+
+    it "should auto generate mapping from name with and" do
+      @klass.create(DesignViewModel, 'by_title_and_name')
+      str = @design_doc['views']['by_title_and_name']['map']
+      str.should include("(doc['title'] != null) && (doc['name'] != null)")
+      str.should include("emit([doc['title'], doc['name']], null);")
     end
 
   end
@@ -106,6 +122,22 @@ describe "Design View" do
 
       it "should return all" do
         DesignViewModel.by_name.all.last.name.should eql("Vilma")
+      end
+
+    end
+
+    describe "index information" do
+      it "should provide total_rows" do
+        DesignViewModel.by_name.total_rows.should eql(5)
+      end
+      it "should provide total_rows" do
+        DesignViewModel.by_name.total_rows.should eql(5)
+      end
+      it "should provide an offset" do
+        DesignViewModel.by_name.offset.should eql(0)
+      end
+      it "should provide a set of keys" do
+        DesignViewModel.by_name.limit(2).keys.should eql(["Judith", "Lorena"])
       end
 
     end

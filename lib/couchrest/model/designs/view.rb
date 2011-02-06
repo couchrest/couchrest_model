@@ -1,6 +1,6 @@
 module CouchRest
   module Model
-    module Design
+    module Designs
 
       #
       # A proxy class that allows view queries to be created using
@@ -42,14 +42,15 @@ module CouchRest
         # Inmediatly send a request to the database for all documents provided by the query.
         #
         def all(&block)
-          include_docs.execute(&block)
+          include_docs.rows.map{|r| r.doc}
         end
 
-        # Inmediatly send a request for the first result of the dataset. This will override 
-        # any limit set in the view previously.
+        # Inmediatly send a request for the first result of the dataset.
+        # This will override any limit set in the view previously.
         def first
-          limit(1).include_docs.execute.first
+          limit(1).all.first
         end
+
 
         def info
           
@@ -64,11 +65,16 @@ module CouchRest
         end
 
         def rows
-          @rows ||= execute['rows'].map{|v| ViewRow.new(v, model)}
+          return @rows if @rows
+          if execute && result['rows']
+            @rows ||= result['rows'].map{|v| ViewRow.new(v, model)}
+          else 
+            [ ]
+          end
         end
 
         def keys
-          execute['rows'].map{|r| r.key}
+          rows.map{|r| r.key}
         end
 
 
@@ -175,15 +181,35 @@ module CouchRest
           self.class.new(self, new_query)
         end
 
+        def database
+          query[:database] || model.database
+        end
+
         # Used internally to ensure that docs are provided. Should not be used outside of 
         # the view class under normal circumstances.
         def include_docs
           raise "Documents cannot be returned from a view that is prepared for a reduce" if query[:reduce]
+          query.delete(:reduce)
           update_query(:include_docs => true)
         end
         
         def execute(&block)
-          self.result ||= model.view(name, query, &block)
+          return self.result if result
+          raise "Database must be defined in model or view!" if database.nil?
+          retryable = true
+          # Remove the reduce value if its not needed
+          query.delete(:reduce) if !query[:reduce] && model.design_doc['views'][name.to_s]['reduce'].blank?
+          begin
+            self.result = model.design_doc.view_on(database, name, query, &block)
+          rescue RestClient::ResourceNotFound => e
+            if retryable
+              model.save_design_doc(database)
+              retryable = false
+              retry
+            else
+              raise e
+            end
+          end
         end
 
         # Class Methods
@@ -208,7 +234,6 @@ module CouchRest
           # subsecuent index.
           #
           def create(model, name, opts = {})
-            views = model.design_doc['views'] ||= {}
 
             unless opts[:map]
               if opts[:by].nil? && name =~ /^by_(.+)/
@@ -221,17 +246,20 @@ module CouchRest
 
               keys = opts[:by].map{|o| "doc['#{o}']"}
               emit = keys.length == 1 ? keys.first : "[#{keys.join(', ')}]"
-              opts[:map] =
-                "function(doc) {" +
-                "  if (#{opts[:guards].join(' && ')}) {" +
-                "    emit(#{emit}, null);" +
-                "  }" +
-                "}"
+              opts[:guards] += keys.map{|k| "(#{k} != null)"}
+              opts[:map] = <<-EOF
+function(doc) {
+  if (#{opts[:guards].join(' && ')}) {
+    emit(#{emit}, null);
+  }
+}
+EOF
             end
 
-            views[name.to_s] = {
-              :map => opts[:map],
-              :reduce => opts[:reduce] || false,
+            model.design_doc['views'] ||= {}
+            model.design_doc['views'][name.to_s] = {
+              'map'    => opts[:map],
+              'reduce' => opts[:reduce]
             }
           end
 
@@ -245,21 +273,25 @@ module CouchRest
         attr_accessor :model
         def initialize(hash, model)
           self.model = model
-          super(hash)
+          replace(hash)
         end
         def id
-          ["id"]
+          self["id"]
         end
         def key
-          ["key"]
+          self["key"]
         end
         def value
-          ['value']
+          self['value']
+        end
+        def raw_doc
+          self['doc']
         end
         # Send a request for the linked document either using the "id" field's
         # value, or the ["value"]["_id"] used for linked documents.
         def doc
-          doc_id = value['_id'] || self.id
+          return model.create_from_database(self['doc']) if self['doc']
+          doc_id = (value && value['_id']) ? value['_id'] : self.id
           model.get(doc_id)
         end
       end

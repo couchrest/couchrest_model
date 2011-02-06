@@ -16,7 +16,7 @@ module CouchRest
     #     end
     #   end
     #
-    module Design
+    module Designs
       extend ActiveSupport::Concern
 
       module ClassMethods
@@ -45,7 +45,7 @@ module CouchRest
           View.create(model, name, opts)
           model.class_eval <<-EOS, __FILE__, __LINE__ + 1
             def self.#{name}(opts = {})
-              CouchRest::Model::Design::View.new(self, opts, '#{name}')
+              CouchRest::Model::Designs::View.new(self, opts, '#{name}')
             end
           EOS
         end
