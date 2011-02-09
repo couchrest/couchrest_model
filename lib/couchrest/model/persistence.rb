@@ -65,8 +65,7 @@ module CouchRest
       # Update the document's attributes and save. For example:
       #
       #   doc.update_attributes :name => "Fred"
-      # 
-      # Is the equivilent of doing the following:
+      # Is the equivalent of doing the following:
       #
       #   doc.attributes = { :name => "Fred" }
       #   doc.save
