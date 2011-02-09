@@ -1,4 +1,8 @@
-== 1.0.1
+== 1.1.0.beta
+
+* Epic enhancements:
+  * Added "View" object for dynamic view queries
+  * Added easy to use proxy_for and proxied_by class methods for proxying data
 
 * Minor enhancements:
   * A yield parameter in an anonymous casted model property block is no longer required (@samlown)
