@@ -15,17 +15,17 @@ describe "Model Persistence" do
   describe "creating a new document from database" do
 
     it "should instantialize" do
-      doc = Article.create_from_database({'_id' => 'testitem1', '_rev' => 123, 'couchrest-type' => 'Article', 'name' => 'my test'})
+      doc = Article.build_from_database({'_id' => 'testitem1', '_rev' => 123, 'couchrest-type' => 'Article', 'name' => 'my test'})
       doc.class.should eql(Article)
     end
 
     it "should instantialize of same class if no couchrest-type included from DB" do
-      doc = Article.create_from_database({'_id' => 'testitem1', '_rev' => 123, 'name' => 'my test'})
+      doc = Article.build_from_database({'_id' => 'testitem1', '_rev' => 123, 'name' => 'my test'})
       doc.class.should eql(Article)
     end
 
     it "should instantialize document of different type" do
-      doc = Article.create_from_database({'_id' => 'testitem2', '_rev' => 123, Article.model_type_key => 'WithTemplateAndUniqueID', 'name' => 'my test'})
+      doc = Article.build_from_database({'_id' => 'testitem2', '_rev' => 123, Article.model_type_key => 'WithTemplateAndUniqueID', 'name' => 'my test'})
       doc.class.should eql(WithTemplateAndUniqueID)
     end
 

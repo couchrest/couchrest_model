@@ -9,19 +9,19 @@ module CouchRest
 
         # Ensure we have a class available so we can check for a usable view
         # or add one if necessary.
-        def setup(klass)
-          @klass = klass
+        def setup(model)
+          @model = model
         end
-
 
         def validate_each(document, attribute, value)
           view_name = options[:view].nil? ? "by_#{attribute}" : options[:view]
+          model = document.model_proxy || @model
           # Determine the base of the search
-          base = options[:proxy].nil? ? @klass : document.instance_eval(options[:proxy])
+          base = options[:proxy].nil? ? model : document.instance_eval(options[:proxy])
 
           if base.respond_to?(:has_view?) && !base.has_view?(view_name)
             raise "View #{document.class.name}.#{options[:view]} does not exist!" unless options[:view].nil?
-            @klass.view_by attribute
+            model.view_by attribute
           end
 
           docs = base.view(view_name, :key => value, :limit => 2, :include_docs => false)['rows']
@@ -35,7 +35,6 @@ module CouchRest
             document.errors.add(attribute, :taken, :default => options[:message], :value => value)
           end
         end
-
 
       end
 

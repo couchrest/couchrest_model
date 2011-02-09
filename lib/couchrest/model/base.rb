@@ -12,6 +12,7 @@ module CouchRest
       include CouchRest::Model::DesignDoc
       include CouchRest::Model::ExtendedAttachments
       include CouchRest::Model::ClassProxy
+      include CouchRest::Model::Proxyable
       include CouchRest::Model::Collection
       include CouchRest::Model::PropertyProtection
       include CouchRest::Model::Associations
@@ -46,9 +47,12 @@ module CouchRest
       # Options supported:
       # 
       # * :directly_set_attributes: true when data comes directly from database
+      # * :database: provide an alternative database
       #
       def initialize(doc = {}, options = {})
         doc = prepare_all_attributes(doc, options)
+        # set the instances database, if provided
+        self.database = options[:database] unless options[:database].nil?
         super(doc)
         unless self['_id'] && self['_rev']
           self[self.model_type_key] = self.class.to_s

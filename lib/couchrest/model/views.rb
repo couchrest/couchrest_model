@@ -131,7 +131,7 @@ module CouchRest
               collection_proxy_for(design_doc, name, opts.merge({:database => db, :include_docs => true}))
             else
               view = fetch_view db, name, opts.merge({:include_docs => true}), &block
-              view['rows'].collect{|r|create_from_database(r['doc'])} if view['rows']
+              view['rows'].collect{|r|build_from_database(r['doc'])} if view['rows']
             end
           end
         end

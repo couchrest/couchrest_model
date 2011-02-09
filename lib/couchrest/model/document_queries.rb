@@ -88,7 +88,7 @@ module CouchRest
         def get!(id, db = database)
           raise "Missing or empty document ID" if id.to_s.empty?
           doc = db.get id
-          create_from_database(doc)
+          build_from_database(doc)
         end
         alias :find! :get!
         

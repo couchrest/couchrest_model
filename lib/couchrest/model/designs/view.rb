@@ -5,18 +5,19 @@ module CouchRest
       #
       # A proxy class that allows view queries to be created using
       # chained method calls. After each call a new instance of the method
-      # is created based on the original in a similar fashion to ruby's sequel 
+      # is created based on the original in a similar fashion to ruby's Sequel 
       # library, or Rails 3's Arel.
       #
       # CouchDB views have inherent limitations, so joins and filters as used in 
-      # a normal relational database are not possible. At least not yet!
+      # a normal relational database are not possible.
       #
       class View
         include Enumerable
 
         attr_accessor :model, :name, :query, :result
 
-        # Initialize a new View object. This method should not be called from outside CouchRest Model.
+        # Initialize a new View object. This method should not be called from
+        # outside CouchRest Model.
         def initialize(parent, new_query = {}, name = nil)
           if parent.is_a?(Class) && parent < CouchRest::Model::Base
             raise "Name must be provided for view to be initialized" if name.nil?
@@ -25,14 +26,14 @@ module CouchRest
             # Default options:
             self.query    = { :reduce => false }
           elsif parent.is_a?(self.class)
-            self.model    = parent.model
+            self.model    = (new_query.delete(:proxy) || parent.model)
             self.name     = parent.name
             self.query    = parent.query.dup
           else
             raise "View cannot be initialized without a parent Model or View"
           end
           query.update(new_query)
-          super
+          super()
         end
 
 
@@ -110,6 +111,13 @@ module CouchRest
           end
         end
 
+        # Check to see if the array of documents is empty. This *will* 
+        # perform the query and return all documents ready to use, if you don't
+        # want to load anything, use +#total_rows+ or +#count+ instead.
+        def empty?
+          all.empty?
+        end
+
         # Run through each document provided by the +#all+ method.
         # This is also used by the Enumerator mixin to provide all the standard
         # ruby collection directly on the view.
@@ -141,6 +149,18 @@ module CouchRest
           rows.map{|r| r.value}
         end
 
+        # Accept requests as if the view was an array. Used for backwards compatibity
+        # with older queries:
+        #
+        #    Model.all(:raw => true, :limit => 0)['total_rows']
+        #
+        # In this example, the raw option will be ignored, and the total rows
+        # will still be accessible.
+        # 
+        def [](value)
+          execute[value]
+        end
+
         # No yet implemented. Eventually this will provide a raw hash
         # of the information CouchDB holds about the view.
         def info
@@ -150,16 +170,11 @@ module CouchRest
 
         # == View Filter Methods
         # 
-        # View filters return an copy of the view instance with the query 
+        # View filters return a copy of the view instance with the query 
         # modified appropriatly. Errors will be raised if the methods
         # are combined in an incorrect fashion.
         #
        
-        # Specify the database the view should use. If not defined,
-        # an attempt will be made to load its value from the model.
-        def database(value)
-          update_query(:database => value)
-        end
 
         # Find all entries in the index whose key matches the value provided.
         #
@@ -229,7 +244,8 @@ module CouchRest
           update_query(:skip => value)
         end
 
-        # Use the reduce function on the view. If none is available this method will fail. 
+        # Use the reduce function on the view. If none is available this method
+        # will fail. 
         def reduce
           raise "Cannot reduce a view without a reduce method" unless can_reduce?
           update_query(:reduce => true)
@@ -255,6 +271,25 @@ module CouchRest
 
         def include_docs
           update_query.include_docs!
+        end
+
+        ### Special View Filter Methods
+
+        # Specify the database the view should use. If not defined,
+        # an attempt will be made to load its value from the model.
+        def database(value)
+          update_query(:database => value)
+        end
+
+        # Set the view's proxy that will be used instead of the model
+        # for any future searches. As soon as this enters the
+        # new object's initializer it will be removed and replace
+        # the model object.
+        #
+        # See the Proxyable mixin for more details.
+        #
+        def proxy(value)
+          update_query(:proxy => value)
         end
 
         # Return any cached values to their nil state so that any queries
@@ -288,20 +323,22 @@ module CouchRest
         def can_reduce?
           !design_doc['views'][name]['reduce'].blank?
         end
-        
+
+        def use_database
+          query[:database] || model.database
+        end
         
         def execute
           return self.result if result
-          db = query[:database] || model.database
-          raise "Database must be defined in model or view!" if db.nil?
+          raise "Database must be defined in model or view!" if use_database.nil?
           retryable = true
           # Remove the reduce value if its not needed
           query.delete(:reduce) unless can_reduce?
           begin
-            self.result = model.design_doc.view_on(db, name, query)
+            self.result = model.design_doc.view_on(use_database, name, query)
           rescue RestClient::ResourceNotFound => e
             if retryable
-              model.save_design_doc(db)
+              model.save_design_doc(use_database)
               retryable = false
               retry
             else
@@ -334,9 +371,10 @@ module CouchRest
           def create(model, name, opts = {})
 
             unless opts[:map]
-              if opts[:by].nil? && name =~ /^by_(.+)/
+              if opts[:by].nil? && name.to_s =~ /^by_(.+)/
                 opts[:by] = $1.split(/_and_/)
               end
+
               raise "View cannot be created without recognised name, :map or :by options" if opts[:by].nil?
 
               opts[:guards] ||= []
@@ -373,9 +411,9 @@ module CouchRest
       # A special wrapper class that provides easy access to the key
       # fields in a result row.
       class ViewRow < Hash
-        attr_accessor :model
+        attr_reader :model
         def initialize(hash, model)
-          self.model = model
+          @model    = model
           replace(hash)
         end
         def id
@@ -393,7 +431,7 @@ module CouchRest
         # Send a request for the linked document either using the "id" field's
         # value, or the ["value"]["_id"] used for linked documents.
         def doc
-          return model.create_from_database(self['doc']) if self['doc']
+          return model.build_from_database(self['doc']) if self['doc']
           doc_id = (value.is_a?(Hash) && value['_id']) ? value['_id'] : self.id
           model.get(doc_id)
         end

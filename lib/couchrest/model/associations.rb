@@ -109,7 +109,7 @@ module CouchRest
           base = options[:proxy] || options[:class_name]
           class_eval <<-EOS, __FILE__, __LINE__ + 1
             def #{attrib}
-              @#{attrib} ||= #{options[:foreign_key]}.nil? ? nil : #{base}.get(self.#{options[:foreign_key]})
+              @#{attrib} ||= #{options[:foreign_key]}.nil? ? nil : (model_proxy || #{base}).get(self.#{options[:foreign_key]})
             end
           EOS
         end
@@ -140,7 +140,7 @@ module CouchRest
           class_eval <<-EOS, __FILE__, __LINE__ + 1
             def #{attrib}(reload = false)
               return @#{attrib} unless @#{attrib}.nil? or reload
-              ary = self.#{options[:foreign_key]}.collect{|i| #{base}.get(i)}
+              ary = self.#{options[:foreign_key]}.collect{|i| (model_proxy || #{base}).get(i)}
               @#{attrib} = ::CouchRest::CollectionOfProxy.new(ary, self, '#{options[:foreign_key]}')
             end
           EOS

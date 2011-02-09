@@ -34,10 +34,16 @@ describe "Model Base" do
       @obj.should be_new_record
     end
 
-    it "should not failed on a nil value in argument" do
+    it "should not fail with nil argument" do
       @obj = Basic.new(nil)
       @obj.should_not be_nil
     end
+
+    it "should allow the database to be set" do
+      @obj = Basic.new(nil, :database => 'database')
+      @obj.database.should eql('database')
+    end
+
   end
  
   describe "ActiveModel compatability Basic" do

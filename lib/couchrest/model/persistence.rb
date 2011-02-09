@@ -93,12 +93,12 @@ module CouchRest
 
         # Creates a new instance, bypassing attribute protection
         #
-        #
         # ==== Returns
         #  a document instance
-        def create_from_database(doc = {})
+        #
+        def build_from_database(doc = {})
           base = (doc[model_type_key].blank? || doc[model_type_key] == self.to_s) ? self : doc[model_type_key].constantize
-          base.new(doc, :directly_set_attributes => true)      
+          base.new(doc, :directly_set_attributes => true)
         end
 
         # Defines an instance and save it directly to the database 

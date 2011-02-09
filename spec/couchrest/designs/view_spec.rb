@@ -194,6 +194,15 @@ describe "Design View" do
         end
       end
 
+      describe "#empty?" do
+        it "should check the #all method for any results" do
+          all = mock("All")
+          all.should_receive(:empty?).and_return('win')
+          @obj.should_receive(:all).and_return(all)
+          @obj.empty?.should eql('win')
+        end
+      end
+
       describe "#each" do
         it "should call each method on all" do
           @obj.should_receive(:all).and_return([])
@@ -239,6 +248,13 @@ describe "Design View" do
           row.should_receive(:value).twice.and_return('foo')
           @obj.should_receive(:rows).and_return([row, row])
           @obj.values.should eql(['foo', 'foo'])
+        end
+      end
+
+      describe "#[]" do
+        it "should execute and provide requested field" do
+          @obj.should_receive(:execute).and_return({'total_rows' => 2})
+          @obj['total_rows'].should eql(2)
         end
       end
 
@@ -509,10 +525,8 @@ describe "Design View" do
         it "should retry once on a resource not found error" do
           @obj.should_receive(:can_reduce?).and_return(true)
           @obj.model.should_receive(:save_design_doc)
-          @design_doc.should_receive(:view_on).ordered
-            .and_raise(RestClient::ResourceNotFound)
-          @design_doc.should_receive(:view_on).ordered
-            .and_return('foos')
+          @design_doc.should_receive(:view_on).ordered.and_raise(RestClient::ResourceNotFound)
+          @design_doc.should_receive(:view_on).ordered.and_return('foos')
           @obj.send(:execute)
           @obj.result.should eql('foos')
         end
@@ -520,8 +534,7 @@ describe "Design View" do
         it "should retry twice and fail on a resource not found error" do
           @obj.should_receive(:can_reduce?).and_return(true)
           @obj.model.should_receive(:save_design_doc)
-          @design_doc.should_receive(:view_on).twice
-            .and_raise(RestClient::ResourceNotFound)
+          @design_doc.should_receive(:view_on).twice.and_raise(RestClient::ResourceNotFound)
           lambda { @obj.send(:execute) }.should raise_error(RestClient::ResourceNotFound)
         end
 
@@ -577,7 +590,7 @@ describe "Design View" do
         hash = {'doc' => {'_id' => '12345', 'name' => 'sam'}}
         obj = @klass.new(hash, DesignViewModel)
         doc = mock('DesignViewModel')
-        obj.model.should_receive(:create_from_database).with(hash['doc']).and_return(doc)
+        obj.model.should_receive(:build_from_database).with(hash['doc']).and_return(doc)
         obj.doc.should eql(doc)
       end
 
