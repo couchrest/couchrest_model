@@ -76,7 +76,17 @@ module CouchRest
         save
       end
 
-    protected
+      # Reloads the attributes of this object from the database.
+      # It doesn't override custom instance variables.
+      #
+      # Returns self.
+      def reload
+        merge!(self.class.get(id))
+        self
+      end
+
+
+      protected
 
       def perform_validations(options = {})
         perform_validation = case options
