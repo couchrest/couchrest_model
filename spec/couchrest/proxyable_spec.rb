@@ -35,7 +35,7 @@ describe "Proxyable" do
         it "should call ModelProxy" do
           DummyProxyable.proxy_for(:cats)
           @obj = DummyProxyable.new
-          CouchRest::Model::Proxyable::ModelProxy.should_receive(:new).with(Cat, @obj, 'cats', 'db').and_return(true)
+          CouchRest::Model::Proxyable::ModelProxy.should_receive(:new).with(Cat, @obj, 'dummy_proxyable', 'db').and_return(true)
           @obj.should_receive('proxy_database').and_return('db')
           @obj.should_receive(:respond_to?).with('proxy_database').and_return(true)
           @obj.cats
@@ -198,15 +198,30 @@ describe "Proxyable" do
         @obj.design_doc
       end
 
-      it "should proxy refresh_design_doc" do
-        Cat.should_receive(:refresh_design_doc).with('database')
-        @obj.refresh_design_doc
+      describe "#refresh_design_doc" do
+        it "should be proxied without database arg" do
+          Cat.should_receive(:refresh_design_doc).with('database')
+          @obj.refresh_design_doc
+        end
+        it "should be proxied with database arg" do
+          Cat.should_receive(:refresh_design_doc).with('db')
+          @obj.refresh_design_doc('db')
+        end
       end
 
-      it "should proxy save_design_doc" do
-        Cat.should_receive(:save_design_doc).with('database')
-        @obj.save_design_doc
+      describe "#save_design_doc" do
+        it "should be proxied without args" do
+          Cat.should_receive(:save_design_doc).with('database')
+          @obj.save_design_doc
+        end
+
+        it "should be proxied with database arg" do
+          Cat.should_receive(:save_design_doc).with('db')
+          @obj.save_design_doc('db')
+        end
       end
+
+      
 
       ### Updating methods
 

@@ -20,7 +20,7 @@ module CouchRest
               unless respond_to?('#{db_method}')
                 raise "Missing ##{db_method} method for proxy"
               end
-              @#{model_name} ||= CouchRest::Model::Proxyable::ModelProxy.new(#{options[:class_name]}, self, '#{model_name}', #{db_method})
+              @#{model_name} ||= CouchRest::Model::Proxyable::ModelProxy.new(#{options[:class_name]}, self, self.class.to_s.underscore, #{db_method})
             end
           EOS
         end
@@ -118,12 +118,12 @@ module CouchRest
           @model.design_doc
         end
         
-        def refresh_design_doc
-          @model.refresh_design_doc(@database)
+        def refresh_design_doc(db = nil)
+          @model.refresh_design_doc(db || @database)
         end
         
-        def save_design_doc
-          @model.save_design_doc(@database)
+        def save_design_doc(db = nil)
+          @model.save_design_doc(db || @database)
         end
 
 
