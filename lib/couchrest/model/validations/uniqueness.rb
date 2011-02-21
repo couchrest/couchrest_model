@@ -32,7 +32,7 @@ module CouchRest
           end
           
           if docs.length > 0
-            document.errors.add(attribute, :taken, :default => options[:message], :value => value)
+            document.errors.add(attribute, :taken, options.merge(:value => value))
           end
         end
 
