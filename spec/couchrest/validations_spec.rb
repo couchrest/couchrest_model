@@ -57,7 +57,6 @@ describe "Validations" do
         @obj.class.should_receive('view').and_return({'rows' => [ ]})
         @obj.valid?
       end
-
     end
  
     context "with a proxy parameter" do
@@ -76,7 +75,6 @@ describe "Validations" do
         proxy.should_receive('view').and_return({'rows' => [ ]})
         @obj.valid?
       end
-
     end
 
  
