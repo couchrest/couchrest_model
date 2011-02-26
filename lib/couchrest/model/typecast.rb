@@ -79,7 +79,7 @@ module CouchRest
         # Match numeric string
         def typecast_to_numeric(value, method)
           if value.respond_to?(:to_str)
-            if value.gsub(/,/, '.').gsub(/\.(?!\d*\Z)/, '').to_str =~ /\A(-?(?:0|[1-9]\d*)(?:\.\d+)?|(?:\.\d+))\z/
+            if value.strip.gsub(/,/, '.').gsub(/\.(?!\d*\Z)/, '').to_str =~ /\A(-?(?:0|[1-9]\d*)(?:\.\d+)?|(?:\.\d+))\z/
               $1.send(method)
             else
               value

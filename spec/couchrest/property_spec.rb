@@ -340,6 +340,11 @@ describe "Model properties" do
         @course.estimate.should eql(1232434123.323)
       end
 
+      it "should handle numbers with whitespace" do
+        @course.estimate = " 24.35 "
+        @course.estimate.should eql(24.35)
+      end
+
       [ Object.new, true, '00.0', '0.', '-.0', 'string' ].each do |value|
         it "does not typecast non-numeric value #{value.inspect}" do
           @course.estimate = value
@@ -426,6 +431,11 @@ describe "Model properties" do
         @course['hours'].should eql(-24)
       end
 
+      it "should handle numbers with whitespace" do
+        @course.hours = " 24 "
+        @course['hours'].should eql(24)
+      end
+
       [ Object.new, true, '00.0', '0.', '-.0', 'string' ].each do |value|
         it "does not typecast non-numeric value #{value.inspect}" do
           @course.hours = value
@@ -509,6 +519,11 @@ describe "Model properties" do
       it 'returns decimal representation of a negative float' do
         @course.profit = -24.35
         @course['profit'].should eql(BigDecimal('-24.35'))
+      end
+
+      it "should handle numbers with whitespace" do
+        @course.profit = " 24.35 "
+        @course['profit'].should eql(BigDecimal('24.35'))
       end
 
       [ Object.new, true, '00.0', '0.', '-.0', 'string' ].each do |value|
