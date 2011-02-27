@@ -6,6 +6,9 @@
 
 * Minor enhancements:
   * A yield parameter in an anonymous casted model property block is no longer required (@samlown)
+	* Narrow the rescued exception to avoid catching class evaluation errors that has nothing to to with the association (thanks Simone Carletti)
+	* Fix validate uniqueness test that was never executed (thanks Simone Carletti)
+	* Adds a #reload method to reload document attributes (thanks Simone Carletti)
 
 == CouchRest Model 1.0.0
 

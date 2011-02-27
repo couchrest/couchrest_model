@@ -25,7 +25,7 @@ describe "Validations" do
     it "should not validate a non-unique document" do
       @obj = WithUniqueValidation.create(:title => 'title 1')
       @obj.should_not be_valid
-      @obj.errors[:title].should eql(['is already taken'])
+      @obj.errors[:title].should == ["has already been taken"]
     end
 
     it "should save already created document" do
@@ -57,7 +57,6 @@ describe "Validations" do
         @obj.class.should_receive('view').and_return({'rows' => [ ]})
         @obj.valid?
       end
-
     end
  
     context "with a proxy parameter" do
@@ -76,7 +75,6 @@ describe "Validations" do
         proxy.should_receive('view').and_return({'rows' => [ ]})
         @obj.valid?
       end
-
     end
 
  

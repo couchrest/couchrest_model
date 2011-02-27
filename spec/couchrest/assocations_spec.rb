@@ -44,11 +44,11 @@ describe "Assocations" do
     end
 
     it "should raise error if class name does not exist" do
-      lambda {
+      lambda do
         class TestBadAssoc < CouchRest::Model::Base
           belongs_to :test_bad_item
         end
-      }.should raise_error
+      end.should raise_error(NameError, /TestBadAssoc#test_bad_item/)
     end
 
     it "should allow override of foreign key" do

@@ -25,8 +25,8 @@ module CouchRest
 
           begin
             opts[:class] = opts[:class_name].constantize
-          rescue
-            raise "Unable to convert class name into Constant for #{self.name}##{attrib}"
+          rescue NameError
+            raise NameError, "Unable to convert class name into Constant for #{self.name}##{attrib}"
           end
 
           prop = property(opts[:foreign_key], opts)

@@ -3,7 +3,7 @@ module CouchRest
     module Persistence
       extend ActiveSupport::Concern
 
-      # Create the document. Validation is enabled by default and will return 
+      # Create the document. Validation is enabled by default and will return
       # false if the document is not valid. If all goes well, the document will
       # be returned.
       def create(options = {})
@@ -16,13 +16,13 @@ module CouchRest
           end
         end
       end
-     
+
       # Creates the document in the db. Raises an exception
       # if the document is not created properly.
       def create!
         self.class.fail_validate!(self) unless self.create
       end
-      
+
       # Trigger the callbacks (before, after, around)
       # only if the document isn't new
       def update(options = {})
@@ -35,12 +35,12 @@ module CouchRest
           end
         end
       end
-      
+
       # Trigger the callbacks (before, after, around) and save the document
       def save(options = {})
         self.new? ? create(options) : update(options)
       end
-      
+
       # Saves the document to the db using save. Raises an exception
       # if the document is not saved properly.
       def save!
@@ -65,7 +65,6 @@ module CouchRest
       # Update the document's attributes and save. For example:
       #
       #   doc.update_attributes :name => "Fred"
-      # 
       # Is the equivilent of doing the following:
       #
       #   doc.attributes = { :name => "Fred" }
@@ -76,7 +75,17 @@ module CouchRest
         save
       end
 
-    protected
+      # Reloads the attributes of this object from the database.
+      # It doesn't override custom instance variables.
+      #
+      # Returns self.
+      def reload
+        merge!(self.class.get(id))
+        self
+      end
+
+
+      protected
 
       def perform_validations(options = {})
         perform_validation = case options
@@ -101,8 +110,8 @@ module CouchRest
           base.new(doc, :directly_set_attributes => true)
         end
 
-        # Defines an instance and save it directly to the database 
-        # 
+        # Defines an instance and save it directly to the database
+        #
         # ==== Returns
         #  returns the reloaded document
         def create(attributes = {})
@@ -110,9 +119,9 @@ module CouchRest
           instance.create
           instance
         end
-        
-        # Defines an instance and save it directly to the database 
-        # 
+
+        # Defines an instance and save it directly to the database
+        #
         # ==== Returns
         #  returns the reloaded document or raises an exception
         def create!(attributes = {})
@@ -148,7 +157,7 @@ module CouchRest
           raise Errors::Validations.new(document)
         end
       end
-      
+
 
     end
   end
