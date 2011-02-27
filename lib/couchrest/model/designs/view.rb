@@ -14,7 +14,7 @@ module CouchRest
       class View
         include Enumerable
 
-        attr_accessor :model, :name, :query, :result
+        attr_accessor :owner, :model, :name, :query, :result
 
         # Initialize a new View object. This method should not be called from
         # outside CouchRest Model.
@@ -22,11 +22,13 @@ module CouchRest
           if parent.is_a?(Class) && parent < CouchRest::Model::Base
             raise "Name must be provided for view to be initialized" if name.nil?
             self.model    = parent
+            self.owner    = parent
             self.name     = name.to_s
             # Default options:
             self.query    = { :reduce => false }
           elsif parent.is_a?(self.class)
             self.model    = (new_query.delete(:proxy) || parent.model)
+            self.owner    = parent.owner
             self.name     = parent.name
             self.query    = parent.query.dup
           else
@@ -174,7 +176,6 @@ module CouchRest
         # modified appropriatly. Errors will be raised if the methods
         # are combined in an incorrect fashion.
         #
-       
 
         # Find all entries in the index whose key matches the value provided.
         #
@@ -299,6 +300,46 @@ module CouchRest
           @rows = nil
           @docs = nil
         end
+
+        # == Kaminari compatible pagination support
+        #
+        # Based on the really simple support for scoped pagination in the
+        # the Kaminari gem, we provide compatible methods here to perform
+        # the same actions you'd expect.
+        #
+
+        alias :total_count :count
+
+        def page(page)
+          limit(owner.default_per_page).skip(owner.default_per_page * ([page.to_i, 1].max - 1))
+        end
+
+        def per(num)
+          raise "View#page must be called before #per!" if limit_value.nil? || offset_value.nil?
+          if (n = num.to_i) <= 0
+            self
+          else
+            limit(num).skip(offset_value / limit_value * n)
+          end
+        end
+
+        def offset_value
+          query[:skip]
+        end
+
+        def limit_value
+          query[:limit]
+        end
+
+        def num_pages
+          (total_count.to_f / limit_value).ceil
+        end
+
+        def current_page
+          (offset_value / limit_value) + 1
+        end
+
+
 
         protected
 

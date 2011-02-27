@@ -10,31 +10,46 @@ describe "Design" do
     DesignModel.respond_to?(:design).should be_true
   end
 
-  describe ".design" do
+  describe "class methods" do
 
-    before :each do 
-      @mapper = mock('DesignMapper')
-      @mapper.stub!(:create_view_method)
+    describe ".design" do
+      before :each do 
+        @mapper = mock('DesignMapper')
+        @mapper.stub!(:create_view_method)
+      end
+
+      it "should instantiate a new DesignMapper" do
+        CouchRest::Model::Designs::DesignMapper.should_receive(:new).with(DesignModel).and_return(@mapper)
+        @mapper.should_receive(:create_view_method).with(:all)
+        @mapper.should_receive(:instance_eval)
+        DesignModel.design() { }
+      end
+
+      it "should allow methods to be called in mapper" do
+        @mapper.should_receive(:foo)
+        CouchRest::Model::Designs::DesignMapper.stub!(:new).and_return(@mapper)
+        DesignModel.design { foo }
+      end
+
+      it "should request a design refresh" do
+        DesignModel.should_receive(:req_design_doc_refresh)
+        DesignModel.design() { }
+      end
+
     end
 
-    it "should instantiate a new DesignMapper" do
-      CouchRest::Model::Designs::DesignMapper.should_receive(:new).with(DesignModel).and_return(@mapper)
-      @mapper.should_receive(:create_view_method).with(:all)
-      @mapper.should_receive(:instance_eval)
-      DesignModel.design() { }
+    describe "default_per_page" do
+      it "should return 25 default" do
+        DesignModel.default_per_page.should eql(25)
+      end
     end
 
-    it "should allow methods to be called in mapper" do
-      @mapper.should_receive(:foo)
-      CouchRest::Model::Designs::DesignMapper.stub!(:new).and_return(@mapper)
-      DesignModel.design { foo }
+    describe ".paginates_per" do
+      it "should set the default per page value" do
+        DesignModel.paginates_per(21)
+        DesignModel.default_per_page.should eql(21)
+      end
     end
-
-    it "should request a design refresh" do
-      DesignModel.should_receive(:req_design_doc_refresh)
-      DesignModel.design() { }
-    end
-
   end
 
   describe "DesignMapper" do

@@ -21,6 +21,8 @@ module CouchRest
 
       module ClassMethods
 
+        # Add views and other design document features
+        # to the current model.
         def design(*args, &block)
           mapper = DesignMapper.new(self)
           mapper.create_view_method(:all)
@@ -28,6 +30,23 @@ module CouchRest
           mapper.instance_eval(&block)
 
           req_design_doc_refresh
+        end
+
+        # Override the default page pagination value:
+        #
+        #   class Person < CouchRest::Model::Base
+        #     paginates_per 10
+        #   end
+        #
+        def paginates_per(val)
+          @_default_per_page = val
+        end
+
+        # The models number of documents to return
+        # by default when performing pagination.
+        # Returns 25 unless explicitly overridden via <tt>paginates_per</tt>
+        def default_per_page
+          @_default_per_page || 25
         end
 
       end

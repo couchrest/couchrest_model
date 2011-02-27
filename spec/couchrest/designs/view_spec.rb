@@ -541,6 +541,53 @@ describe "Design View" do
 
       end
 
+      describe "pagination methods" do
+
+        describe "#total_count" do
+          it "should be an alias for count" do
+            @obj.method(:total_count).should eql(@obj.method(:count))
+          end
+        end
+
+        describe "#page" do
+          it "should call limit and skip" do
+            @obj.should_receive(:limit).with(25).and_return(@obj)
+            @obj.should_receive(:skip).with(25).and_return(@obj)
+            @obj.page(2)
+          end
+        end
+
+        describe "#per" do
+          it "should raise an error if page not called before hand" do
+            lambda { @obj.per(12) }.should raise_error
+          end
+          it "should not do anything if number less than or eql 0" do
+            view = @obj.page(1)
+            view.per(0).should eql(view)
+          end
+          it "should set limit and update skip" do
+            view = @obj.page(2).per(10)
+            view.query[:skip].should eql(10)
+            view.query[:limit].should eql(10)
+          end
+        end
+
+        describe "#num_pages" do
+          it "should use total_count and limit_value" do
+            @obj.should_receive(:total_count).and_return(200)
+            @obj.should_receive(:limit_value).and_return(25)
+            @obj.num_pages.should eql(8)
+          end
+        end
+
+        describe "#current_page" do
+          it "should use offset and limit" do
+            @obj.should_receive(:offset_value).and_return(25)
+            @obj.should_receive(:limit_value).and_return(25)
+            @obj.current_page.should eql(2)
+          end
+        end
+      end
     end
   end
 
