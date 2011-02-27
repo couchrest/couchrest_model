@@ -364,6 +364,21 @@ You'll see that this new syntax requires all views to be defined inside a design
       puts "Tag: #{row.key}  Uses: #{row.value}"
     end
 
+#### Pagination
+
+The view objects have built in support for pagination based on the [kaminari](https://github.com/amatsuda/kaminari) gem. Methods are provided to match those required by the library to peform pagination.
+
+For your view to support paginating the results, it must use a reduce function that provides a total count of the documents in the result set. By default, auto-generated views include a reduce function that supports this.
+
+Use pagination as follows:
+
+    # Prepare a query:
+    @posts = Post.by_title.page(params[:page]).per(10)
+    
+    # In your view, with the kaminari gem loaded:
+    paginate @posts
+
+
 ## Assocations
 
 Two types at the moment:

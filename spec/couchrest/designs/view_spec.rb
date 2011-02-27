@@ -367,7 +367,7 @@ describe "Design View" do
       describe "#reduce" do
         it "should update query" do
           @obj.should_receive(:can_reduce?).and_return(true)
-          @obj.should_receive(:update_query).with({:reduce => true})
+          @obj.should_receive(:update_query).with({:reduce => true, :include_docs => nil})
           @obj.reduce
         end
         it "should raise error if query cannot be reduced" do
@@ -441,6 +441,10 @@ describe "Design View" do
           @obj.should_receive(:reset!)
           @obj.send(:include_docs!)
           @obj.query[:include_docs].should be_true
+        end
+        it "should raise an error if view is reduced" do
+          @obj.query[:reduce] = true
+          lambda { @obj.send(:include_docs!) }.should raise_error
         end
       end
 
@@ -538,16 +542,18 @@ describe "Design View" do
           lambda { @obj.send(:execute) }.should raise_error(RestClient::ResourceNotFound)
         end
 
+        it "should remove nil values from query" do
+          @obj.should_receive(:can_reduce?).and_return(true)
+          @obj.stub!(:use_database).and_return('database')
+          @obj.query = {:reduce => true, :limit => nil, :skip => nil}
+          @design_doc.should_receive(:view_on).with('database', 'test_view', {:reduce => true})
+          @obj.send(:execute)
+        end
+
 
       end
 
       describe "pagination methods" do
-
-        describe "#total_count" do
-          it "should be an alias for count" do
-            @obj.method(:total_count).should eql(@obj.method(:count))
-          end
-        end
 
         describe "#page" do
           it "should call limit and skip" do
@@ -569,6 +575,16 @@ describe "Design View" do
             view = @obj.page(2).per(10)
             view.query[:skip].should eql(10)
             view.query[:limit].should eql(10)
+          end
+        end
+
+        describe "#total_count" do
+          it "set limit and skip to nill and perform count" do
+            @obj.should_receive(:limit).with(nil).and_return(@obj)
+            @obj.should_receive(:skip).with(nil).and_return(@obj)
+            @obj.should_receive(:count).and_return(5)
+            @obj.total_count.should eql(5)
+            @obj.total_count.should eql(5) # Second to test caching
           end
         end
 
@@ -657,6 +673,15 @@ describe "Design View" do
         obj.doc.should eql(doc)
       end
 
+      it "should try to return nil for document if none available" do
+        hash = {'value' => 23} # simulate reduce
+        obj = @klass.new(hash, DesignViewModel)
+        doc = mock('DesignViewModel')
+        obj.model.should_not_receive(:get)
+        obj.doc.should be_nil
+      end
+
+
     end
    
   end
@@ -705,6 +730,33 @@ describe "Design View" do
       end
       it "should provide a set of keys" do
         DesignViewModel.by_name.limit(2).keys.should eql(["Judith", "Lorena"])
+      end
+    end
+
+    describe "pagination" do
+      before :all do
+        DesignViewModel.paginates_per 3
+      end
+      before :each do
+        @view = DesignViewModel.by_name.page(1)
+      end
+
+      it "should calculate number of pages" do
+        @view.num_pages.should eql(2)
+      end
+      it "should return results from first page" do
+        @view.all.first.name.should eql('Judith')
+        @view.all.last.name.should eql('Peter')
+      end
+      it "should return results from second page" do
+        @view.page(2).all.first.name.should eql('Sam')
+        @view.page(2).all.last.name.should eql('Vilma')
+      end
+
+      it "should allow overriding per page count" do
+        @view = @view.per(10)
+        @view.num_pages.should eql(1)
+        @view.all.last.name.should eql('Vilma')
       end
     end
 

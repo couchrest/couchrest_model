@@ -249,7 +249,7 @@ module CouchRest
         # will fail. 
         def reduce
           raise "Cannot reduce a view without a reduce method" unless can_reduce?
-          update_query(:reduce => true)
+          update_query(:reduce => true, :include_docs => nil)
         end
 
         # Control whether the reduce function reduces to a set of distinct keys
@@ -308,8 +308,6 @@ module CouchRest
         # the same actions you'd expect.
         #
 
-        alias :total_count :count
-
         def page(page)
           limit(owner.default_per_page).skip(owner.default_per_page * ([page.to_i, 1].max - 1))
         end
@@ -321,6 +319,10 @@ module CouchRest
           else
             limit(num).skip(offset_value / limit_value * n)
           end
+        end
+
+        def total_count
+          @total_count ||= limit(nil).skip(nil).count
         end
 
         def offset_value
@@ -344,6 +346,7 @@ module CouchRest
         protected
 
         def include_docs!
+          raise "Cannot include documents in view that has been reduced!" if query[:reduce]
           reset! if result && !include_docs?
           query[:include_docs] = true
           self
@@ -376,7 +379,7 @@ module CouchRest
           # Remove the reduce value if its not needed
           query.delete(:reduce) unless can_reduce?
           begin
-            self.result = model.design_doc.view_on(use_database, name, query)
+            self.result = model.design_doc.view_on(use_database, name, query.reject{|k,v| v.nil?})
           rescue RestClient::ResourceNotFound => e
             if retryable
               model.save_design_doc(use_database)
@@ -474,7 +477,7 @@ module CouchRest
         def doc
           return model.build_from_database(self['doc']) if self['doc']
           doc_id = (value.is_a?(Hash) && value['_id']) ? value['_id'] : self.id
-          model.get(doc_id)
+          doc_id ? model.get(doc_id) : nil
         end
       end
 
