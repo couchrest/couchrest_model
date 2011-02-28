@@ -39,7 +39,6 @@ module CouchRest
 
       # Store a casted value in the current instance of an attribute defined
       # with a property.
-      # TODO: mixin dirty functionality into value (?)
       def write_attribute(property, value)
         prop = find_property!(property)
         self[prop.to_s] = prop.is_a?(String) ? value : prop.cast(self, value)
@@ -169,7 +168,7 @@ module CouchRest
           end
           existing_property = self.properties.find{|p| p.name == name.to_s}
           if existing_property.nil? || (existing_property.default != opts[:default])
-            define_property(name, opts, &block)            
+            define_property(name, opts, &block)
           end
         end
 
