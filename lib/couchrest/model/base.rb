@@ -16,6 +16,7 @@ module CouchRest
       include CouchRest::Model::PropertyProtection
       include CouchRest::Model::Associations
       include CouchRest::Model::Validations
+      include CouchRest::Model::Dirty
 
       def self.subclasses
         @subclasses ||= []
@@ -55,7 +56,7 @@ module CouchRest
         after_initialize if respond_to?(:after_initialize)
       end
      
-      
+       
       # Temp solution to make the view_by methods available
       def self.method_missing(m, *args, &block)
         if has_view?(m)

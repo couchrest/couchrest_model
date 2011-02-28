@@ -1,6 +1,12 @@
 module CouchRest
   module Model
     module ExtendedAttachments
+      extend ActiveSupport::Concern
+      include ActiveModel::Dirty
+      included do
+        # for _attachments_will_change!
+        define_attribute_methods [:_attachments]
+      end
 
       # Add a file attachment to the current document. Expects
       # :file and :name to be included in the arguments.
@@ -35,6 +41,7 @@ module CouchRest
       # deletes a file attachment from the current doc
       def delete_attachment(attachment_name)
         return unless attachments
+        _attachments_will_change! if attachments.include?(attachment_name)
         attachments.delete attachment_name
       end
 
@@ -66,6 +73,8 @@ module CouchRest
         def set_attachment_attr(args)
           content_type = args[:content_type] ? args[:content_type] : get_mime_type(args[:file].path)
           content_type ||= (get_mime_type(args[:name]) || 'text/plain')
+
+          _attachments_will_change!
           attachments[args[:name]] = {
             'content_type' => content_type,
             'data'         => args[:file].read

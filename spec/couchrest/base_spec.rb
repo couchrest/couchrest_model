@@ -372,6 +372,7 @@ describe "Model Base" do
       foundart.created_at.should == foundart.updated_at
     end
     it "should set the time on update" do
+      @art.title = "new title"  # only saved if @art.changed? == true
       @art.save
       @art.created_at.should < @art.updated_at
     end

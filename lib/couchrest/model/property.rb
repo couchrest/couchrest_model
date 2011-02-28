@@ -40,6 +40,10 @@ module CouchRest::Model
         # allow casted_by calls to be passed up chain by wrapping in CastedArray
         value = type_class != String ? CastedArray.new(arr, self) : arr
         value.casted_by = parent if value.respond_to?(:casted_by)
+      elsif (type == Object || type == Hash) && (value.class == Hash)
+        # allow casted_by calls to be passed up chain by wrapping in CastedHash
+        value = CouchRest::Model::CastedHash[value]
+        value.casted_by = parent
       elsif !value.nil?
         value = cast_value(parent, value)
       end

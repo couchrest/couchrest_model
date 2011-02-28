@@ -3,6 +3,7 @@ module CouchRest
   module Model
     module Properties
       extend ActiveSupport::Concern
+      include ActiveModel::Dirty
 
       included do
         extlib_inheritable_accessor(:properties) unless self.respond_to?(:properties)
@@ -38,9 +39,31 @@ module CouchRest
 
       # Store a casted value in the current instance of an attribute defined
       # with a property.
+      # TODO: mixin dirty functionality into value (?)
       def write_attribute(property, value)
         prop = find_property!(property)
         self[prop.to_s] = prop.is_a?(String) ? value : prop.cast(self, value)
+      end
+
+      # write property, update dirty status
+      def write_attribute_dirty(property, value)
+        prop = find_property!(property)
+        value = prop.is_a?(String) ? value : prop.cast(self, value)
+        self.send("#{prop}_will_change!") unless self[prop.to_s] == value
+        write_attribute(property, value)
+      end
+
+      def []=(key,value)
+        old_id = get_unique_id if self.respond_to?(:get_unique_id)
+
+        super(key, value)
+
+        if self.respond_to?(:get_unique_id)
+          # if we have set an attribute that results in the _id changing (unique_id),
+          # force changed? to return true so that the record can be saved
+          new_id = get_unique_id
+          changed_attributes["_id"] = new_id if old_id != new_id
+        end
       end
 
       # Takes a hash as argument, and applies the values by using writer methods
@@ -50,12 +73,23 @@ module CouchRest
         # Remove any protected and update all the rest. Any attributes
         # which do not have a property will simply be ignored.
         attrs = remove_protected_attributes(hash)
-        directly_set_attributes(attrs)
+        directly_set_attributes(attrs, :dirty => true)
       end
       alias :attributes= :update_attributes_without_saving
 
+      # needed for Dirty
+      def attributes
+        ret = {}
+        self.class.properties.each do |property|
+          ret[property.name] = read_attribute(property)
+        end
+        ret
+      end
 
-      private
+      def find_property(property)
+        property.is_a?(Property) ? property : self.class.properties.detect {|p| p.to_s == property.to_s}
+      end
+
       # The following methods should be accessable by the Model::Base Class, but not by anything else!
       def apply_all_property_defaults
         return if self.respond_to?(:new?) && (new? == false)
@@ -76,17 +110,26 @@ module CouchRest
       end
 
       def find_property!(property)
-        prop = property.is_a?(Property) ? property : self.class.properties.detect {|p| p.to_s == property.to_s}
+        prop = find_property(property)
         raise ArgumentError, "Missing property definition for #{property.to_s}" if prop.nil?
         prop
       end
 
       # Set all the attributes and return a hash with the attributes
       # that have not been accepted.
-      def directly_set_attributes(hash)
+      def directly_set_attributes(hash, options = {})
         hash.reject do |attribute_name, attribute_value|
           if self.respond_to?("#{attribute_name}=")
-            self.send("#{attribute_name}=", attribute_value)
+            if find_property(attribute_name)
+              if options[:dirty]
+                self.write_attribute_dirty(attribute_name, attribute_value)
+              else
+                # set attribute without updating dirty status
+                self.write_attribute(attribute_name, attribute_value)
+              end
+            else
+              self.send("#{attribute_name}=", attribute_value)
+            end
             true
           elsif mass_assign_any_attribute # config option
             self[attribute_name] = attribute_value
@@ -126,7 +169,7 @@ module CouchRest
           end
           existing_property = self.properties.find{|p| p.name == name.to_s}
           if existing_property.nil? || (existing_property.default != opts[:default])
-            define_property(name, opts, &block)
+            define_property(name, opts, &block)            
           end
         end
 
@@ -139,8 +182,8 @@ module CouchRest
             property(:created_at, Time, :read_only => true, :protected => true, :auto_validation => false)
 
             set_callback :save, :before do |object|
-              write_attribute('updated_at', Time.now)
-              write_attribute('created_at', Time.now) if object.new?
+              write_attribute_dirty('updated_at', Time.now)
+              write_attribute_dirty('created_at', Time.now) if object.new?
             end
           EOS
         end
@@ -203,7 +246,7 @@ module CouchRest
             property_name = property.name
             class_eval <<-EOS
               def #{property_name}=(value)
-                write_attribute('#{property_name}', value)
+                write_attribute_dirty('#{property_name}', value)
               end
             EOS
 

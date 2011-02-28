@@ -131,7 +131,7 @@ class WithUniqueValidationView < CouchRest::Model::Base
   attr_accessor :code
   unique_id :code
   def code
-    self["_id"] ||= @code
+    @code
   end
   property :title
 
