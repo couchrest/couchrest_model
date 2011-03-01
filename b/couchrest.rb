@@ -12,6 +12,8 @@ class BenchmarkCasted < Hash
 end
 
 class BenchmarkModel < CouchRest::Model::Base
+  use_database CouchRest.database!(ENV['BENCHMARK_DB'] || "http://localhost:5984/test")
+
   property :string, String
   property :number, Integer
   property :casted, BenchmarkCasted
@@ -58,6 +60,14 @@ begin
 
     x.report("read casted hash list") do
       n.times { b.casted_list }
+    end
+
+    # db writing
+    if ENV['BENCHMARK_DB']
+      x.report("write record") do
+        # need to make change before it will save
+        n.times { b.string = "test#{n}"; b.save }  
+      end
     end
 
   end

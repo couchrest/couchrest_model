@@ -53,16 +53,22 @@ module CouchRest
       end
 
       def []=(key,value)
-        old_id = get_unique_id if self.respond_to?(:get_unique_id)
+        has_changes = self.changed?
+        if !has_changes && self.respond_to?(:get_unique_id)
+          check_id_change = true
+          old_id = get_unique_id
+        end
 
-        super(key, value)
+        ret = super(key, value)
 
-        if self.respond_to?(:get_unique_id)
+        if check_id_change
           # if we have set an attribute that results in the _id changing (unique_id),
           # force changed? to return true so that the record can be saved
           new_id = get_unique_id
           changed_attributes["_id"] = new_id if old_id != new_id
         end
+
+        ret
       end
 
       # Takes a hash as argument, and applies the values by using writer methods
@@ -181,8 +187,8 @@ module CouchRest
             property(:created_at, Time, :read_only => true, :protected => true, :auto_validation => false)
 
             set_callback :save, :before do |object|
-              write_attribute_dirty('updated_at', Time.now)
-              write_attribute_dirty('created_at', Time.now) if object.new?
+              write_attribute('updated_at', Time.now)
+              write_attribute('created_at', Time.now) if object.new?
             end
           EOS
         end

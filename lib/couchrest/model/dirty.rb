@@ -18,9 +18,7 @@ module CouchRest
       def couchrest_attribute_will_change!(attr)
         return if attr.nil?
         self.send("#{attr}_will_change!")
-        if pkey = casted_by_attribute
-          @casted_by.couchrest_attribute_will_change!(pkey)
-        end
+        couchrest_parent_will_change!
       end
       
       def couchrest_parent_will_change!
@@ -31,9 +29,9 @@ module CouchRest
       
       # return the attribute name this object is referenced by in the parent
       def casted_by_attribute
-        return nil unless @casted_by
+        return @casted_by_attribute if @casted_by_attribute_set
         attr = @casted_by.attributes
-        attr.keys.detect { |k| attr[k] == self }
+        @casted_by_attribute = attr.keys.detect { |k| attr[k] == self }
       end
 
     end
