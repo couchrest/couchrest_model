@@ -5,6 +5,7 @@
 	* Narrow the rescued exception to avoid catching class evaluation errors that has nothing to to with the association (thanks Simone Carletti)
 	* Fix validate uniqueness test that was never executed (thanks Simone Carletti)
 	* Adds a #reload method to reload document attributes (thanks Simone Carletti)
+	* Numeric types can be casted from strings with leading or trailing whitespace (thanks chrisdurtschi)
 
 == CouchRest Model 1.0.0
 
