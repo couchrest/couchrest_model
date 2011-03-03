@@ -33,6 +33,10 @@ def set_dirty(value)
   orig
 end
 
+def supports_dirty?
+  CouchRest::Model::Base.respond_to?(:use_dirty)
+end
+
 def run_benchmark
   n = 50000     # property operation count
   db_n = 1000   # database operation count
@@ -97,11 +101,13 @@ def run_benchmark
 end
 
 begin
-  puts "with use_dirty true"
-  set_dirty(true)
-  run_benchmark
+  if supports_dirty?
+    puts "with use_dirty true"
+    set_dirty(true)
+    run_benchmark
     
-  puts "\nwith use_dirty false"
-  set_dirty(false)
+    puts "\nwith use_dirty false"
+    set_dirty(false)
+  end
   run_benchmark
 end

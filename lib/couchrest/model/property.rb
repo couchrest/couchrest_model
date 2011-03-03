@@ -4,7 +4,7 @@ module CouchRest::Model
 
     include ::CouchRest::Model::Typecast
 
-    attr_reader :name, :type, :type_class, :read_only, :alias, :default, :casted, :init_method, :options
+    attr_reader :name, :type, :type_class, :read_only, :alias, :default, :casted, :init_method, :use_dirty, :options
 
     # Attribute to define.
     # All Properties are assumed casted unless the type is nil.
@@ -38,7 +38,7 @@ module CouchRest::Model
         end
         arr = value.collect { |data| cast_value(parent, data) }
         # allow casted_by calls to be passed up chain by wrapping in CastedArray
-        value = type_class != String ? CastedArray.new(arr, self) : arr
+        value = (use_dirty || type_class != String) ? CastedArray.new(arr, self) : arr
         value.casted_by = parent if value.respond_to?(:casted_by)
       elsif (type == Object || type == Hash) && (value.class == Hash)
         # allow casted_by calls to be passed up chain by wrapping in CastedHash
@@ -94,6 +94,7 @@ module CouchRest::Model
         @alias              = options.delete(:alias)      if options[:alias]
         @default            = options.delete(:default)    unless options[:default].nil?
         @init_method        = options[:init_method] ? options.delete(:init_method) : 'new'
+        @use_dirty          = options.delete(:use_dirty)
         @options            = options
       end
 

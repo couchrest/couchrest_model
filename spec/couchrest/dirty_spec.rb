@@ -17,8 +17,8 @@ class DummyModel < CouchRest::Model::Base
   use_database TEST_SERVER.default_database
   raise "Default DB not set" if TEST_SERVER.default_database.nil?
   property :casted_attribute, WithCastedModelMixin
-  property :details, Object, :default => {}
-  property :keywords,         [String]
+  property :details,     Object,   :default => { 'color' => 'blue' }
+  property :keywords,    [String], :default => ['default-keyword']
   property :sub_models do |child|
     child.property :title
   end
@@ -128,6 +128,11 @@ describe "With use_dirty(on)" do
       @card.changed?.should be_false
     end
 
+    it "should report no changes on a hash property with a default value" do
+      @obj = DummyModel.new
+      @obj.details.changed?.should be_false
+    end
+
 =begin
     # match activerecord behaviour
     # not currently working - not too important
@@ -218,12 +223,190 @@ describe "With use_dirty(on)" do
       @cat.changed?.should be_true
     end
 
-    it "should report changes to hashes" do
-      @obj = DummyModel.create!
-      @obj = DummyModel.get(@obj.id)
-      deets = @obj.details
-      deets['color'] = 'orange'
-      @obj.changed?.should be_true
+    # casted arrays
+
+    def test_casted_array(change_expected)
+      obj = DummyModel.create!
+      obj = DummyModel.get(obj.id)
+      array = obj.keywords
+      yield array, obj
+      if change_expected
+        obj.changed?.should be_true
+      else
+        obj.changed?.should be_false
+      end
+    end
+
+    def should_change_array
+      test_casted_array(true) { |a,b| yield a,b }
+    end
+
+    def should_not_change_array
+      test_casted_array(false) { |a,b| yield a,b }
+    end
+
+    it "should report changes if an array index is modified" do
+      should_change_array do |array|
+        array[0] = "keyword"
+      end
+    end
+
+    it "should report no changes if an array index is unmodified" do
+      should_not_change_array do |array|
+        array[0] = array[0]
+      end
+    end
+
+    it "should report changes if an array is appended with <<" do
+      should_change_array do |array|
+        array << 'keyword'
+      end
+    end
+
+    it "should report changes if an array is popped" do
+      should_change_array do |array|
+        array.pop
+      end
+    end
+
+    it "should report no changes if an empty array is popped" do
+      should_not_change_array do |array, obj|
+        array.clear
+        obj.save!  # clears changes
+        array.pop
+      end
+    end
+
+    it "should report changes if an array is pushed" do
+      should_change_array do |array|
+        array.push("keyword")
+      end
+    end
+
+    it "should report changes if an array is shifted" do
+      should_change_array do |array|
+        array.shift
+      end
+    end
+
+    it "should report no changes if an empty array is shifted" do
+      should_not_change_array do |array, obj|
+        array.clear
+        obj.save!  # clears changes
+        array.shift
+      end
+    end
+
+    it "should report changes if an array is unshifted" do
+      should_change_array do |array|
+        array.unshift("keyword")
+      end
+    end
+
+    it "should report changes if an array is cleared" do
+      should_change_array do |array|
+        array.clear
+      end
+    end
+
+    # Object, {}  (casted hash)
+
+    def test_casted_hash(change_expected)
+      obj = DummyModel.create!
+      obj = DummyModel.get(obj.id)
+      hash = obj.details
+      yield hash, obj
+      if change_expected
+        obj.changed?.should be_true
+      else
+        obj.changed?.should be_false
+      end
+    end
+
+    def should_change_hash
+      test_casted_hash(true) { |a,b| yield a,b }
+    end
+
+    def should_not_change_hash
+      test_casted_hash(false) { |a,b| yield a,b }
+    end
+
+    it "should report changes if a hash is modified" do
+      should_change_hash do |hash|
+        hash['color'] = 'orange'
+      end
+    end
+
+    it "should report no changes if a hash is unmodified" do
+      should_not_change_hash do |hash|
+        hash['color'] = hash['color']
+      end
+    end
+
+    it "should report changes when deleting from a hash" do
+      should_change_hash do |hash|
+        hash.delete('color')
+      end
+    end
+
+    it "should report no changes when deleting a non existent key from a hash" do
+      should_not_change_hash do |hash|
+        hash.delete('non-existent-key')
+      end
+    end
+
+    it "should report changes when clearing a hash" do
+      should_change_hash do |hash|
+        hash.clear
+      end
+    end
+
+    it "should report changes when merging changes to a hash" do
+      should_change_hash do |hash|
+        hash.merge!('foo' => 'bar')
+      end
+    end
+
+    it "should report no changes when merging no changes to a hash" do
+      should_not_change_hash do |hash|
+        hash.merge!('color' => hash['color'])
+      end
+    end
+
+    it "should report changes when replacing hash content" do
+      should_change_hash do |hash|
+        hash.replace('foo' => 'bar')
+      end
+    end
+
+    it "should report no changes when replacing hash content with same content" do
+      should_not_change_hash do |hash|
+        hash.replace(hash)
+      end
+    end
+
+    it "should report changes when removing records with delete_if" do
+      should_change_hash do |hash|
+        hash.delete_if { true }
+      end
+    end
+
+    it "should report no changes when removing no records with delete_if" do
+      should_not_change_hash do |hash|
+        hash.delete_if { false }
+      end
+    end
+
+    it "should report changes when removing records with keep_if" do
+      should_change_hash do |hash|
+        hash.keep_if { false }
+      end
+    end
+
+    it "should report no changes when removing no records with keep_if" do
+      should_not_change_hash do |hash|
+        hash.keep_if { true }
+      end
     end
 
   end

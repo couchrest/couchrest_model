@@ -15,34 +15,39 @@ module CouchRest::Model
     end
     
     def << obj
-      couchrest_parent_will_change!
+      couchrest_parent_will_change! if use_dirty?
       super(instantiate_and_cast(obj))
     end
     
     def push(obj)
-      couchrest_parent_will_change!
+      couchrest_parent_will_change! if use_dirty?
       super(instantiate_and_cast(obj))
     end
 
     def pop
-      couchrest_parent_will_change!
+      couchrest_parent_will_change! if use_dirty? && self.length > 0
       super
     end
 
     def shift
-      couchrest_parent_will_change!
+      couchrest_parent_will_change! if use_dirty? && self.length > 0
       super
     end
 
     def unshift(obj)
-      couchrest_parent_will_change!
-      super(obj)
+      couchrest_parent_will_change! if use_dirty?
+      super(instantiate_and_cast(obj))
     end
     
     def []= index, obj
       value = instantiate_and_cast(obj)
-      couchrest_parent_will_change! if value != self[index]
+      couchrest_parent_will_change! if use_dirty? && value != self[index]
       super(index, value)
+    end
+
+    def clear
+      couchrest_parent_will_change! if use_dirty? && self.length > 0
+      super
     end
 
     protected

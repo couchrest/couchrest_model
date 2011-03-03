@@ -13,16 +13,16 @@ module CouchRest
       include CouchRest::Model::CastedBy  # needed for base_doc
       include ActiveModel::Dirty
 
-      def use_dirty?
-        bdoc = base_doc
-        bdoc && !bdoc.disable_dirty && bdoc.use_dirty
-      end
-
       included do
         # internal dirty setting - overrides global setting.
         # this is used to temporarily disable dirty tracking when setting 
         # attributes directly, for performance reasons.
         self.send(:attr_accessor, :disable_dirty)
+      end
+
+      def use_dirty?
+        bdoc = base_doc
+        bdoc && !bdoc.disable_dirty && bdoc.use_dirty
       end
 
       def couchrest_attribute_will_change!(attr)
