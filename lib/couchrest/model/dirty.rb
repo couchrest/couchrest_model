@@ -10,14 +10,24 @@ module CouchRest
     # This applies to both Model::Base and Model::CastedModel
     module Dirty
       extend ActiveSupport::Concern
+      include CouchRest::Model::CastedBy  # needed for base_doc
+      include ActiveModel::Dirty
+
+      def use_dirty?
+        bdoc = base_doc
+        bdoc && !bdoc.disable_dirty && bdoc.use_dirty
+      end
 
       included do
-        include ActiveModel::Dirty
+        # internal dirty setting - overrides global setting.
+        # this is used to temporarily disable dirty tracking when setting 
+        # attributes directly, for performance reasons.
+        self.send(:attr_accessor, :disable_dirty)
       end
 
       def couchrest_attribute_will_change!(attr)
-        return if attr.nil?
-        self.send("#{attr}_will_change!")
+        return if attr.nil? || !use_dirty?
+        attribute_will_change!(attr)
         couchrest_parent_will_change!
       end
       
@@ -29,7 +39,7 @@ module CouchRest
       
       # return the attribute name this object is referenced by in the parent
       def casted_by_attribute
-        return @casted_by_attribute if @casted_by_attribute_set
+        return @casted_by_attribute if @casted_by_attribute
         attr = @casted_by.attributes
         @casted_by_attribute = attr.keys.detect { |k| attr[k] == self }
       end

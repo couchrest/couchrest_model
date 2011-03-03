@@ -10,10 +10,12 @@ module CouchRest
       included do
         add_config :model_type_key
         add_config :mass_assign_any_attribute
-        
+        add_config :use_dirty
+
         configure do |config|
           config.model_type_key = 'couchrest-type' # 'model'?
           config.mass_assign_any_attribute = false
+          config.use_dirty = true
         end
       end
 

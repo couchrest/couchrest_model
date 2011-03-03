@@ -3,7 +3,6 @@ module CouchRest
   module Model
     module Properties
       extend ActiveSupport::Concern
-      include ActiveModel::Dirty
 
       included do
         extlib_inheritable_accessor(:properties) unless self.respond_to?(:properties)
@@ -48,11 +47,14 @@ module CouchRest
       def write_attribute_dirty(property, value)
         prop = find_property!(property)
         value = prop.is_a?(String) ? value : prop.cast(self, value)
-        self.send("#{prop}_will_change!") unless self[prop.to_s] == value
-        write_attribute(property, value)
+        propname = prop.to_s
+        attribute_will_change!(propname) if use_dirty? && self[propname] != value
+        self[propname] = value
       end
 
       def []=(key,value)
+        return super(key,value) unless use_dirty?
+
         has_changes = self.changed?
         if !has_changes && self.respond_to?(:get_unique_id)
           check_id_change = true
@@ -82,14 +84,8 @@ module CouchRest
       end
       alias :attributes= :update_attributes_without_saving
 
-      # needed for Dirty
-      def attributes
-        ret = {}
-        self.class.properties.each do |property|
-          ret[property.name] = read_attribute(property)
-        end
-        ret
-      end
+      # 'attributes' needed for Dirty
+      alias :attributes :properties_with_values
 
       def find_property(property)
         property.is_a?(Property) ? property : self.class.properties.detect {|p| p.to_s == property.to_s}
@@ -123,18 +119,10 @@ module CouchRest
       # Set all the attributes and return a hash with the attributes
       # that have not been accepted.
       def directly_set_attributes(hash, options = {})
-        hash.reject do |attribute_name, attribute_value|
+        self.disable_dirty = !options[:dirty]
+        ret = hash.reject do |attribute_name, attribute_value|
           if self.respond_to?("#{attribute_name}=")
-            if find_property(attribute_name)
-              if options[:dirty]
-                self.write_attribute_dirty(attribute_name, attribute_value)
-              else
-                # set attribute without updating dirty status
-                self.write_attribute(attribute_name, attribute_value)
-              end
-            else
-              self.send("#{attribute_name}=", attribute_value)
-            end
+            self.send("#{attribute_name}=", attribute_value)
             true
           elsif mass_assign_any_attribute # config option
             self[attribute_name] = attribute_value
@@ -143,6 +131,8 @@ module CouchRest
             false
           end
         end
+        self.disable_dirty = false
+        ret
       end
 
       def directly_set_read_only_attributes(hash)

@@ -20,13 +20,27 @@ class BenchmarkModel < CouchRest::Model::Base
   property :casted_list, [BenchmarkCasted]
 end
 
-begin
-  n = 50000
+# set dirty configuration, return previous configuration setting
+def set_dirty(value)
+  orig = nil
+  CouchRest::Model::Base.configure do |config|
+    orig = config.use_dirty
+    config.use_dirty = value
+  end
+  BenchmarkModel.instance_eval do
+    self.use_dirty = value
+  end
+  orig
+end
+
+def run_benchmark
+  n = 50000     # property operation count
+  db_n = 1000   # database operation count
   b = BenchmarkModel.new
 
-  Benchmark.bm(25) do |x|
+  Benchmark.bm(30) do |x|
 
-    # assigning
+    # property assigning
 
     x.report("assign string:") do
       n.times { b.string = "test" }
@@ -44,7 +58,7 @@ begin
       n.times { b.casted_list = [{ 'name' => 'test' }] }
     end
 
-    # reading
+    # property reading
 
     x.report("read string") do
       n.times { b.string }
@@ -62,13 +76,32 @@ begin
       n.times { b.casted_list }
     end
 
-    # db writing
     if ENV['BENCHMARK_DB']
-      x.report("write record") do
-        # need to make change before it will save
-        n.times { b.string = "test#{n}"; b.save }  
+      # db writing
+      x.report("write changed record to db") do
+        db_n.times { |i| b.string = "test#{i}"; b.save }  
       end
+
+      x.report("write unchanged record to db") do
+        db_n.times { b.save }  
+      end
+
+      # db reading
+      x.report("read record from db") do
+        db_n.times { BenchmarkModel.find(b.id) }
+      end
+
     end
 
   end
+end
+
+begin
+  puts "with use_dirty true"
+  set_dirty(true)
+  run_benchmark
+    
+  puts "\nwith use_dirty false"
+  set_dirty(false)
+  run_benchmark
 end

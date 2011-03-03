@@ -17,6 +17,7 @@ module CouchRest
       include CouchRest::Model::Associations
       include CouchRest::Model::Validations
       include CouchRest::Model::Dirty
+      include CouchRest::Model::CastedBy
 
       def self.subclasses
         @subclasses ||= []
@@ -25,6 +26,7 @@ module CouchRest
       def self.inherited(subklass)
         super
         subklass.send(:include, CouchRest::Model::Properties)
+
         subklass.class_eval <<-EOS, __FILE__, __LINE__ + 1
           def self.inherited(subklass)
             super
@@ -72,16 +74,9 @@ module CouchRest
       end
       
       ### instance methods
-      
-      # Gets a reference to the actual document in the DB
-      # Calls up to the next document if there is one,
-      # Otherwise we're at the top and we return self
-      def base_doc
-        return self if base_doc?
-        @casted_by.base_doc
-      end
-      
+
       # Checks if we're the top document
+      # (overrides base_doc? in casted_by.rb)
       def base_doc?
         !@casted_by
       end

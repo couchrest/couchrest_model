@@ -21,7 +21,7 @@ module CouchRest::Model
     end
     
     def []= key, value
-      couchrest_attribute_will_change!(key) unless self[key] == value
+      couchrest_attribute_will_change!(key) if use_dirty && self[key] != value
       super(key.to_s, value)
     end
     

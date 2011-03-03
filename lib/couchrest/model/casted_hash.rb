@@ -7,6 +7,7 @@ module CouchRest::Model
     attr_accessor :casted_by
 
     def []= index, obj
+      return super(index, obj) unless use_dirty?
       couchrest_parent_will_change! if obj != self[index]
       super(index, obj)
     end
