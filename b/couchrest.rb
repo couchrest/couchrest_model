@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require 'rubygems'
 require 'benchmark'
 
 $:.unshift(File.dirname(__FILE__) + '/../lib')
@@ -49,6 +50,8 @@ def run_benchmark
     x.report("assign string:") do
       n.times { b.string = "test" }
     end
+
+    next if ENV["BENCHMARK_STRING"]
 
     x.report("assign integer:") do
       n.times { b.number = 1 }
@@ -102,12 +105,14 @@ end
 
 begin
   if supports_dirty?
-    puts "with use_dirty true"
-    set_dirty(true)
-    run_benchmark
-    
-    puts "\nwith use_dirty false"
+    if !ENV['BENCHMARK_DIRTY_OFF']
+      set_dirty(true)
+      puts "with use_dirty true"
+      run_benchmark
+    end
     set_dirty(false)
   end
+  
+  puts "\nwith use_dirty false"
   run_benchmark
 end

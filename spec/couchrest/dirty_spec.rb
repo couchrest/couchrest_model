@@ -246,25 +246,25 @@ describe "With use_dirty(on)" do
     end
 
     it "should report changes if an array index is modified" do
-      should_change_array do |array|
+      should_change_array do |array, obj|
         array[0] = "keyword"
       end
     end
 
     it "should report no changes if an array index is unmodified" do
-      should_not_change_array do |array|
+      should_not_change_array do |array, obj|
         array[0] = array[0]
       end
     end
 
     it "should report changes if an array is appended with <<" do
-      should_change_array do |array|
+      should_change_array do |array, obj|
         array << 'keyword'
       end
     end
 
     it "should report changes if an array is popped" do
-      should_change_array do |array|
+      should_change_array do |array, obj|
         array.pop
       end
     end
@@ -278,13 +278,13 @@ describe "With use_dirty(on)" do
     end
 
     it "should report changes if an array is pushed" do
-      should_change_array do |array|
+      should_change_array do |array, obj|
         array.push("keyword")
       end
     end
 
     it "should report changes if an array is shifted" do
-      should_change_array do |array|
+      should_change_array do |array, obj|
         array.shift
       end
     end
@@ -298,13 +298,13 @@ describe "With use_dirty(on)" do
     end
 
     it "should report changes if an array is unshifted" do
-      should_change_array do |array|
+      should_change_array do |array, obj|
         array.unshift("keyword")
       end
     end
 
     it "should report changes if an array is cleared" do
-      should_change_array do |array|
+      should_change_array do |array, obj|
         array.clear
       end
     end
@@ -332,81 +332,85 @@ describe "With use_dirty(on)" do
     end
 
     it "should report changes if a hash is modified" do
-      should_change_hash do |hash|
+      should_change_hash do |hash, obj|
         hash['color'] = 'orange'
       end
     end
 
     it "should report no changes if a hash is unmodified" do
-      should_not_change_hash do |hash|
+      should_not_change_hash do |hash, obj|
         hash['color'] = hash['color']
       end
     end
 
     it "should report changes when deleting from a hash" do
-      should_change_hash do |hash|
+      should_change_hash do |hash, obj|
         hash.delete('color')
       end
     end
 
     it "should report no changes when deleting a non existent key from a hash" do
-      should_not_change_hash do |hash|
+      should_not_change_hash do |hash, obj|
         hash.delete('non-existent-key')
       end
     end
 
     it "should report changes when clearing a hash" do
-      should_change_hash do |hash|
+      should_change_hash do |hash, obj|
         hash.clear
       end
     end
 
     it "should report changes when merging changes to a hash" do
-      should_change_hash do |hash|
+      should_change_hash do |hash, obj|
         hash.merge!('foo' => 'bar')
       end
     end
 
     it "should report no changes when merging no changes to a hash" do
-      should_not_change_hash do |hash|
+      should_not_change_hash do |hash, obj|
         hash.merge!('color' => hash['color'])
       end
     end
 
     it "should report changes when replacing hash content" do
-      should_change_hash do |hash|
+      should_change_hash do |hash, obj|
         hash.replace('foo' => 'bar')
       end
     end
 
     it "should report no changes when replacing hash content with same content" do
-      should_not_change_hash do |hash|
+      should_not_change_hash do |hash, obj|
         hash.replace(hash)
       end
     end
 
     it "should report changes when removing records with delete_if" do
-      should_change_hash do |hash|
+      should_change_hash do |hash, obj|
         hash.delete_if { true }
       end
     end
 
     it "should report no changes when removing no records with delete_if" do
-      should_not_change_hash do |hash|
+      should_not_change_hash do |hash, obj|
         hash.delete_if { false }
       end
     end
 
-    it "should report changes when removing records with keep_if" do
-      should_change_hash do |hash|
-        hash.keep_if { false }
-      end
-    end
+    if {}.respond_to?(:keep_if)
 
-    it "should report no changes when removing no records with keep_if" do
-      should_not_change_hash do |hash|
-        hash.keep_if { true }
+      it "should report changes when removing records with keep_if" do
+        should_change_hash do |hash, obj|
+          hash.keep_if { false }
+        end
       end
+
+      it "should report no changes when removing no records with keep_if" do
+        should_not_change_hash do |hash, obj|
+          hash.keep_if { true }
+        end
+      end
+
     end
 
   end

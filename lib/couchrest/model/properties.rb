@@ -6,7 +6,9 @@ module CouchRest
 
       included do
         extlib_inheritable_accessor(:properties) unless self.respond_to?(:properties)
+        extlib_inheritable_accessor(:prop_by_name) unless self.respond_to?(:prop_by_name)
         self.properties ||= []
+        self.prop_by_name ||= {}
         raise "You can only mixin Properties in a class responding to [] and []=, if you tried to mixin CastedModel, make sure your class inherits from Hash or responds to the proper methods" unless (method_defined?(:[]) && method_defined?(:[]=))
       end
 
@@ -88,7 +90,7 @@ module CouchRest
       alias :attributes :properties_with_values
 
       def find_property(property)
-        property.is_a?(Property) ? property : self.class.properties.detect {|p| p.to_s == property.to_s}
+        property.is_a?(Property) ? property : self.class.prop_by_name[property.to_s]
       end
 
       # The following methods should be accessable by the Model::Base Class, but not by anything else!
@@ -208,6 +210,7 @@ module CouchRest
               validates_casted_model property.name
             end
             properties << property
+            prop_by_name[property.to_s] = property
             property
           end
 

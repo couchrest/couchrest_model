@@ -62,6 +62,7 @@ module CouchRest::Model
       super
     end
 
+    # ruby 1.9 
     def keep_if
       if use_dirty? && block_given?
         self.keys.each do |key|
