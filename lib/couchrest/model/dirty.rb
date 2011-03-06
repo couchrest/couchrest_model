@@ -22,7 +22,7 @@ module CouchRest
 
       def use_dirty?
         bdoc = base_doc
-        bdoc && bdoc.use_dirty && !bdoc.disable_dirty
+        bdoc && !bdoc.disable_dirty
       end
 
       def couchrest_attribute_will_change!(attr)

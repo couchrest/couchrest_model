@@ -111,8 +111,8 @@ begin
       run_benchmark
     end
     set_dirty(false)
+    puts "\nwith use_dirty false"
   end
   
-  puts "\nwith use_dirty false"
   run_benchmark
 end

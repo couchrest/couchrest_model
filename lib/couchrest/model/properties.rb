@@ -203,7 +203,7 @@ module CouchRest
               end
               type = [type] # inject as an array
             end
-            property = Property.new(name, type, options.merge(:use_dirty => use_dirty))
+            property = Property.new(name, type, options)
             create_property_getter(property)
             create_property_setter(property) unless property.read_only == true
             if property.type_class.respond_to?(:validates_casted_model)

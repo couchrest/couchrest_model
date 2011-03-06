@@ -843,10 +843,10 @@ describe "Property Class" do
       property.cast(parent, ["2010-06-01", "2010-06-02"]).class.should eql(CouchRest::Model::CastedArray)
     end
 
-    it "should not set a CastedArray on array of Strings" do
+    it "should set a CastedArray on array of Strings" do
       property = CouchRest::Model::Property.new(:test, [String])
       parent = mock("FooObject")
-      property.cast(parent, ["2010-06-01", "2010-06-02"]).class.should_not eql(CouchRest::Model::CastedArray)
+      property.cast(parent, ["2010-06-01", "2010-06-02"]).class.should eql(CouchRest::Model::CastedArray)
     end
 
     it "should raise and error if value is array when type is not" do
