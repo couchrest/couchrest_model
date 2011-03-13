@@ -36,6 +36,10 @@ describe "Design" do
         DesignModel.design() { }
       end
 
+      it "should work even if a block is not provided" do
+        lambda { DesignModel.design }.should_not raise_error
+      end
+
     end
 
     describe "default_per_page" do

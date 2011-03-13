@@ -41,6 +41,18 @@ describe "Proxyable" do
           @obj.cats
         end
 
+        it "should call class on root namespace" do
+          class ::Document < CouchRest::Model::Base
+            def self.foo; puts 'bar'; end
+          end
+          DummyProxyable.proxy_for(:documents)
+          @obj = DummyProxyable.new
+          CouchRest::Model::Proxyable::ModelProxy.should_receive(:new).with(::Document, @obj, 'dummy_proxyable', 'db').and_return(true)
+          @obj.should_receive('proxy_database').and_return('db')
+          @obj.should_receive(:respond_to?).with('proxy_database').and_return(true)
+          @obj.documents
+        end
+
         it "should raise an error if the database method is missing" do
           DummyProxyable.proxy_for(:cats)
           @obj = DummyProxyable.new
@@ -53,6 +65,7 @@ describe "Proxyable" do
           @obj = DummyProxyable.new
           lambda { @obj.proxy_kittens }.should raise_error(StandardError, "Missing #foobardom method for proxy")
         end
+
 
       end
 

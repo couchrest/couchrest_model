@@ -27,7 +27,7 @@ module CouchRest
           mapper = DesignMapper.new(self)
           mapper.create_view_method(:all)
 
-          mapper.instance_eval(&block)
+          mapper.instance_eval(&block) if block_given?
 
           req_design_doc_refresh
         end

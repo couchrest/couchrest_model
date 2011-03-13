@@ -66,6 +66,11 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  activemodel (~> 3.0.0)
+  couchrest (~> 1.0.1)
   couchrest_model!
+  mime-types (~> 1.15)
   rack-test (>= 0.5.7)
+  railties (~> 3.0.0)
   rspec (>= 2.0.0)
+  tzinfo (~> 0.3.22)
