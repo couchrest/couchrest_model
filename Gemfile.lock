@@ -3,7 +3,7 @@ PATH
   specs:
     couchrest_model (1.1.0.beta)
       activemodel (~> 3.0.0)
-      couchrest (~> 1.0.1)
+      couchrest (~> 1.0.2)
       mime-types (~> 1.15)
       railties (~> 3.0.0)
       tzinfo (~> 0.3.22)
@@ -28,10 +28,10 @@ GEM
       i18n (~> 0.4)
     activesupport (3.0.4)
     builder (2.1.2)
-    couchrest (1.0.1)
-      json (>= 1.4.6)
-      mime-types (>= 1.15)
-      rest-client (>= 1.5.1)
+    couchrest (1.0.2)
+      json (~> 1.5.1)
+      mime-types (~> 1.15)
+      rest-client (~> 1.6.1)
     diff-lcs (1.1.2)
     erubis (2.6.6)
       abstract (>= 1.0.0)
@@ -67,7 +67,7 @@ PLATFORMS
 
 DEPENDENCIES
   activemodel (~> 3.0.0)
-  couchrest (~> 1.0.1)
+  couchrest (~> 1.0.2)
   couchrest_model!
   mime-types (~> 1.15)
   rack-test (>= 0.5.7)

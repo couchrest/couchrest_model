@@ -18,7 +18,7 @@ class Article < CouchRest::Model::Base
     :reduce => 
       "function(keys, values, rereduce) {
         return sum(values);
-      }"  
+      }"
 
   property :date, Date
   property :slug, :read_only => true

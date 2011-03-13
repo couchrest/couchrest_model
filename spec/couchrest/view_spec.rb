@@ -27,6 +27,20 @@ describe "Model views" do
       end
 
     end
+
+    describe "#has_view?" do
+      it "should check the design doc" do
+        Article.design_doc.should_receive(:has_view?).with(:test).and_return(true)
+        Article.has_view?(:test).should be_true
+      end
+    end
+
+    describe "#can_reduce_view?" do
+      it "should check if view has a reduce method" do
+        Article.design_doc.should_receive(:can_reduce_view?).with(:test).and_return(true)
+        Article.can_reduce_view?(:test).should be_true
+      end
+    end
   end
 
   describe "a model with simple views and a default param" do
@@ -182,6 +196,11 @@ describe "Model views" do
     it "should perform a search directly with range" do
       course = Course.first_from_view('by_title', :startkey => 'bbb', :endkey => 'eee')
       course.title.should eql('bbb')
+    end
+
+    it "should perform a search for first when reduce method present" do
+      course = Course.first_from_view('by_active')
+      course.should_not be_nil
     end
 
   end
@@ -372,97 +391,6 @@ describe "Model views" do
       Article.by_updated_at
       @original_doc_rev.should_not == Article.model_design_doc['_rev']
       Article.design_doc["views"].keys.should include("by_updated_at")
-    end
-  end
-  
-  describe "with a collection" do
-    before(:all) do
-      reset_test_db!
-      titles = ["very uniq one", "really interesting", "some fun",
-        "really awesome", "crazy bob", "this rocks", "super rad"]
-      titles.each_with_index do |title,i|
-        a = Article.new(:title => title, :date => Date.today)
-        a.save
-      end
-      
-      titles = ["yesterday very uniq one", "yesterday really interesting", "yesterday some fun",
-        "yesterday really awesome", "yesterday crazy bob", "yesterday this rocks"]
-      titles.each_with_index do |title,i|
-        a = Article.new(:title => title, :date => Date.today - 1)
-        a.save
-      end
-    end 
-    require 'date'
-    it "should return a proxy that looks like an array of 7 Article objects" do
-      articles = Article.by_date :key => Date.today
-      articles.class.should == Array
-      articles.size.should == 7
-    end
-    it "should get a subset of articles using paginate" do
-      articles = Article.by_date :key => Date.today
-      articles.paginate(:page => 1, :per_page => 3).size.should == 3
-      articles.paginate(:page => 2, :per_page => 3).size.should == 3
-      articles.paginate(:page => 3, :per_page => 3).size.should == 1
-    end
-    it "should get all articles, a few at a time, using paginated each" do
-      articles = Article.by_date :key => Date.today
-      articles.paginated_each(:per_page => 3) do |a|
-        a.should_not be_nil
-      end
-    end 
-    it "should provide a class method to access the collection directly" do
-      articles = Article.collection_proxy_for('Article', 'by_date', :descending => true,
-        :key => Date.today, :include_docs => true)
-      articles.class.should == Array
-      articles.size.should == 7
-    end
-    it "should provide a class method for paginate" do
-      articles = Article.paginate(:design_doc => 'Article', :view_name => 'by_date',
-        :per_page => 3, :descending => true, :key => Date.today, :include_docs => true)
-      articles.size.should == 3
-      
-      articles = Article.paginate(:design_doc => 'Article', :view_name => 'by_date',
-        :per_page => 3, :page => 2, :descending => true, :key => Date.today, :include_docs => true)
-      articles.size.should == 3
-      
-      articles = Article.paginate(:design_doc => 'Article', :view_name => 'by_date',
-        :per_page => 3, :page => 3, :descending => true, :key => Date.today, :include_docs => true)
-      articles.size.should == 1
-    end
-    it "should provide a class method for paginated_each" do
-      options = { :design_doc => 'Article', :view_name => 'by_date',
-        :per_page => 3, :page => 1, :descending => true, :key => Date.today,
-        :include_docs => true }
-      Article.paginated_each(options) do |a|
-        a.should_not be_nil
-      end
-    end
-    it "should provide a class method to get a collection for a view" do
-      articles = Article.find_all_article_details(:key => Date.today)
-      articles.class.should == Array
-      articles.size.should == 7
-    end
-    it "should raise an exception if design_doc is not provided" do
-      lambda{Article.collection_proxy_for(nil, 'by_date')}.should raise_error
-      lambda{Article.paginate(:view_name => 'by_date')}.should raise_error
-    end
-    it "should raise an exception if view_name is not provided" do
-      lambda{Article.collection_proxy_for('Article', nil)}.should raise_error
-      lambda{Article.paginate(:design_doc => 'Article')}.should raise_error
-    end
-    it "should be able to span multiple keys" do
-      articles = Article.by_date :startkey => Date.today, :endkey => Date.today - 1
-      articles.paginate(:page => 1, :per_page => 3).size.should == 3
-      articles.paginate(:page => 2, :per_page => 3).size.should == 3
-      articles.paginate(:page => 3, :per_page => 3).size.should == 3
-      articles.paginate(:page => 4, :per_page => 3).size.should == 3
-      articles.paginate(:page => 5, :per_page => 3).size.should == 1
-    end
-    it "should pass database parameter to pager" do
-      proxy = mock(:proxy)
-      proxy.stub!(:paginate)
-      ::CouchRest::Model::Collection::CollectionProxy.should_receive(:new).with('database', anything(), anything(), anything(), anything()).and_return(proxy)
-      Article.paginate(:design_doc => 'Article', :view_name => 'by_date', :database => 'database')
     end
   end
 

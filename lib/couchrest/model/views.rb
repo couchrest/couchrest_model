@@ -85,9 +85,14 @@ module CouchRest
         end
 
         # returns stored defaults if there is a view named this in the design doc
-        def has_view?(view)
-          view = view.to_s
-          design_doc && design_doc['views'] && design_doc['views'][view]
+        def has_view?(name)
+          design_doc && design_doc.has_view?(name)
+        end
+
+        # Check if the view can be reduced by checking to see if it has a
+        # reduce function.
+        def can_reduce_view?(name)
+          design_doc && design_doc.can_reduce_view?(name)
         end
 
         # Dispatches to any named view.
@@ -127,12 +132,9 @@ module CouchRest
           if raw || (opts.has_key?(:include_docs) && opts[:include_docs] == false)
             fetch_view(db, name, opts, &block)
           else
-            if block.nil?
-              collection_proxy_for(design_doc, name, opts.merge({:database => db, :include_docs => true}))
-            else
-              view = fetch_view db, name, opts.merge({:include_docs => true}), &block
-              view['rows'].collect{|r|build_from_database(r['doc'])} if view['rows']
-            end
+            opts = opts.merge(:include_docs => true)
+            view = fetch_view db, name, opts, &block
+            view['rows'].collect{|r| build_from_database(r['doc'])} if view['rows']
           end
         end
 
