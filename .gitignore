@@ -2,7 +2,7 @@
 html/*
 pkg
 *.swp
-.rvmrc
+.rvmrc*
 .bundle
 couchdb.std*
 *.*~
