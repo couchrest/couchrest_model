@@ -1,26 +1,3 @@
-class Time                       
-  # returns a local time value much faster than Time.parse
-  def self.mktime_with_offset(string)
-    string =~ /(\d{4})[\-|\/](\d{2})[\-|\/](\d{2})[T|\s](\d{2}):(\d{2}):(\d{2})(([\+|\s|\-])*(\d{2}):?(\d{2}))?/
-    # $1 = year
-    # $2 = month
-    # $3 = day
-    # $4 = hours
-    # $5 = minutes
-    # $6 = seconds
-    # $8 = time zone direction
-    # $9 = tz difference
-    # utc time with wrong TZ info: 
-    time = mktime($1, RFC2822_MONTH_NAME[$2.to_i - 1], $3, $4, $5, $6)
-    if ($7)
-      tz_difference = ("#{$8 == '-' ? '+' : '-'}#{$9}".to_i * 3600)
-      time + tz_difference + zone_offset(time.zone) 
-    else
-      time
-    end
-  end 
-end
-
 module CouchRest
   module Model
     module Typecast
@@ -29,7 +6,11 @@ module CouchRest
         return nil if value.nil?
         klass = property.type_class
         if value.instance_of?(klass) || klass == Object
-          value
+          if klass == Time && !value.utc?
+            value.utc # Ensure Time is always in UTC
+          else
+            value
+          end
         elsif [String, TrueClass, Integer, Float, BigDecimal, DateTime, Time, Date, Class].include?(klass)
           send('typecast_to_'+klass.to_s.downcase, value)
         else
@@ -127,12 +108,11 @@ module CouchRest
           if value.is_a?(Hash)
             typecast_hash_to_time(value)
           else
-            Time.mktime_with_offset(value.to_s)
+            Time.parse_iso8601(value.to_s)
           end
         rescue ArgumentError
           value
         rescue TypeError
-          # After failures, resort to normal time parse
           value
         end
 
@@ -150,13 +130,13 @@ module CouchRest
         # Creates a Time instance from a Hash with keys :year, :month, :day,
         # :hour, :min, :sec
         def typecast_hash_to_time(value)
-          Time.local(*extract_time(value))
+          Time.utc(*extract_time(value))
         end
 
         # Extracts the given args from the hash. If a value does not exist, it
         # uses the value of Time.now.
         def extract_time(value)
-          now  = Time.now
+          now = Time.now
           [:year, :month, :day, :hour, :min, :sec].map do |segment|
             typecast_to_numeric(value.fetch(segment, now.send(segment)), :to_i)
           end

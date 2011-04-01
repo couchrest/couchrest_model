@@ -46,7 +46,9 @@ require "couchrest/model/designs/view"
 
 # Monkey patches applied to couchrest
 require "couchrest/model/support/couchrest"
-require "couchrest/model/support/hash"
+# Core Extensions
+require "couchrest/model/core_extensions/hash"
+require "couchrest/model/core_extensions/time_parsing"
 
 # Base libraries
 require "couchrest/model/casted_model"

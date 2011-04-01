@@ -131,8 +131,10 @@ module CouchRest
         end
 
         # Automatically set <tt>updated_at</tt> and <tt>created_at</tt> fields
-        # on the document whenever saving occurs. CouchRest uses a pretty
-        # decent time format by default. See Time#to_json
+        # on the document whenever saving occurs.
+        # 
+        # These properties are casted as Time objects, so they should always
+        # be set to UTC.
         def timestamps!
           class_eval <<-EOS, __FILE__, __LINE__
             property(:updated_at, Time, :read_only => true, :protected => true, :auto_validation => false)
