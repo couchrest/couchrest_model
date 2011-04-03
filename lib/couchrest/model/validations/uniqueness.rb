@@ -15,7 +15,8 @@ module CouchRest
 
         def validate_each(document, attribute, value)
           view_name = options[:view].nil? ? "by_#{attribute}" : options[:view]
-          model = document.model_proxy || @model
+
+          model = (respond_to?(:model_proxy) && model_proxy ? model_proxy : @model)
           # Determine the base of the search
           base = options[:proxy].nil? ? model : document.instance_eval(options[:proxy])
 
@@ -30,7 +31,7 @@ module CouchRest
           unless document.new?
             return if docs.find{|doc| doc['id'] == document.id}
           end
-          
+
           if docs.length > 0
             document.errors.add(attribute, :taken, options.merge(:value => value))
           end

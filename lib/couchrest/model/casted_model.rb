@@ -54,13 +54,6 @@ module CouchRest::Model
     alias :to_key :id
     alias :to_param :id
 
-    # Fixes belongs_to assocations. 
-    # See it "should allow to reference association by id in casted model" in 
-    # assocations_spec.rb
-    def model_proxy 
-      nil
-    end
-    
     # Sets the attributes from a hash
     def update_attributes_without_saving(hash)
       hash.each do |k, v|

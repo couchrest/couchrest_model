@@ -64,22 +64,6 @@ describe "Assocations" do
       @invoice.alternate_client.id.should eql(@client.id)
     end
 
-    it "should allow to reference association by id in casted model" do
-      class Money < Hash
-        include CouchRest::Model::CastedModel
-
-        property :value, Integer
-        belongs_to :client
-      end
-
-      money = Money.new :value => 1000
-
-      money.client_id = @client.id
-
-      money.client.should eql(@client)
-      money.valid?.should be_true
-    end
-
   end
 
   describe "of type collection_of" do
