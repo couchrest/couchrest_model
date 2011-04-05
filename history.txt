@@ -2,6 +2,7 @@
 
 * Minor enhancements:
   * Time handling improved in accordance with CouchRest 1.0.3. Always set to UTC.
+  * Refinements to associations and uniqueness validation for proxy (based on issue found by Gleb Kanterov)
 
 == 1.1.0.beta
 

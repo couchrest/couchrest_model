@@ -100,7 +100,7 @@ module CouchRest
           query = query.dup # Modifications made on copy!
           db = query.delete(:database) || database
           refresh_design_doc(db)
-          query[:raw] = true if query[:reduce]        
+          query[:raw] = true if query[:reduce]
           raw = query.delete(:raw)
           fetch_view_with_docs(db, name, query, raw, &block)
         end

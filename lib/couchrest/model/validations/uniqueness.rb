@@ -16,7 +16,7 @@ module CouchRest
         def validate_each(document, attribute, value)
           view_name = options[:view].nil? ? "by_#{attribute}" : options[:view]
 
-          model = (respond_to?(:model_proxy) && model_proxy ? model_proxy : @model)
+          model = (document.respond_to?(:model_proxy) && document.model_proxy ? document.model_proxy : @model)
           # Determine the base of the search
           base = options[:proxy].nil? ? model : document.instance_eval(options[:proxy])
 

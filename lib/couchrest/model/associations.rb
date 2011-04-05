@@ -36,15 +36,12 @@ module CouchRest
         # it can be set with the :proxy_name option.
         #
         def belongs_to(attrib, *options)
+          opts = merge_belongs_to_association_options(attrib, options.first)
 
-          opts = merge_belongs_to_assocation_options(attrib, options.first)
+          property(opts[:foreign_key], opts)
 
-          prop = property(opts[:foreign_key], opts)
-
-          create_belongs_to_getter(attrib, prop, opts)
-          create_belongs_to_setter(attrib, prop, opts)
-
-          prop
+          create_belongs_to_getter(attrib, opts)
+          create_belongs_to_setter(attrib, opts)
         end
 
         # Provide access to a collection of objects where the associated
@@ -87,41 +84,27 @@ module CouchRest
         # frequently! Use with prudence.
         #
         def collection_of(attrib, *options)
-
-          opts = merge_belongs_to_assocation_options(attrib, options.first)
+          opts = merge_belongs_to_association_options(attrib, options.first)
           opts[:foreign_key] = opts[:foreign_key].pluralize
           opts[:readonly] = true
 
-          prop = property(opts[:foreign_key], [], opts)
+          property(opts[:foreign_key], [], opts)
 
-          create_collection_of_property_setter(attrib, prop, opts)
-          create_collection_of_getter(attrib, prop, opts)
-          create_collection_of_setter(attrib, prop, opts)
-
-          prop
+          create_collection_of_property_setter(attrib, opts)
+          create_collection_of_getter(attrib, opts)
+          create_collection_of_setter(attrib, opts)
         end
 
 
         private
 
-        def merge_belongs_to_assocation_options(attrib, options = nil)
+        def merge_belongs_to_association_options(attrib, options = nil)
           opts = {
-            :foreign_key => attrib.to_s + '_id',
-            :class_name => attrib.to_s.camelcase,
+            :foreign_key => attrib.to_s.singularize + '_id',
+            :class_name => attrib.to_s.singularize.camelcase,
             :proxy_name => attrib.to_s.pluralize
           }
-
-          # merge the options
-          case options
-          when Hash
-            opts.merge!(options)
-          end
-          # Get a class name
-          begin
-            opts[:class] = opts[:class_name].constantize
-          rescue NameError
-            raise NameError, "Unable to convert class name into Constant for #{self.name}##{attrib}"
-          end
+          opts.merge!(options) if options.is_a?(Hash)
 
           # Generate a string for the proxy method call
           # Assumes that the proxy_owner_method from "proxyable" is available.
@@ -129,14 +112,14 @@ module CouchRest
             opts[:proxy] = if proxy_owner_method
               "self.#{proxy_owner_method}.#{opts[:proxy_name]}"
             else
-              opts[:class_name].constantize
+              opts[:class_name]
             end
           end
 
           opts
         end
 
-        def create_belongs_to_getter(attrib, property, options)
+        def create_belongs_to_getter(attrib, options)
           class_eval <<-EOS, __FILE__, __LINE__ + 1
             def #{attrib}
               @#{attrib} ||= #{options[:foreign_key]}.nil? ? nil : #{options[:proxy]}.get(self.#{options[:foreign_key]})
@@ -144,7 +127,7 @@ module CouchRest
           EOS
         end
 
-        def create_belongs_to_setter(attrib, property, options)
+        def create_belongs_to_setter(attrib, options)
           class_eval <<-EOS, __FILE__, __LINE__ + 1
             def #{attrib}=(value)
               self.#{options[:foreign_key]} = value.nil? ? nil : value.id
@@ -155,7 +138,7 @@ module CouchRest
 
         ### collection_of support methods
 
-        def create_collection_of_property_setter(attrib, property, options)
+        def create_collection_of_property_setter(attrib, options)
           # ensure CollectionOfProxy is nil, ready to be reloaded on request
           class_eval <<-EOS, __FILE__, __LINE__ + 1
             def #{options[:foreign_key]}=(value)
@@ -165,18 +148,17 @@ module CouchRest
           EOS
         end
 
-        def create_collection_of_getter(attrib, property, options)
-          base = options[:proxy] || options[:class_name]
+        def create_collection_of_getter(attrib, options)
           class_eval <<-EOS, __FILE__, __LINE__ + 1
             def #{attrib}(reload = false)
               return @#{attrib} unless @#{attrib}.nil? or reload
-              ary = self.#{options[:foreign_key]}.collect{|i| #{base}.get(i)}
+              ary = self.#{options[:foreign_key]}.collect{|i| #{options[:proxy]}.get(i)}
               @#{attrib} = ::CouchRest::CollectionOfProxy.new(ary, self, '#{options[:foreign_key]}')
             end
           EOS
         end
 
-        def create_collection_of_setter(attrib, property, options)
+        def create_collection_of_setter(attrib, options)
           class_eval <<-EOS, __FILE__, __LINE__ + 1
             def #{attrib}=(value)
               @#{attrib} = ::CouchRest::CollectionOfProxy.new(value, self, '#{options[:foreign_key]}')

@@ -5,6 +5,35 @@ require File.join(FIXTURE_PATH, 'more', 'sale_invoice')
 
 describe "Assocations" do
 
+  describe ".merge_belongs_to_association_options" do
+    before :all do
+      def SaleInvoice.merge_assoc_opts(*args)
+        merge_belongs_to_association_options(*args)
+      end
+    end
+
+    it "should return a default set of options" do
+      o = SaleInvoice.merge_assoc_opts(:cat)
+      o[:foreign_key].should eql('cat_id')
+      o[:class_name].should eql('Cat')
+      o[:proxy_name].should eql('cats')
+      o[:proxy].should eql('Cat') # same as class name
+    end
+
+    it "should merge with provided options" do
+      o = SaleInvoice.merge_assoc_opts(:cat, :foreign_key => 'somecat_id', :proxy => 'some_cats')
+      o[:foreign_key].should eql('somecat_id')
+      o[:proxy].should eql('some_cats')
+    end
+
+    it "should generate a proxy string if proxied" do
+      SaleInvoice.stub!(:proxy_owner_method).twice.and_return('company')
+      o = SaleInvoice.merge_assoc_opts(:cat)
+      o[:proxy].should eql('self.company.cats')
+    end
+    
+  end
+
   describe "of type belongs to" do
 
     before :each do
@@ -43,14 +72,6 @@ describe "Assocations" do
       @invoice.client
     end
 
-    it "should raise error if class name does not exist" do
-      lambda do
-        class TestBadAssoc < CouchRest::Model::Base
-          belongs_to :test_bad_item
-        end
-      end.should raise_error(NameError, /TestBadAssoc#test_bad_item/)
-    end
-
     it "should allow override of foreign key" do
       @invoice.respond_to?(:alternate_client).should be_true
       @invoice.respond_to?("alternate_client=").should be_true
@@ -78,8 +99,8 @@ describe "Assocations" do
     end
 
     it "should create an associated property and collection proxy" do
-      @invoice.respond_to?('entry_ids')
-      @invoice.respond_to?('entry_ids=')
+      @invoice.respond_to?('entry_ids').should be_true
+      @invoice.respond_to?('entry_ids=').should be_true
       @invoice.entries.class.should eql(::CouchRest::CollectionOfProxy)
     end
 

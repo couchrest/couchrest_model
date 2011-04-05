@@ -77,7 +77,17 @@ describe "Validations" do
       end
     end
 
- 
+    context "when proxied" do
+      it "should lookup the model_proxy" do
+        mp = mock(:ModelProxy)
+        mp.should_receive(:view).and_return({'rows' => []})
+        @obj = WithUniqueValidation.new(:title => 'test 8')
+        @obj.stub!(:model_proxy).twice.and_return(mp)
+        @obj.valid?
+      end
+
+    end
+
   end
 
 end

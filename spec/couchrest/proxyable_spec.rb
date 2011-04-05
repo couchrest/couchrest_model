@@ -13,16 +13,27 @@ end
 
 describe "Proxyable" do
 
-  it "should provide #model_proxy method" do
-    DummyProxyable.new.should respond_to(:model_proxy)
-  end
-
   describe "class methods" do
+
+    before(:each) do
+      @class = DummyProxyable.clone
+    end
+
+    describe ".proxy_owner_method" do
+      it "should provide proxy_owner_method accessors" do
+        @class.should respond_to(:proxy_owner_method)
+        @class.should respond_to(:proxy_owner_method=)
+      end
+      it "should work as expected" do
+        @class.proxy_owner_method = "foo"
+        @class.proxy_owner_method.should eql("foo")
+      end
+    end
 
     describe ".proxy_for" do
 
       it "should be provided" do
-        DummyProxyable.should respond_to(:proxy_for)
+        @class.should respond_to(:proxy_for)
       end
 
       it "should create a new method" do
@@ -54,42 +65,53 @@ describe "Proxyable" do
         end
 
         it "should raise an error if the database method is missing" do
-          DummyProxyable.proxy_for(:cats)
-          @obj = DummyProxyable.new
+          @class.proxy_for(:cats)
+          @obj = @class.new
           @obj.should_receive(:respond_to?).with('proxy_database').and_return(false)
           lambda { @obj.cats }.should raise_error(StandardError, "Missing #proxy_database method for proxy")
         end
 
         it "should raise an error if custom database method missing" do
-          DummyProxyable.proxy_for(:proxy_kittens, :database_method => "foobardom")
-          @obj = DummyProxyable.new
+          @class.proxy_for(:proxy_kittens, :database_method => "foobardom")
+          @obj = @class.new
           lambda { @obj.proxy_kittens }.should raise_error(StandardError, "Missing #foobardom method for proxy")
         end
-
-
       end
-
     end
 
     describe ".proxied_by" do
       it "should be provided" do
-        DummyProxyable.should respond_to(:proxied_by)
+        @class.should respond_to(:proxied_by)
       end
 
       it "should add an attribute accessor" do
-        DummyProxyable.proxied_by(:foobar)
-        DummyProxyable.new.should respond_to(:foobar)
+        @class.proxied_by(:foobar)
+        @class.new.should respond_to(:foobar)
+      end
+
+      it "should provide #model_proxy method" do
+        @class.proxied_by(:foobar)
+        @class.new.should respond_to(:model_proxy)
+      end
+
+      it "should set the proxy_owner_method" do
+        @class.proxied_by(:foobar)
+        @class.proxy_owner_method.should eql(:foobar)
       end
 
       it "should raise an error if model name pre-defined" do
-        lambda { DummyProxyable.proxied_by(:object_id) }.should raise_error
+        lambda { @class.proxied_by(:object_id) }.should raise_error
+      end
+
+      it "should raise an error if object already has a proxy" do
+        @class.proxied_by(:department)
+        lambda { @class.proxied_by(:company) }.should raise_error
       end
     end
-
   end
 
   describe "ModelProxy" do
-    
+
     before :all do
       @klass = CouchRest::Model::Proxyable::ModelProxy
     end
@@ -241,22 +263,18 @@ describe "Proxyable" do
       describe "#proxy_update" do
         it "should set returned doc fields" do
           doc = mock(:Document)
-          doc.should_receive(:respond_to?).with(:database=).and_return(true)
+          doc.should_receive(:is_a?).with(Cat).and_return(true)
           doc.should_receive(:database=).with('database')
-          doc.should_receive(:respond_to?).with(:model_proxy=).and_return(true)
           doc.should_receive(:model_proxy=).with(@obj)
-          doc.should_receive(:respond_to?).with('owner_name=').and_return(true)
           doc.should_receive(:send).with('owner_name=', 'owner')
           @obj.send(:proxy_update, doc).should eql(doc)
         end
 
-        it "should not fail if some fields missing" do
-          doc = mock(:Document)
-          doc.should_receive(:respond_to?).with(:database=).and_return(true)
-          doc.should_receive(:database=).with('database')
-          doc.should_receive(:respond_to?).with(:model_proxy=).and_return(false)
+        it "should not set anything if matching document not provided" do
+          doc = mock(:DocumentFoo)
+          doc.should_receive(:is_a?).with(Cat).and_return(false)
+          doc.should_not_receive(:database=)
           doc.should_not_receive(:model_proxy=)
-          doc.should_receive(:respond_to?).with('owner_name=').and_return(false)
           doc.should_not_receive(:owner_name=)
           @obj.send(:proxy_update, doc).should eql(doc)
         end
@@ -309,6 +327,7 @@ describe "Proxyable" do
 
     it "should allow creation of new entries" do
       inv = @company.proxyable_invoices.new(:client => "Lorena", :total => 35)
+      inv.database.should_not be_nil
       inv.save.should be_true
       @company.proxyable_invoices.count.should eql(1)
       @company.proxyable_invoices.first.client.should eql("Lorena")
