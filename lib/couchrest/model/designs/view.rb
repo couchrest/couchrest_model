@@ -25,7 +25,7 @@ module CouchRest
             self.owner    = parent
             self.name     = name.to_s
             # Default options:
-            self.query    = { :reduce => false }
+            self.query    = { }
           elsif parent.is_a?(self.class)
             self.model    = (new_query.delete(:proxy) || parent.model)
             self.owner    = parent.owner
@@ -139,12 +139,6 @@ module CouchRest
           execute['total_rows']
         end
 
-        # Convenience wrapper around the rows result set. This will provide
-        # and array of keys.
-        def keys
-          rows.map{|r| r.key}
-        end
-
         # Convenience wrapper to provide all the values from the route
         # set without having to go through +rows+.
         def values
@@ -181,7 +175,7 @@ module CouchRest
         #
         # Cannot be used when the +#startkey+ or +#endkey+ have been set.
         def key(value)
-          raise "View#key cannot be used when startkey or endkey have been set" unless query[:startkey].nil? && query[:endkey].nil?
+          raise "View#key cannot be used when startkey or endkey have been set" unless query[:keys].nil? && query[:startkey].nil? && query[:endkey].nil?
           update_query(:key => value)
         end
 
@@ -193,7 +187,7 @@ module CouchRest
         #
         # Cannot be used if the key has been set.
         def startkey(value)
-          raise "View#startkey cannot be used when key has been set" unless query[:key].nil?
+          raise "View#startkey cannot be used when key has been set" unless query[:key].nil? && query[:keys].nil?
           update_query(:startkey => value)
         end
 
@@ -210,7 +204,7 @@ module CouchRest
         # See the +#startkey+ method for more details and the +#inclusive_end+
         # option.
         def endkey(value)
-          raise "View#endkey cannot be used when key has been set" unless query[:key].nil?
+          raise "View#endkey cannot be used when key has been set" unless query[:key].nil? && query[:keys].nil?
           update_query(:endkey => value)
         end
 
@@ -219,6 +213,22 @@ module CouchRest
         # call or a string.
         def endkey_doc(value)
           update_query(:endkey_docid => value.is_a?(String) ? value : value.id)
+        end
+
+        # Keys is a special CouchDB option that will cause the view request to be POSTed
+        # including an array of keys. Only documents with the matching keys will be 
+        # returned. This is much faster than sending multiple requests for a set 
+        # non-consecutive documents.
+        #
+        # If no values are provided, this method will act as a wrapper around 
+        # the rows result set, providing an array of keys.
+        def keys(*keys)
+          if keys.empty?
+            rows.map{|r| r.key}
+          else
+            raise "View#keys cannot by used when key or startkey/endkey have been set" unless query[:key].nil? && query[:startkey].nil? && query[:endkey].nil?
+            update_query(:keys => keys.first)
+          end
         end
 
 
@@ -341,8 +351,6 @@ module CouchRest
           (offset_value / limit_value) + 1
         end
 
-
-
         protected
 
         def include_docs!
@@ -371,7 +379,7 @@ module CouchRest
         def use_database
           query[:database] || model.database
         end
-        
+
         def execute
           return self.result if result
           raise "Database must be defined in model or view!" if use_database.nil?

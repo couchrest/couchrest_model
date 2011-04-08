@@ -7,6 +7,7 @@ class DesignViewModel < CouchRest::Model::Base
 
   design do
     view :by_name
+    view :by_just_name, :map => "function(doc) { emit(doc['name'], null); }"
   end
 end
 
@@ -32,7 +33,7 @@ describe "Design View" do
           @obj = @klass.new(DesignViewModel, {}, 'test_view')
           @obj.model.should eql(DesignViewModel)
           @obj.name.should eql('test_view')
-          @obj.query.should eql({:reduce => false})
+          @obj.query.should be_empty
         end
 
         it "should complain if there is no name" do
@@ -51,7 +52,7 @@ describe "Design View" do
         it "should copy attributes" do
           @obj.model.should eql(DesignViewModel)
           @obj.name.should eql('test_view')
-          @obj.query.should eql({:reduce => false, :foo => :bar})
+          @obj.query.should eql({:foo => :bar})
         end
 
       end
@@ -233,15 +234,6 @@ describe "Design View" do
         end
       end
 
-      describe "#keys" do
-        it "should request each row and provide key value" do
-          row = mock("Row")
-          row.should_receive(:key).twice.and_return('foo')
-          @obj.should_receive(:rows).and_return([row, row])
-          @obj.keys.should eql(['foo', 'foo'])
-        end
-      end
-
       describe "#values" do
         it "should request each row and provide value" do
           row = mock("Row")
@@ -276,21 +268,25 @@ describe "Design View" do
           @obj.should_receive(:update_query).with({:key => 'foo'})
           @obj.key('foo')
         end
-        it "should raise and error if startkey set" do
+        it "should raise error if startkey set" do
           @obj.query[:startkey] = 'bar'
           lambda { @obj.key('foo') }.should raise_error
         end
-        it "should raise and error if endkey set" do
+        it "should raise error if endkey set" do
           @obj.query[:endkey] = 'bar'
           lambda { @obj.key('foo') }.should raise_error
         end
-        it "should raise and error if both startkey and endkey set" do
+        it "should raise error if both startkey and endkey set" do
           @obj.query[:startkey] = 'bar'
           @obj.query[:endkey] = 'bar'
+          lambda { @obj.key('foo') }.should raise_error
+        end
+        it "should raise error if keys set" do
+          @obj.query[:keys] = 'bar'
           lambda { @obj.key('foo') }.should raise_error
         end
       end
-      
+
       describe "#startkey" do
         it "should update query with value" do
           @obj.should_receive(:update_query).with({:startkey => 'foo'})
@@ -298,7 +294,11 @@ describe "Design View" do
         end
         it "should raise and error if key set" do
           @obj.query[:key] = 'bar'
-          lambda { @obj.startkey('foo') }.should raise_error
+          lambda { @obj.startkey('foo') }.should raise_error(/View#startkey/)
+        end
+        it "should raise and error if keys set" do
+          @obj.query[:keys] = 'bar'
+          lambda { @obj.startkey('foo') }.should raise_error(/View#startkey/)
         end
       end
 
@@ -322,7 +322,11 @@ describe "Design View" do
         end
         it "should raise and error if key set" do
           @obj.query[:key] = 'bar'
-          lambda { @obj.endkey('foo') }.should raise_error
+          lambda { @obj.endkey('foo') }.should raise_error(/View#endkey/)
+        end
+        it "should raise and error if keys set" do
+          @obj.query[:keys] = 'bar'
+          lambda { @obj.endkey('foo') }.should raise_error(/View#endkey/)
         end
       end
 
@@ -336,6 +340,33 @@ describe "Design View" do
           doc.should_receive(:id).and_return(44)
           @obj.should_receive(:update_query).with({:endkey_docid => 44})
           @obj.endkey_doc(doc)
+        end
+      end
+
+      describe "#keys" do
+        it "should update the query" do
+          @obj.should_receive(:update_query).with({:keys => ['foo', 'bar']})
+          @obj.keys(['foo', 'bar'])
+        end
+        it "should raise and error if key set" do
+          @obj.query[:key] = 'bar'
+          lambda { @obj.keys('foo') }.should raise_error(/View#keys/)
+        end
+        it "should raise and error if startkey or endkey set" do
+          @obj.query[:startkey] = 'bar'
+          lambda { @obj.keys('foo') }.should raise_error(/View#keys/)
+          @obj.query.delete(:startkey)
+          @obj.query[:endkey] = 'bar'
+          lambda { @obj.keys('foo') }.should raise_error(/View#keys/)
+        end
+      end
+
+      describe "#keys (without parameters)" do
+        it "should request each row and provide key value" do
+          row = mock("Row")
+          row.should_receive(:key).twice.and_return('foo')
+          @obj.should_receive(:rows).and_return([row, row])
+          @obj.keys.should eql(['foo', 'foo'])
         end
       end
 
@@ -700,7 +731,6 @@ describe "Design View" do
     end
 
     describe "loading documents" do
-
       it "should return first" do
         DesignViewModel.by_name.first.name.should eql("Judith")
       end
@@ -715,7 +745,6 @@ describe "Design View" do
         view.last.name.should eql("Peter")
         view.all.length.should eql(3)
       end
-
     end
 
     describe "index information" do
@@ -730,6 +759,18 @@ describe "Design View" do
       end
       it "should provide a set of keys" do
         DesignViewModel.by_name.limit(2).keys.should eql(["Judith", "Lorena"])
+      end
+    end
+
+    describe "viewing" do
+      it "should load views with no reduce method" do
+        docs = DesignViewModel.by_just_name.all
+        docs.length.should eql(5)
+      end
+      it "should load documents by specific keys" do
+        docs = DesignViewModel.by_name.keys(["Judith", "Peter"]).all
+        docs[0].name.should eql("Judith")
+        docs[1].name.should eql("Peter")
       end
     end
 

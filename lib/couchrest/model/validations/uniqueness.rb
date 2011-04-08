@@ -29,7 +29,8 @@ module CouchRest
 
           if base.respond_to?(:has_view?) && !base.has_view?(view_name)
             raise "View #{document.class.name}.#{options[:view]} does not exist!" unless options[:view].nil?
-            model.view_by *keys, :allow_nil => true
+            keys << {:allow_nil => true}
+            model.view_by(*keys)
           end
 
           rows = base.view(view_name, :key => values, :limit => 2, :include_docs => false)['rows']

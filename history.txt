@@ -5,6 +5,7 @@
   * Refinements to associations and uniqueness validation for proxy (based on issue found by Gleb Kanterov)
   * Added :allow_nil and :allow_blank options when creating a new view
   * Unique Validation now supports scopes!
+  * Added support for #keys with list on Design View.
 
 == 1.1.0.beta
 
