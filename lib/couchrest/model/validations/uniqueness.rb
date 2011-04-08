@@ -14,7 +14,14 @@ module CouchRest
         end
 
         def validate_each(document, attribute, value)
-          view_name = options[:view].nil? ? "by_#{attribute}" : options[:view]
+          keys = [attribute]
+          unless options[:scope].nil?
+            keys = (options[:scope].is_a?(Array) ? options[:scope] : [options[:scope]]) + keys
+          end
+          values = keys.map{|k| document.send(k)}
+          values = values.first if values.length == 1
+
+          view_name = options[:view].nil? ? "by_#{keys.join('_and_')}" : options[:view]
 
           model = (document.respond_to?(:model_proxy) && document.model_proxy ? document.model_proxy : @model)
           # Determine the base of the search
@@ -22,18 +29,20 @@ module CouchRest
 
           if base.respond_to?(:has_view?) && !base.has_view?(view_name)
             raise "View #{document.class.name}.#{options[:view]} does not exist!" unless options[:view].nil?
-            model.view_by attribute
+            model.view_by *keys, :allow_nil => true
           end
 
-          docs = base.view(view_name, :key => value, :limit => 2, :include_docs => false)['rows']
-          return if docs.empty?
+          rows = base.view(view_name, :key => values, :limit => 2, :include_docs => false)['rows']
+          return if rows.empty?
 
           unless document.new?
-            return if docs.find{|doc| doc['id'] == document.id}
+            return if rows.find{|row| row['id'] == document.id}
           end
 
-          if docs.length > 0
-            document.errors.add(attribute, :taken, options.merge(:value => value))
+          if rows.length > 0
+            opts = options.merge(:value => value)
+            opts.delete(:scope) # Has meaning with I18n!
+            document.errors.add(attribute, :taken, opts)
           end
         end
 

@@ -138,4 +138,13 @@ class WithUniqueValidationView < CouchRest::Model::Base
   validates_uniqueness_of :code, :view => 'all'
 end
 
+class WithScopedUniqueValidation < CouchRest::Model::Base
+  use_database DB
+
+  property :parent_id
+  property :title
+
+  validates_uniqueness_of :title, :scope => :parent_id
+end
+
 
