@@ -1,7 +1,7 @@
 == 1.1.0.beta2
 
 * Minor enhancements:
-  * Time handling improved in accordance with CouchRest 1.0.3. Always set to UTC.
+  * Time handling improved in accordance with CouchRest 1.1.0. Always set to UTC.
   * Refinements to associations and uniqueness validation for proxy (based on issue found by Gleb Kanterov)
   * Added :allow_nil and :allow_blank options when creating a new view
   * Unique Validation now supports scopes!
