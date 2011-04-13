@@ -89,6 +89,9 @@ module CouchRest
         self
       end
 
+      def database
+        self.class.database(@database)
+      end
 
       protected
 
@@ -104,6 +107,20 @@ module CouchRest
 
 
       module ClassMethods
+
+        # Replace CouchRest's database reader with a more advanced
+        # version that will make a best guess at the database you might
+        # want to use. Allows for a string to be provided instead of 
+        # a database object.
+        def database(db = nil)
+          db ||= @database
+          if db.nil?
+            # try to grab from configuration files
+            
+          else
+            db
+          end
+        end
 
         # Creates a new instance, bypassing attribute protection
         #
