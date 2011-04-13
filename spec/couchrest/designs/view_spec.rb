@@ -535,6 +535,7 @@ describe "Design View" do
           # disable real execution!
           @design_doc = mock("DesignDoc")
           @design_doc.stub!(:view_on)
+          @obj.model.stub!(:save_design_doc)
           @obj.model.stub!(:design_doc).and_return(@design_doc)
         end
 
@@ -557,27 +558,17 @@ describe "Design View" do
           @obj.send(:execute)
         end
 
+        it "should call to save the design document" do
+          @obj.should_receive(:can_reduce?).and_return(false)
+          @obj.model.should_receive(:save_design_doc).with(DB)
+          @obj.send(:execute)
+        end
+
         it "should populate the results" do
           @obj.should_receive(:can_reduce?).and_return(true)
           @design_doc.should_receive(:view_on).and_return('foos')
           @obj.send(:execute)
           @obj.result.should eql('foos')
-        end
-
-        it "should retry once on a resource not found error" do
-          @obj.should_receive(:can_reduce?).and_return(true)
-          @obj.model.should_receive(:save_design_doc)
-          @design_doc.should_receive(:view_on).ordered.and_raise(RestClient::ResourceNotFound)
-          @design_doc.should_receive(:view_on).ordered.and_return('foos')
-          @obj.send(:execute)
-          @obj.result.should eql('foos')
-        end
-
-        it "should retry twice and fail on a resource not found error" do
-          @obj.should_receive(:can_reduce?).and_return(true)
-          @obj.model.should_receive(:save_design_doc)
-          @design_doc.should_receive(:view_on).twice.and_raise(RestClient::ResourceNotFound)
-          lambda { @obj.send(:execute) }.should raise_error(RestClient::ResourceNotFound)
         end
 
         it "should remove nil values from query" do

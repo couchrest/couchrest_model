@@ -1,3 +1,8 @@
+== 1.1.0.beta3
+
+* Minor enhancements:
+  * Adding "couchrest-hash" to Design Docs with aim to improve view update handling.
+
 == 1.1.0.beta2
 
 * Minor enhancements:

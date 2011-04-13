@@ -391,11 +391,9 @@ module CouchRest
           return self.result if result
           raise "Database must be defined in model or view!" if use_database.nil?
 
-          # Remove the reduce value if its not needed
+          # Remove the reduce value if its not needed to prevent CouchDB errors
           query.delete(:reduce) unless can_reduce?
 
-          # Save the design doc for the current database. This should be efficient
-          # and check for changes
           model.save_design_doc(use_database)
 
           self.result = model.design_doc.view_on(use_database, name, query.reject{|k,v| v.nil?})
