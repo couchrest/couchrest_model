@@ -2,7 +2,7 @@ module CouchRest
   module Model
     module Views
       extend ActiveSupport::Concern
-      
+
       module ClassMethods
         # Define a CouchDB view. The name of the view will be the concatenation
         # of <tt>by</tt> and the keys joined by <tt>_and_</tt>

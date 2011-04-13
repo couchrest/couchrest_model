@@ -246,18 +246,12 @@ describe "Model Base" do
   
   describe "finding all instances of a model" do
     before(:all) do
-      WithTemplateAndUniqueID.req_design_doc_refresh
       WithTemplateAndUniqueID.all.map{|o| o.destroy}
       WithTemplateAndUniqueID.database.bulk_delete
       WithTemplateAndUniqueID.new('important-field' => '1').save
       WithTemplateAndUniqueID.new('important-field' => '2').save
       WithTemplateAndUniqueID.new('important-field' => '3').save
       WithTemplateAndUniqueID.new('important-field' => '4').save
-    end
-    it "should make the design doc" do
-      WithTemplateAndUniqueID.all
-      d = WithTemplateAndUniqueID.design_doc
-      d['views']['all']['map'].should include('WithTemplateAndUniqueID')
     end
     it "should find all" do
       rs = WithTemplateAndUniqueID.all 
@@ -268,7 +262,7 @@ describe "Model Base" do
   describe "counting all instances of a model" do
     before(:each) do
       @db = reset_test_db!
-      WithTemplateAndUniqueID.req_design_doc_refresh
+      # WithTemplateAndUniqueID.req_design_doc_refresh
     end
     
     it ".count should return 0 if there are no docuemtns" do
@@ -287,16 +281,10 @@ describe "Model Base" do
   describe "finding the first instance of a model" do
     before(:each) do      
       @db = reset_test_db!
-      # WithTemplateAndUniqueID.req_design_doc_refresh # Removed by Sam Lown, design doc should be loaded automatically
       WithTemplateAndUniqueID.new('important-field' => '1').save
       WithTemplateAndUniqueID.new('important-field' => '2').save
       WithTemplateAndUniqueID.new('important-field' => '3').save
       WithTemplateAndUniqueID.new('important-field' => '4').save
-    end
-    it "should make the design doc" do
-      WithTemplateAndUniqueID.all
-      d = WithTemplateAndUniqueID.design_doc
-      d['views']['all']['map'].should include('WithTemplateAndUniqueID')
     end
     it "should find first" do
       rs = WithTemplateAndUniqueID.first
@@ -308,21 +296,6 @@ describe "Model Base" do
     end
   end
 
-  describe "lazily refreshing the design document" do
-    before(:all) do
-      @db = reset_test_db!
-      WithTemplateAndUniqueID.new('important-field' => '1').save
-    end
-    it "should not save the design doc twice" do
-      WithTemplateAndUniqueID.all
-      WithTemplateAndUniqueID.req_design_doc_refresh
-      WithTemplateAndUniqueID.refresh_design_doc
-      rev = WithTemplateAndUniqueID.design_doc['_rev']
-      WithTemplateAndUniqueID.req_design_doc_refresh
-      WithTemplateAndUniqueID.refresh_design_doc
-      WithTemplateAndUniqueID.design_doc['_rev'].should eql(rev)
-    end
-  end
   
   describe "getting a model with a subobject field" do
     before(:all) do

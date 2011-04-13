@@ -103,12 +103,6 @@ module CouchRest
           design_doc
         end
 
-        # Return true if the two views match
-        def compare_views(orig, repl)
-          return false if orig.nil? or repl.nil?
-          (orig['map'].to_s.strip == repl['map'].to_s.strip) && (orig['reduce'].to_s.strip == repl['reduce'].to_s.strip)
-        end
-
       end # module ClassMethods
 
     end

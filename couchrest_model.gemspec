@@ -30,6 +30,6 @@ Gem::Specification.new do |s|
   s.add_dependency(%q<railties>, "~> 3.0.0")
   s.add_development_dependency(%q<rspec>, ">= 2.0.0")
   s.add_development_dependency(%q<rack-test>, ">= 0.5.7")
-  s.add_development_dependency("jruby-openssl", ">= 0.7.3")
+  # s.add_development_dependency("jruby-openssl", ">= 0.7.3")
 end
 

@@ -15,8 +15,8 @@ CouchRest::Design.class_eval do
     base.delete('_rev')
     result = nil
     flatten =
-      lambda{|v|
-        v.is_a?(Hash) ? v.flatten.map{|v| flatten.call(v)}.flatten : v
+      lambda {|v|
+        v.is_a?(Hash) ? v.flatten.map{|v| flatten.call(v)}.flatten : v.to_s
       }
     Digest::MD5.hexdigest(flatten.call(base).sort.join(''))
   end
