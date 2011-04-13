@@ -7,7 +7,7 @@ module CouchRest
       module ClassMethods
         
         def design_doc
-          @design_doc ||= Design.new(default_design_doc)
+          @design_doc ||= ::CouchRest::Design.new(default_design_doc)
         end
     
         # Use when something has been changed, like a view, so that on the next request
@@ -90,24 +90,17 @@ module CouchRest
         # Writes out a design_doc to a given database, returning the
         # updated design doc
         def update_design_doc(design_doc, db, force = false)
+          design_doc['couchrest-hash'] = design_doc.checksum
           saved = stored_design_doc(db)
           if saved
-            changes = force
-            design_doc['views'].each do |name, view|
-              if !compare_views(saved['views'][name], view)
-                changes = true
-                saved['views'][name] = view
-              end
-            end
-            if changes
+            if force || saved['couchrest-hash'] != design_doc['couchrest-hash']
+              saved.merge!(design_doc)
               db.save_doc(saved)
             end
-            design_doc
           else
-            design_doc.database = db
-            design_doc.save
-            design_doc
+            db.save_doc(design_doc)
           end
+          design_doc
         end
 
         # Return true if the two views match
@@ -117,7 +110,7 @@ module CouchRest
         end
 
       end # module ClassMethods
-      
+
     end
   end
 end

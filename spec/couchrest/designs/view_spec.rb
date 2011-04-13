@@ -163,6 +163,13 @@ describe "Design View" do
         end
       end
 
+      describe "#length" do
+        it "should provide a length from the docs array" do
+          @obj.should_receive(:docs).and_return([1, 2, 3])
+          @obj.length.should eql(3)
+        end
+      end
+
       describe "#count" do
         it "should raise an error if view prepared for group" do
           @obj.should_receive(:query).and_return({:group => true})

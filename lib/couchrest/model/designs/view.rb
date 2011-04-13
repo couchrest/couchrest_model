@@ -90,6 +90,13 @@ module CouchRest
           result ? all.last : limit(1).descending.all.last
         end
 
+        # Return the number of documents in the currently defined result set.
+        # Use <tt>#count</tt> for the total number of documents regardless
+        # of the current limit defined.
+        def length
+          docs.length
+        end
+
         # Perform a count operation based on the current view. If the view
         # can be reduced, the reduce will be performed and return the first
         # value. This is okay for most simple queries, but may provide
@@ -383,30 +390,24 @@ module CouchRest
         def execute
           return self.result if result
           raise "Database must be defined in model or view!" if use_database.nil?
-          retryable = true
+
           # Remove the reduce value if its not needed
           query.delete(:reduce) unless can_reduce?
-          begin
-            self.result = model.design_doc.view_on(use_database, name, query.reject{|k,v| v.nil?})
-          rescue RestClient::ResourceNotFound => e
-            if retryable
-              model.save_design_doc(use_database)
-              retryable = false
-              retry
-            else
-              raise e
-            end
-          end
+
+          # Save the design doc for the current database. This should be efficient
+          # and check for changes
+          model.save_design_doc(use_database)
+
+          self.result = model.design_doc.view_on(use_database, name, query.reject{|k,v| v.nil?})
         end
 
         # Class Methods
         class << self
-          
           # Simplified view creation. A new view will be added to the 
           # provided model's design document using the name and options.
           #
           # If the view name starts with "by_" and +:by+ is not provided in 
-          # the options, the new view's map method will be interpretted and
+          # the options, the new view's map method will be interpreted and
           # generated automatically. For example:
           #
           #   View.create(Meeting, "by_date_and_name")
