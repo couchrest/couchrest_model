@@ -386,6 +386,24 @@ describe "Design View" do
           @obj.should_receive(:update_query).with({:descending => true})
           @obj.descending
         end
+        it "should reverse start and end keys if given" do
+          @obj = @obj.startkey('a').endkey('z')
+          @obj = @obj.descending
+          @obj.query[:endkey].should eql('a')
+          @obj.query[:startkey].should eql('z')
+        end
+        it "should reverse even if start or end nil" do
+          @obj = @obj.startkey('a')
+          @obj = @obj.descending
+          @obj.query[:endkey].should eql('a')
+          @obj.query[:startkey].should be_nil
+        end
+        it "should reverse start_doc and end_doc keys if given" do
+          @obj = @obj.startkey_doc('a').endkey_doc('z')
+          @obj = @obj.descending
+          @obj.query[:endkey_docid].should eql('a')
+          @obj.query[:startkey_docid].should eql('z')
+        end
       end
 
       describe "#limit" do

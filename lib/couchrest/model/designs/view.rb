@@ -239,11 +239,19 @@ module CouchRest
         end
 
 
-        # The results should be provided in descending order.
+        # The results should be provided in descending order. If the startkey or
+        # endkey query options have already been seen set, calling this method
+        # will automatically swap the options around. If you don't want this,
+        # simply set descending before any other option.
         #
-        # Descending is false by default, this method will enable it and cannot
-        # be undone.
+        # Descending is false by default, and this method cannot
+        # be undone once used, it has no inverse option.
         def descending
+          if query[:startkey] || query[:endkey]
+            query[:startkey], query[:endkey] = query[:endkey], query[:startkey]
+          elsif query[:startkey_docid] || query[:endkey_docid]
+            query[:startkey_docid], query[:endkey_docid] = query[:endkey_docid], query[:startkey_docid]
+          end
           update_query(:descending => true)
         end
 

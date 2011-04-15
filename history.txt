@@ -2,6 +2,7 @@
 
 * Minor enhancements:
   * Adding "couchrest-hash" to Design Docs with aim to improve view update handling.
+  * Using #descending on View object will automatically swap startkey with endkey.
 
 == 1.1.0.beta2
 
