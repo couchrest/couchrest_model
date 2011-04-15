@@ -173,7 +173,7 @@ describe "Design View" do
       describe "#count" do
         it "should raise an error if view prepared for group" do
           @obj.should_receive(:query).and_return({:group => true})
-          lambda { @obj.count }.should raise_error
+          lambda { @obj.count }.should raise_error(/group/)
         end
 
         it "should return first row value if reduce possible" do
@@ -181,6 +181,8 @@ describe "Design View" do
           row = mock("Row")
           @obj.should_receive(:can_reduce?).and_return(true)
           @obj.should_receive(:reduce).and_return(view)
+          view.should_receive(:skip).with(0).and_return(view)
+          view.should_receive(:limit).with(1).and_return(view)
           view.should_receive(:rows).and_return([row])
           row.should_receive(:value).and_return(2)
           @obj.count.should eql(2)
@@ -189,6 +191,8 @@ describe "Design View" do
           view = mock("SubView")
           @obj.should_receive(:can_reduce?).and_return(true)
           @obj.should_receive(:reduce).and_return(view)
+          view.should_receive(:skip).with(0).and_return(view)
+          view.should_receive(:limit).with(1).and_return(view)
           view.should_receive(:rows).and_return([])
           @obj.count.should eql(0)
         end
@@ -769,6 +773,10 @@ describe "Design View" do
         docs = DesignViewModel.by_name.keys(["Judith", "Peter"]).all
         docs[0].name.should eql("Judith")
         docs[1].name.should eql("Peter")
+      end
+      it "should provide count even if limit or skip set" do
+        docs = DesignViewModel.by_name.limit(20).skip(2)
+        docs.count.should eql(5)
       end
     end
 

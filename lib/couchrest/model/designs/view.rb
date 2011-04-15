@@ -113,7 +113,7 @@ module CouchRest
         def count
           raise "View#count cannot be used with group options" if query[:group]
           if can_reduce?
-            row = reduce.rows.first
+            row = reduce.skip(0).limit(1).rows.first
             row.nil? ? 0 : row.value
           else
             limit(0).total_rows
