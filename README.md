@@ -378,6 +378,43 @@ Use pagination as follows:
     # In your view, with the kaminari gem loaded:
     paginate @posts
 
+### Design Documents and Views
+
+Views must be defined in a Design Document for CouchDB to be able to perform searches. Each model therefore must have its own Design Document. Deciding when to update the model's design doc is a difficult issue, as in production you don't want to be constantly checking for updates and in development maximum flexability is important. CouchRest Model solves this issue by providing the `auto_update_design_doc` configuration option and is enabled by default.
+
+Each time a view or other design method is requested a quick GET for the design will be sent to ensure it is up to date with the latest changes. Results are cached in the current thread for the complete design document's URL, including the database, to try and limit requests. This should be fine for most projects, but dealing with multiple sub-databases may require a different strategy.
+
+Setting the option to false will require a manual update of each model's design doc whenever you know a change has happened. This will be useful in cases when you do not want CouchRest Model to interfere with the views already store in the CouchRest database, or you'd like to deploy your own update strategy. Here's an example of a module that will update all submodules:
+
+    module CouchRestMigration
+      def self.update_design_docs
+        CouchRest::Model::Base.subclasses.each{|klass| klass.save_design_doc! if klass.respond_to?(:save_design_doc!)}
+      end
+    end
+
+    # Running this from your applications initializers would be a good idea,
+    # for example in Rail's application.rb or environments/production.rb:
+    config.after_initialize do
+      CouchRestMigration.update_design_docs
+    end
+
+If you're dealing with multiple databases, using proxied models, or databases that are created on-the-fly, a more sophisticated approach might be required:
+
+    module CouchRestMigration
+      def self.update_all_design_docs
+        update_design_docs(COUCHREST_DATABASE)
+        Company.all.each do |company|
+          update_design_docs(company.proxy_database)
+        end
+      end
+      def self.update_design_docs(db)
+        CouchRest::Model::Base.subclasses.each{|klass| klass.save_design_doc!(db) if klass.respond_to?(:save_design_doc!(db)}
+      end
+    end
+
+    # Command to run after a capistrano migration:
+    $ rails runner "CouchRestMigratin.update_all_design_docs"
+
 
 ## Assocations
 
@@ -546,7 +583,7 @@ such as validating for uniqueness and associations.
 
 CouchRest Model supports a few configuration options. These can be set either for the whole Model code
 base or for a specific model of your chosing. To configure globally, provide something similar to the 
-following in your projects loading code:
+following in your projects initializers or environments:
 
     CouchRest::Model::Base.configure do |config|
       config.mass_assign_any_attribute = true
@@ -563,6 +600,7 @@ Options currently avilable are:
 
  * `mass_assign_any_attribute` - false by default, when true any attribute may be updated via the update_attributes or attributes= methods.
  * `model_type_key` - 'couchrest-type' by default, is the name of property that holds the class name of each CouchRest Model.
+ * `auto_update_design_doc` - true by default, every time a view is requested and this option is enabled, a quick check will be performed to ensure the model's design document is up to date. When disabled, you'll need to perform the updates manually. Typically, this option should be enabled in development, and disabled in production. See the View section for more details.
 
 
 ## Notable Issues

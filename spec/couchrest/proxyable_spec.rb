@@ -233,17 +233,6 @@ describe "Proxyable" do
         @obj.design_doc
       end
 
-      describe "#refresh_design_doc" do
-        it "should be proxied without database arg" do
-          Cat.should_receive(:refresh_design_doc).with('database')
-          @obj.refresh_design_doc
-        end
-        it "should be proxied with database arg" do
-          Cat.should_receive(:refresh_design_doc).with('db')
-          @obj.refresh_design_doc('db')
-        end
-      end
-
       describe "#save_design_doc" do
         it "should be proxied without args" do
           Cat.should_receive(:save_design_doc).with('database')

@@ -61,37 +61,27 @@ describe "Subclassing a Model" do
     validated_fields.should_not include(:extension_code)
     validated_fields.should_not include(:job_title) 
   end
-  
+
   it "should inherit default property values" do
     @card.bg_color.should == '#ccc'
   end
-  
+
   it "should be able to overwrite a default property" do
     DesignBusinessCard.new.bg_color.should == '#eee'
   end
-  
+
   it "should have a design doc slug based on the subclass name" do
-    Course.refresh_design_doc
     OnlineCourse.design_doc_slug.should =~ /^OnlineCourse/
   end
-  
-  it "should have its own design_doc_fresh" do
-    Animal.refresh_design_doc
-    Dog.send(:design_doc_fresh, Dog.database).should_not == true
-    Dog.refresh_design_doc
-    Dog.send(:design_doc_fresh, Dog.database).should == true
-  end
-  
+
   it "should not add views to the parent's design_doc" do
     Course.design_doc['views'].keys.should_not include('by_url')
   end
-  
+
   it "should not add the parent's views to its design doc" do
-    Course.refresh_design_doc
-    OnlineCourse.refresh_design_doc
     OnlineCourse.design_doc['views'].keys.should_not include('by_title')
   end
-  
+
   it "should have an all view with a guard clause for model == subclass name in the map function" do
     OnlineCourse.design_doc['views']['all']['map'].should =~ /if \(doc\['#{OnlineCourse.model_type_key}'\] == 'OnlineCourse'\)/
   end

@@ -2,6 +2,8 @@
 
 * Minor enhancements:
   * Adding "couchrest-hash" to Design Docs with aim to improve view update handling.
+  * Major changes to the way design document updates are handled internally.
+  * Added "auto_update_design_doc" configuration option.
   * Using #descending on View object will automatically swap startkey with endkey.
 
 == 1.1.0.beta2

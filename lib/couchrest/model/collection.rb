@@ -1,7 +1,13 @@
 module CouchRest
   module Model
+    # Warning! The Collection module is seriously depricated.
+    # Use the new Design Views instead, as this code copies many other parts
+    # of CouchRest Model.
+    #
+    # Expect this to be removed soon.
+    #
     module Collection
-  
+
       def self.included(base)
         base.extend(ClassMethods)
       end
@@ -131,6 +137,9 @@ module CouchRest
           else
             @view_name = "#{design_doc}/#{view_name}"
           end
+
+          # Save the design doc, ready for use
+          @container_class.save_design_doc(@database)
         end
 
         # See Collection.paginate

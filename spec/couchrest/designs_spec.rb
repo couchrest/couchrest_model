@@ -31,11 +31,6 @@ describe "Design" do
         DesignModel.design { foo }
       end
 
-      it "should request a design refresh" do
-        DesignModel.should_receive(:req_design_doc_refresh)
-        DesignModel.design() { }
-      end
-
       it "should work even if a block is not provided" do
         lambda { DesignModel.design }.should_not raise_error
       end

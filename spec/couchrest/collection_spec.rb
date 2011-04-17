@@ -5,7 +5,6 @@ describe "Collections" do
 
   before(:all) do
     reset_test_db!
-    Article.refresh_design_doc
     titles = ["very uniq one", "really interesting", "some fun",
       "really awesome", "crazy bob", "this rocks", "super rad"]
     titles.each_with_index do |title,i|

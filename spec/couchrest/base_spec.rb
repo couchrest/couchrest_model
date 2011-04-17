@@ -262,7 +262,6 @@ describe "Model Base" do
   describe "counting all instances of a model" do
     before(:each) do
       @db = reset_test_db!
-      # WithTemplateAndUniqueID.req_design_doc_refresh
     end
     
     it ".count should return 0 if there are no docuemtns" do

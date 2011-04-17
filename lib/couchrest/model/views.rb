@@ -81,7 +81,6 @@ module CouchRest
           end
           keys.push opts
           design_doc.view_by(*keys)
-          req_design_doc_refresh
         end
 
         # returns stored defaults if there is a view named this in the design doc
@@ -99,9 +98,9 @@ module CouchRest
         def view(name, query={}, &block)
           query = query.dup # Modifications made on copy!
           db = query.delete(:database) || database
-          refresh_design_doc(db)
           query[:raw] = true if query[:reduce]
           raw = query.delete(:raw)
+          save_design_doc(db)
           fetch_view_with_docs(db, name, query, raw, &block)
         end
 
@@ -140,23 +139,10 @@ module CouchRest
 
         def fetch_view(db, view_name, opts, &block)
           raise "A view needs a database to operate on (specify :database option, or use_database in the #{self.class} class)" unless db
-          retryable = true
-          begin
-            design_doc.view_on(db, view_name, opts, &block)
-            # the design doc may not have been saved yet on this database
-          rescue RestClient::ResourceNotFound => e
-            if retryable
-              save_design_doc(db)
-              retryable = false
-              retry
-            else
-              raise e
-            end
-          end
+          design_doc.view_on(db, view_name, opts, &block)
         end
-        
       end # module ClassMethods
-      
+
     end
   end
 end

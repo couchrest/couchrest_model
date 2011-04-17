@@ -6,22 +6,92 @@ require File.join(FIXTURE_PATH, 'more', 'article')
 
 describe "Design Documents" do
 
+  before :all do
+    reset_test_db!
+  end
+
   describe "CouchRest Extension" do
 
-    it "should have created a checksum method" do
-      ::CouchRest::Design.new.should respond_to(:checksum)
+    it "should have created a checksum! method" do
+      ::CouchRest::Design.new.should respond_to(:checksum!)
     end
 
     it "should calculate a consistent checksum for model" do
-      WithTemplateAndUniqueID.design_doc.checksum.should eql('7786018bacb492e34a38436421a728d0')
+      WithTemplateAndUniqueID.design_doc.checksum!.should eql('7786018bacb492e34a38436421a728d0')
     end
 
     it "should calculate checksum for complex model" do
-      Article.design_doc.checksum.should eql('1e6c315853cd5ff10e5c914863aee569')
+      Article.design_doc.checksum!.should eql('1e6c315853cd5ff10e5c914863aee569')
+    end
+
+    it "should cache the generated checksum value" do
+      Article.design_doc.checksum!
+      Article.design_doc['couchrest-hash'].should_not be_blank
     end
   end
 
+  describe "class methods" do
+
+    describe ".design_doc" do
+      it "should provide Design document" do
+        Article.design_doc.should be_a(::CouchRest::Design)
+      end
+    end
+
+    describe ".design_doc_id" do
+      it "should provide a reasonable id" do
+        Article.design_doc_id.should eql("_design/Article")
+      end
+    end
+
+    describe ".design_doc_slug" do
+      it "should provide slug part of design doc" do
+        Article.design_doc_slug.should eql('Article')
+      end
+    end
+
+    describe ".design_doc_full_url" do
+      it "should provide complete url" do
+        Article.design_doc_full_url.should eql("#{DB.uri}/_design/Article")
+      end
+      it "should provide complete url for new DB" do
+        db = mock("Database")
+        db.should_receive(:uri).and_return('db')
+        Article.design_doc_full_url(db).should eql("db/_design/Article")
+      end
+    end
+
+    describe ".stored_design_doc" do
+      it "should load a stored design from the database" do
+        Article.by_date
+        Article.stored_design_doc['_rev'].should_not be_blank
+      end
+      it "should return nil if not already stored" do
+        WithDefaultValues.stored_design_doc.should be_nil
+      end
+    end
+
+    describe ".save_design_doc" do
+      it "should call up the design updater" do
+        Article.should_receive(:update_design_doc).with('db', false)
+        Article.save_design_doc('db')
+      end
+    end
+
+    describe ".save_design_doc!" do
+      it "should call save_design_doc with force" do
+        Article.should_receive(:save_design_doc).with('db', true)
+        Article.save_design_doc!('db')
+      end
+    end
+
+  end
+
   describe "basics" do
+
+    before :all do
+      reset_test_db!
+    end
 
     it "should have been instantiated with views" do
       d = Article.design_doc
@@ -54,6 +124,13 @@ describe "Design Documents" do
           written_at += 24 * 3600
         end
       end
+
+      it "will send request for the saved design doc on view request" do
+        reset_test_db!
+        Article.should_receive(:stored_design_doc).and_return(nil)
+        Article.by_date
+      end
+
       it "should have generated a design doc" do
         Article.design_doc["views"]["by_date"].should_not be_nil
       end
@@ -68,17 +145,52 @@ describe "Design Documents" do
         design = Article.design_doc
         view = design['views']['by_date']['map']
         design['views']['by_date']['map'] = view + '  ' # little bit of white space
-        Article.req_design_doc_refresh
         Article.by_date
-        orig = Article.stored_design_doc
-        orig['views']['by_date']['map'].should eql(Article.design_doc['views']['by_date']['map'])
+        Article.stored_design_doc['_rev'].should_not eql(orig['_rev'])
+        orig['views']['by_date']['map'].should_not eql(Article.design_doc['views']['by_date']['map'])
       end
       it "should not save design doc if not changed" do
         Article.by_date
         orig = Article.stored_design_doc['_rev']
-        Article.req_design_doc_refresh
         Article.by_date
         Article.stored_design_doc['_rev'].should eql(orig)
+      end
+    end
+
+    describe "when auto_update_design_doc false" do
+  
+      before :all do
+        Article.auto_update_design_doc = false
+        Article.save_design_doc!
+      end
+
+      after :all do
+        Article.auto_update_design_doc = true
+      end
+
+      it "will not send a request for the saved design doc" do
+        Article.should_not_receive(:stored_design_doc)
+        Article.by_date
+      end
+
+      it "will not update stored design doc if view changed" do
+        Article.by_date
+        orig = Article.stored_design_doc
+        design = Article.design_doc
+        view = design['views']['by_date']['map']
+        design['views']['by_date']['map'] = view + '  '
+        Article.by_date
+        Article.stored_design_doc['_rev'].should eql(orig['_rev'])
+      end
+
+      it "will update stored design if forced" do
+        Article.by_date
+        orig = Article.stored_design_doc
+        design = Article.design_doc
+        view = design['views']['by_date']['map']
+        design['views']['by_date']['map'] = view + '  '
+        Article.save_design_doc!
+        Article.stored_design_doc['_rev'].should_not eql(orig['_rev'])
       end
     end
   end
@@ -90,11 +202,7 @@ describe "Design Documents" do
     end
     it "should not save the design doc twice" do
       WithTemplateAndUniqueID.all
-      WithTemplateAndUniqueID.req_design_doc_refresh
-      WithTemplateAndUniqueID.refresh_design_doc
       rev = WithTemplateAndUniqueID.design_doc['_rev']
-      WithTemplateAndUniqueID.req_design_doc_refresh
-      WithTemplateAndUniqueID.refresh_design_doc
       WithTemplateAndUniqueID.design_doc['_rev'].should eql(rev)
     end
   end

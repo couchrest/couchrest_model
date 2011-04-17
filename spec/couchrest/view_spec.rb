@@ -19,11 +19,11 @@ describe "Model views" do
     # NOTE! Add more unit tests!
 
     describe "#view" do
-    
+
       it "should not alter original query" do
         options = { :database => DB }
         view = Article.view('by_date', options)
-        options[:database].should_not be_nil
+        options[:database].should eql(DB)
       end
 
     end
@@ -266,19 +266,7 @@ describe "Model views" do
       u = Unattached.last :database=>@db
       u.title.should == "aaa"
     end
-    
-    it "should barf on all_design_doc_versions if no database given" do
-      lambda{Unattached.all_design_doc_versions}.should raise_error
-    end
-    it "should be able to cleanup the db/bump the revision number" do
-      # if the previous specs were not run, the model_design_doc will be blank
-      Unattached.use_database DB
-      Unattached.view_by :questions
-      Unattached.by_questions(:database => @db)
-      original_revision = Unattached.model_design_doc(@db)['_rev']
-      Unattached.save_design_doc!(@db)
-      Unattached.model_design_doc(@db)['_rev'].should_not == original_revision
-    end
+
   end
   
   describe "a model with a compound key view" do
@@ -346,7 +334,7 @@ describe "Model views" do
     before(:each) do
       reset_test_db!
       Article.by_date
-      @original_doc_rev = Article.model_design_doc['_rev']
+      @original_doc_rev = Article.stored_design_doc['_rev']
       @design_docs = Article.database.documents :startkey => "_design/", :endkey => "_design/\u9999"
     end
     it "should not create a design doc on view definition" do
@@ -355,10 +343,9 @@ describe "Model views" do
       newdocs["rows"].length.should == @design_docs["rows"].length
     end
     it "should create a new version of the design document on view access" do
-      ddocs = Article.all_design_doc_versions["rows"].length
       Article.view_by :updated_at
       Article.by_updated_at
-      @original_doc_rev.should_not == Article.model_design_doc['_rev']
+      @original_doc_rev.should_not == Article.stored_design_doc['_rev']
       Article.design_doc["views"].keys.should include("by_updated_at")
     end
   end
