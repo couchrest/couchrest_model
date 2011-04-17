@@ -18,8 +18,8 @@ module CouchRest
           self.to_s
         end
 
-        def design_doc_full_url(db = database)
-          "#{db.uri}/#{design_doc_id}"
+        def design_doc_uri(db = database)
+          "#{db.root}/#{design_doc_id}"
         end
 
         # Retreive the latest version of the design document directly
@@ -54,10 +54,10 @@ module CouchRest
           Thread.current[:couchrest_design_cache] ||= {}
         end
         def design_doc_cache_checksum(db)
-          design_doc_cache[design_doc_full_url(db)]
+          design_doc_cache[design_doc_uri(db)]
         end
         def set_design_doc_cache_checksum(db, checksum)
-          design_doc_cache[design_doc_full_url(db)] = checksum
+          design_doc_cache[design_doc_uri(db)] = checksum
         end
 
         # Writes out a design_doc to a given database if forced

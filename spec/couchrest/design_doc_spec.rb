@@ -50,14 +50,14 @@ describe "Design Documents" do
       end
     end
 
-    describe ".design_doc_full_url" do
+    describe ".design_doc_uri" do
       it "should provide complete url" do
-        Article.design_doc_full_url.should eql("#{DB.uri}/_design/Article")
+        Article.design_doc_uri.should eql("#{COUCHHOST}/#{TESTDB}/_design/Article")
       end
       it "should provide complete url for new DB" do
         db = mock("Database")
-        db.should_receive(:uri).and_return('db')
-        Article.design_doc_full_url(db).should eql("db/_design/Article")
+        db.should_receive(:root).and_return('db')
+        Article.design_doc_uri(db).should eql("db/_design/Article")
       end
     end
 
