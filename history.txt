@@ -1,5 +1,8 @@
 == 1.1.0.beta3
 
+* Major changes:
+  * Default CouchRest Model type field now set to 'model' instead of 'couchrest-type'.
+
 * Minor enhancements:
   * Adding "couchrest-hash" to Design Docs with aim to improve view update handling.
   * Major changes to the way design document updates are handled internally.

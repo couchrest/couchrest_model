@@ -55,6 +55,9 @@ describe "Model properties" do
     card.calias.name.should == ["Aimonetti"]
   end
 
+  it "should raise error if property name coincides with model type key" do
+    lambda { Person.property(Person.model_type_key) }.should raise_error(/already used/)
+  end
 
   it "should be auto timestamped" do
     @card.created_at.should be_nil

@@ -13,7 +13,7 @@ module CouchRest
         add_config :auto_update_design_doc
 
         configure do |config|
-          config.model_type_key = 'couchrest-type' # 'model'?
+          config.model_type_key = 'model' # was 'couchrest-type'
           config.mass_assign_any_attribute = false
           config.auto_update_design_doc = true
         end

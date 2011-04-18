@@ -11,6 +11,14 @@ it is not possible to load ActiveModel into programs that do not use ActiveSuppo
 
 CouchRest Model is only properly tested on CouchDB version 1.0 or newer.
 
+*WARNING:* As of April 2011 and the release of version 1.1.0, the default model type key is 'model' instead of 'couchrest-type'. Simply updating your project will not work unless you migrate your data or set the configuration option in your initializers:
+
+    CouchRest::Model::Base.configure do |config|
+      config.model_type_key = 'couchrest-type'
+    end
+
+This is because CouchRest Model's are not couchrest specific and may be used in any other system such as a Javascript library, the model type should reflect this.
+
 ## Install
 
 ### Gem
@@ -57,6 +65,7 @@ Try some of these gems that add extra funcionality to couchrest_model:
 * [couch_photo](http://github.com/moonmaster9000/couch_photo) - attach images to documents with variations (Matt Parker)
 * [copycouch](http://github.com/moonmaster9000/copycouch) - single document replication on documents (Matt Parker)
 * [recloner](https://github.com/moonmaster9000/recloner) - clone documents easily (Matt Parker)
+* [couchrest_localised_properties](https://github.com/samlown/couchrest_localised_properties) - Transparent support for localised properties (Sam Lown)
 
 If you have an extension that you'd us to add to this list, please get in touch!
 			   
@@ -148,7 +157,7 @@ Boolean or TrueClass types will create a getter with question mark at the end:
 
     @cat.awake?   # true
 
-Adding the +:default+ option will ensure the attribute always has a value.
+Adding the `:default` option will ensure the attribute always has a value.
 
 A read-only property will only have a getter method, and its value is set when the document
 is read from the database. You can however update a read-only attribute using the `write_attribute` method:
@@ -380,7 +389,7 @@ Use pagination as follows:
 
 ### Design Documents and Views
 
-Views must be defined in a Design Document for CouchDB to be able to perform searches. Each model therefore must have its own Design Document. Deciding when to update the model's design doc is a difficult issue, as in production you don't want to be constantly checking for updates and in development maximum flexability is important. CouchRest Model solves this issue by providing the `auto_update_design_doc` configuration option and is enabled by default.
+Views must be defined in a Design Document for CouchDB to be able to perform searches. Each model therefore must have its own Design Document. Deciding when to update the model's design doc is a difficult issue, as in production you don't want to be constantly checking for updates and in development maximum flexability is important. CouchRest Model solves this issue by providing the `auto_update_design_doc` configuration option and is true by default.
 
 Each time a view or other design method is requested a quick GET for the design will be sent to ensure it is up to date with the latest changes. Results are cached in the current thread for the complete design document's URL, including the database, to try and limit requests. This should be fine for most projects, but dealing with multiple sub-databases may require a different strategy.
 
@@ -408,7 +417,7 @@ If you're dealing with multiple databases, using proxied models, or databases th
         end
       end
       def self.update_design_docs(db)
-        CouchRest::Model::Base.subclasses.each{|klass| klass.save_design_doc!(db) if klass.respond_to?(:save_design_doc!(db)}
+        CouchRest::Model::Base.subclasses.each{|klass| klass.save_design_doc!(db) if klass.respond_to?(:save_design_doc!}
       end
     end
 
@@ -599,8 +608,8 @@ To set for a specific model:
 Options currently avilable are:
 
  * `mass_assign_any_attribute` - false by default, when true any attribute may be updated via the update_attributes or attributes= methods.
- * `model_type_key` - 'couchrest-type' by default, is the name of property that holds the class name of each CouchRest Model.
- * `auto_update_design_doc` - true by default, every time a view is requested and this option is enabled, a quick check will be performed to ensure the model's design document is up to date. When disabled, you'll need to perform the updates manually. Typically, this option should be enabled in development, and disabled in production. See the View section for more details.
+ * `model_type_key` - 'model' by default, is the name of property that holds the class name of each CouchRest Model.
+ * `auto_update_design_doc` - true by default, every time a view is requested and this option is true, a quick check will be performed to ensure the model's design document is up to date. When disabled, you're design documents will never be updated automatically and you'll need to perform updates manually. Results are cached on a per-database and per-design basis to help lower the number of requests. See the View section for more details.
 
 
 ## Notable Issues

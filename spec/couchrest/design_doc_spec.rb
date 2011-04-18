@@ -17,11 +17,11 @@ describe "Design Documents" do
     end
 
     it "should calculate a consistent checksum for model" do
-      WithTemplateAndUniqueID.design_doc.checksum!.should eql('7786018bacb492e34a38436421a728d0')
+      WithTemplateAndUniqueID.design_doc.checksum!.should eql('ff6fa2eaf774397391942d51428c1fe2')
     end
 
     it "should calculate checksum for complex model" do
-      Article.design_doc.checksum!.should eql('1e6c315853cd5ff10e5c914863aee569')
+      Article.design_doc.checksum!.should eql('fb65c06a76b6141529e31e894ad00b1a')
     end
 
     it "should cache the generated checksum value" do
