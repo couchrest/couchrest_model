@@ -113,6 +113,6 @@ begin
     set_dirty(false)
     puts "\nwith use_dirty false"
   end
-  
+
   run_benchmark
 end
