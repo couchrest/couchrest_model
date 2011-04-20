@@ -6,9 +6,9 @@ module CouchRest
 
       included do
         extlib_inheritable_accessor(:properties) unless self.respond_to?(:properties)
-        extlib_inheritable_accessor(:prop_by_name) unless self.respond_to?(:prop_by_name)
+        extlib_inheritable_accessor(:property_by_name) unless self.respond_to?(:property_by_name)
         self.properties ||= []
-        self.prop_by_name ||= {}
+        self.property_by_name ||= {}
         raise "You can only mixin Properties in a class responding to [] and []=, if you tried to mixin CastedModel, make sure your class inherits from Hash or responds to the proper methods" unless (method_defined?(:[]) && method_defined?(:[]=))
       end
 
@@ -39,19 +39,12 @@ module CouchRest
       end
 
       # Store a casted value in the current instance of an attribute defined
-      # with a property.
+      # with a property and update dirty status
       def write_attribute(property, value)
         prop = find_property!(property)
-        self[prop.to_s] = prop.is_a?(String) ? value : prop.cast(self, value)
-      end
-
-      # write property, update dirty status
-      def write_attribute_dirty(property, value)
-        prop = find_property!(property)
         value = prop.is_a?(String) ? value : prop.cast(self, value)
-        propname = prop.to_s
-        attribute_will_change!(propname) if use_dirty? && self[propname] != value
-        self[propname] = value
+        attribute_will_change!(prop.name) if use_dirty? && self[prop.name] != value
+        self[prop.name] = value
       end
 
       def []=(key,value)
@@ -82,34 +75,47 @@ module CouchRest
         # Remove any protected and update all the rest. Any attributes
         # which do not have a property will simply be ignored.
         attrs = remove_protected_attributes(hash)
-        directly_set_attributes(attrs, :dirty => true)
+        directly_set_attributes(attrs)
       end
       alias :attributes= :update_attributes_without_saving
 
       # 'attributes' needed for Dirty
       alias :attributes :properties_with_values
 
+      def set_attributes(hash)
+        attrs = remove_protected_attributes(hash)
+        directly_set_attributes(attrs)
+      end
+
+      protected
+
       def find_property(property)
-        property.is_a?(Property) ? property : self.class.prop_by_name[property.to_s]
+        property.is_a?(Property) ? property : self.class.property_by_name[property.to_s]
       end
 
       # The following methods should be accessable by the Model::Base Class, but not by anything else!
       def apply_all_property_defaults
         return if self.respond_to?(:new?) && (new? == false)
         # TODO: cache the default object
+        # Never mark default options as dirty!
+        dirty, self.disable_dirty = self.disable_dirty, true
         self.class.properties.each do |property|
           write_attribute(property, property.default_value)
         end
+        self.disable_dirty = dirty
       end
 
       def prepare_all_attributes(doc = {}, options = {})
+        self.disable_dirty = !!options[:directly_set_attributes]
         apply_all_property_defaults
         if options[:directly_set_attributes]
           directly_set_read_only_attributes(doc)
         else
           doc = remove_protected_attributes(doc)
         end
-        directly_set_attributes(doc) unless doc.nil?
+        res = doc.nil? ? doc : directly_set_attributes(doc)
+        self.disable_dirty = false
+        res
       end
 
       def find_property!(property)
@@ -120,9 +126,8 @@ module CouchRest
 
       # Set all the attributes and return a hash with the attributes
       # that have not been accepted.
-      def directly_set_attributes(hash, options = {})
-        self.disable_dirty = !options[:dirty]
-        ret = hash.reject do |attribute_name, attribute_value|
+      def directly_set_attributes(hash)
+        hash.reject do |attribute_name, attribute_value|
           if self.respond_to?("#{attribute_name}=")
             self.send("#{attribute_name}=", attribute_value)
             true
@@ -133,8 +138,6 @@ module CouchRest
             false
           end
         end
-        self.disable_dirty = false
-        ret
       end
 
       def directly_set_read_only_attributes(hash)
@@ -147,10 +150,6 @@ module CouchRest
         end
       end
 
-      def set_attributes(hash)
-        attrs = remove_protected_attributes(hash)
-        directly_set_attributes(attrs)
-      end
 
 
       module ClassMethods
@@ -206,14 +205,14 @@ module CouchRest
               end
               type = [type] # inject as an array
             end
-            property = Property.new(name, type, options.merge(:use_dirty => use_dirty))
+            property = Property.new(name, type, options)
             create_property_getter(property)
             create_property_setter(property) unless property.read_only == true
             if property.type_class.respond_to?(:validates_casted_model)
               validates_casted_model property.name
             end
             properties << property
-            prop_by_name[property.to_s] = property
+            property_by_name[property.to_s] = property
             property
           end
 
@@ -247,7 +246,7 @@ module CouchRest
             property_name = property.name
             class_eval <<-EOS
               def #{property_name}=(value)
-                write_attribute_dirty('#{property_name}', value)
+                write_attribute('#{property_name}', value)
               end
             EOS
 

@@ -14,88 +14,25 @@ class WithCastedModelMixin < Hash
 end 
 
 class DummyModel < CouchRest::Model::Base
-  use_database TEST_SERVER.default_database
-  raise "Default DB not set" if TEST_SERVER.default_database.nil?
+  use_database DB
+
   property :casted_attribute, WithCastedModelMixin
+  property :title, :default => 'Sample Title'
   property :details,     Object,   :default => { 'color' => 'blue' }
   property :keywords,    [String], :default => ['default-keyword']
-  property :sub_models do |child|
-    child.property :title
+  property :sub_models do
+    property :title
   end
 end
 
-# set dirty configuration, return previous configuration setting
-def set_dirty(value)
-  orig = nil
-  CouchRest::Model::Base.configure do |config|
-    orig = config.use_dirty
-    config.use_dirty = value
-  end
-  Card.instance_eval do
-    self.use_dirty = value
-  end
-  orig
-end
-
-describe "With use_dirty(off)" do
-
-  before(:all) do
-    @use_dirty_orig = set_dirty(false)
-  end
-
-  # turn dirty back to default
-  after(:all) do
-    set_dirty(@use_dirty_orig)
-  end
-
-  describe "changes" do
-    
-    it "should not respond to the changes method" do
-      @card = Card.new
-      @card.first_name = "andrew"
-      @card.changes.should == {}
-    end
-
-  end
-
-  describe "changed?" do
-
-    it "should not record changes" do
-      @card = Card.new
-      @card.first_name = "andrew"
-      @card.changed?.should be_false
-    end
-  end
-
-  describe "save" do
-    
-    it "should save unchanged records" do
-      @card = Card.create!(:first_name => "matt")
-      @card = Card.find(@card.id)
-      @card.database.should_receive(:save_doc).and_return({"ok" => true})
-      @card.save
-    end
-
-  end
-
-end
-
-describe "With use_dirty(on)" do
-
-  before(:all) do
-    @use_dirty_orig = set_dirty(true)
-  end
-
-  # turn dirty back to default
-  after(:all) do
-    set_dirty(@use_dirty_orig)
-  end
+describe "Dirty" do
 
   describe "changes" do
 
     it "should return changes on an attribute" do
       @card = Card.new(:first_name => "matt")
       @card.first_name = "andrew"
+      @card.first_name_changed?.should be_true
       @card.changes.should == { "first_name" => ["matt", "andrew"] }
     end
 

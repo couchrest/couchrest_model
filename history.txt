@@ -1,6 +1,7 @@
 == 1.1.0.beta3
 
 * Major changes:
+  * Fast Dirty Tracking! Many thanks to @sobakasu (Andrew Williams)
   * Default CouchRest Model type field now set to 'model' instead of 'couchrest-type'.
 
 * Minor enhancements:

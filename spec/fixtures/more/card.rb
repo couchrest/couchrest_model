@@ -7,10 +7,10 @@ class Card < CouchRest::Model::Base
   property :last_name,        :alias     => :family_name
   property :read_only_value,  :read_only => true
   property :cast_alias,       Person,  :alias  => :calias
+  property :fg_color,         :default   => '#000'
 
-  
   timestamps!
-  
+
   # Validation
   validates_presence_of :first_name
   

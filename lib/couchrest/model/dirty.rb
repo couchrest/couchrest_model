@@ -22,7 +22,7 @@ module CouchRest
 
       def use_dirty?
         bdoc = base_doc
-        bdoc && bdoc.use_dirty && !bdoc.disable_dirty
+        bdoc && !bdoc.disable_dirty
       end
 
       def couchrest_attribute_will_change!(attr)
@@ -30,13 +30,13 @@ module CouchRest
         attribute_will_change!(attr)
         couchrest_parent_will_change!
       end
-      
+
       def couchrest_parent_will_change!
         @casted_by.couchrest_attribute_will_change!(casted_by_attribute) if @casted_by
       end
 
       private
-      
+
       # return the attribute name this object is referenced by in the parent
       def casted_by_attribute
         return @casted_by_attribute if @casted_by_attribute

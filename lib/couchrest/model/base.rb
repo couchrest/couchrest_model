@@ -40,10 +40,6 @@ module CouchRest
         subclasses << subklass
       end
 
-      # Accessors
-      attr_accessor :casted_by
-
-
       # Instantiate a new CouchRest::Model::Base by preparing all properties
       # using the provided document hash.
       #

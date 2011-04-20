@@ -30,7 +30,7 @@ module CouchRest
       def update(options = {})
         raise "Calling #{self.class.name}#update on document that has not been created!" if self.new?
         return false unless perform_validations(options)
-        return true if use_dirty? && !self.changed?
+        return true if !self.changed?
         _run_update_callbacks do
           _run_save_callbacks do
             result = database.save_doc(self)

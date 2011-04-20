@@ -11,31 +11,31 @@ module CouchRest::Model
       include CouchRest::Model::Associations
       include CouchRest::Model::Validations
       include CouchRest::Model::Dirty
-      attr_accessor :casted_by
+      # attr_accessor :casted_by
     end
-    
+
     def initialize(keys = {})
       raise StandardError unless self.is_a? Hash
       prepare_all_attributes(keys)
       super()
     end
-    
+
     def []= key, value
-      couchrest_attribute_will_change!(key) if use_dirty && self[key] != value
+      couchrest_attribute_will_change!(key) if self[key] != value
       super(key.to_s, value)
     end
-    
+
     def [] key
       super(key.to_s)
     end
-    
+
     # Gets a reference to the top level extended
     # document that a model is saved inside of
     def base_doc
       return nil unless @casted_by
       @casted_by.base_doc
     end
-    
+
     # False if the casted model has already
     # been saved in the containing document
     def new?
