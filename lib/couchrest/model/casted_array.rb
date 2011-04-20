@@ -5,6 +5,7 @@
 
 module CouchRest::Model
   class CastedArray < Array
+    include CouchRest::Model::Dirty
     attr_accessor :casted_by
     attr_accessor :property
 
@@ -14,15 +15,39 @@ module CouchRest::Model
     end
     
     def << obj
+      couchrest_parent_will_change! if use_dirty?
       super(instantiate_and_cast(obj))
     end
     
     def push(obj)
+      couchrest_parent_will_change! if use_dirty?
+      super(instantiate_and_cast(obj))
+    end
+
+    def pop
+      couchrest_parent_will_change! if use_dirty? && self.length > 0
+      super
+    end
+
+    def shift
+      couchrest_parent_will_change! if use_dirty? && self.length > 0
+      super
+    end
+
+    def unshift(obj)
+      couchrest_parent_will_change! if use_dirty?
       super(instantiate_and_cast(obj))
     end
     
     def []= index, obj
-      super(index, instantiate_and_cast(obj))
+      value = instantiate_and_cast(obj)
+      couchrest_parent_will_change! if use_dirty? && value != self[index]
+      super(index, value)
+    end
+
+    def clear
+      couchrest_parent_will_change! if use_dirty? && self.length > 0
+      super
     end
 
     protected

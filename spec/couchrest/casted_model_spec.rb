@@ -160,7 +160,7 @@ describe CouchRest::Model::CastedModel do
     end
 
     it "should cast the array properly" do
-      @obj.keywords.should be_an_instance_of(Array)
+      @obj.keywords.should be_kind_of(Array)
       @obj.keywords.first.should == 'couch'
     end
   end

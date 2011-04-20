@@ -11,11 +11,13 @@ module CouchRest
         add_config :model_type_key
         add_config :mass_assign_any_attribute
         add_config :auto_update_design_doc
+        add_config :use_dirty
 
         configure do |config|
           config.model_type_key = 'model' # was 'couchrest-type'
           config.mass_assign_any_attribute = false
           config.auto_update_design_doc = true
+          config.use_dirty = true
         end
       end
 
@@ -49,5 +51,3 @@ module CouchRest
     end
   end
 end
-
-

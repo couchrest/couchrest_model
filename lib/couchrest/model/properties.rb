@@ -6,7 +6,9 @@ module CouchRest
 
       included do
         extlib_inheritable_accessor(:properties) unless self.respond_to?(:properties)
+        extlib_inheritable_accessor(:prop_by_name) unless self.respond_to?(:prop_by_name)
         self.properties ||= []
+        self.prop_by_name ||= {}
         raise "You can only mixin Properties in a class responding to [] and []=, if you tried to mixin CastedModel, make sure your class inherits from Hash or responds to the proper methods" unless (method_defined?(:[]) && method_defined?(:[]=))
       end
 
@@ -43,6 +45,36 @@ module CouchRest
         self[prop.to_s] = prop.is_a?(String) ? value : prop.cast(self, value)
       end
 
+      # write property, update dirty status
+      def write_attribute_dirty(property, value)
+        prop = find_property!(property)
+        value = prop.is_a?(String) ? value : prop.cast(self, value)
+        propname = prop.to_s
+        attribute_will_change!(propname) if use_dirty? && self[propname] != value
+        self[propname] = value
+      end
+
+      def []=(key,value)
+        return super(key,value) unless use_dirty?
+
+        has_changes = self.changed?
+        if !has_changes && self.respond_to?(:get_unique_id)
+          check_id_change = true
+          old_id = get_unique_id
+        end
+
+        ret = super(key, value)
+
+        if check_id_change
+          # if we have set an attribute that results in the _id changing (unique_id),
+          # force changed? to return true so that the record can be saved
+          new_id = get_unique_id
+          changed_attributes["_id"] = new_id if old_id != new_id
+        end
+
+        ret
+      end
+
       # Takes a hash as argument, and applies the values by using writer methods
       # for each key. It doesn't save the document at the end. Raises a NoMethodError if the corresponding methods are
       # missing. In case of error, no attributes are changed.
@@ -50,12 +82,17 @@ module CouchRest
         # Remove any protected and update all the rest. Any attributes
         # which do not have a property will simply be ignored.
         attrs = remove_protected_attributes(hash)
-        directly_set_attributes(attrs)
+        directly_set_attributes(attrs, :dirty => true)
       end
       alias :attributes= :update_attributes_without_saving
 
+      # 'attributes' needed for Dirty
+      alias :attributes :properties_with_values
 
-      private
+      def find_property(property)
+        property.is_a?(Property) ? property : self.class.prop_by_name[property.to_s]
+      end
+
       # The following methods should be accessable by the Model::Base Class, but not by anything else!
       def apply_all_property_defaults
         return if self.respond_to?(:new?) && (new? == false)
@@ -76,15 +113,16 @@ module CouchRest
       end
 
       def find_property!(property)
-        prop = property.is_a?(Property) ? property : self.class.properties.detect {|p| p.to_s == property.to_s}
+        prop = find_property(property)
         raise ArgumentError, "Missing property definition for #{property.to_s}" if prop.nil?
         prop
       end
 
       # Set all the attributes and return a hash with the attributes
       # that have not been accepted.
-      def directly_set_attributes(hash)
-        hash.reject do |attribute_name, attribute_value|
+      def directly_set_attributes(hash, options = {})
+        self.disable_dirty = !options[:dirty]
+        ret = hash.reject do |attribute_name, attribute_value|
           if self.respond_to?("#{attribute_name}=")
             self.send("#{attribute_name}=", attribute_value)
             true
@@ -95,6 +133,8 @@ module CouchRest
             false
           end
         end
+        self.disable_dirty = false
+        ret
       end
 
       def directly_set_read_only_attributes(hash)
@@ -166,13 +206,14 @@ module CouchRest
               end
               type = [type] # inject as an array
             end
-            property = Property.new(name, type, options)
+            property = Property.new(name, type, options.merge(:use_dirty => use_dirty))
             create_property_getter(property)
             create_property_setter(property) unless property.read_only == true
             if property.type_class.respond_to?(:validates_casted_model)
               validates_casted_model property.name
             end
             properties << property
+            prop_by_name[property.to_s] = property
             property
           end
 
@@ -206,7 +247,7 @@ module CouchRest
             property_name = property.name
             class_eval <<-EOS
               def #{property_name}=(value)
-                write_attribute('#{property_name}', value)
+                write_attribute_dirty('#{property_name}', value)
               end
             EOS
 

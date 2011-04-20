@@ -10,6 +10,7 @@ module CouchRest::Model
       include CouchRest::Model::PropertyProtection
       include CouchRest::Model::Associations
       include CouchRest::Model::Validations
+      include CouchRest::Model::Dirty
       attr_accessor :casted_by
     end
     
@@ -20,6 +21,7 @@ module CouchRest::Model
     end
     
     def []= key, value
+      couchrest_attribute_will_change!(key) if use_dirty && self[key] != value
       super(key.to_s, value)
     end
     
@@ -64,5 +66,6 @@ module CouchRest::Model
       end
     end
     alias :attributes= :update_attributes_without_saving
+
   end
 end
