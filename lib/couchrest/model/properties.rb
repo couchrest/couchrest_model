@@ -6,9 +6,9 @@ module CouchRest
 
       included do
         extlib_inheritable_accessor(:properties) unless self.respond_to?(:properties)
-        extlib_inheritable_accessor(:property_by_name) unless self.respond_to?(:property_by_name)
+        extlib_inheritable_accessor(:properties_by_name) unless self.respond_to?(:properties_by_name)
         self.properties ||= []
-        self.property_by_name ||= {}
+        self.properties_by_name ||= {}
         raise "You can only mixin Properties in a class responding to [] and []=, if you tried to mixin CastedModel, make sure your class inherits from Hash or responds to the proper methods" unless (method_defined?(:[]) && method_defined?(:[]=))
       end
 
@@ -18,6 +18,12 @@ module CouchRest
       # Array:: the list of properties for model's class
       def properties
         self.class.properties
+      end
+
+      # Returns all the class's properties as a Hash where the key is the name
+      # of the property.
+      def properties_by_name
+        self.class.properties_by_name
       end
 
       # Returns the Class properties with their values
@@ -43,29 +49,8 @@ module CouchRest
       def write_attribute(property, value)
         prop = find_property!(property)
         value = prop.is_a?(String) ? value : prop.cast(self, value)
-        attribute_will_change!(prop.name) if use_dirty? && self[prop.name] != value
+        couchrest_attribute_will_change!(prop.name) if use_dirty? && self[prop.name] != value
         self[prop.name] = value
-      end
-
-      def []=(key,value)
-        return super(key,value) unless use_dirty?
-
-        has_changes = self.changed?
-        if !has_changes && self.respond_to?(:get_unique_id)
-          check_id_change = true
-          old_id = get_unique_id
-        end
-
-        ret = super(key, value)
-
-        if check_id_change
-          # if we have set an attribute that results in the _id changing (unique_id),
-          # force changed? to return true so that the record can be saved
-          new_id = get_unique_id
-          changed_attributes["_id"] = new_id if old_id != new_id
-        end
-
-        ret
       end
 
       # Takes a hash as argument, and applies the values by using writer methods
@@ -90,7 +75,7 @@ module CouchRest
       protected
 
       def find_property(property)
-        property.is_a?(Property) ? property : self.class.property_by_name[property.to_s]
+        property.is_a?(Property) ? property : self.class.properties_by_name[property.to_s]
       end
 
       # The following methods should be accessable by the Model::Base Class, but not by anything else!
@@ -212,7 +197,7 @@ module CouchRest
               validates_casted_model property.name
             end
             properties << property
-            property_by_name[property.to_s] = property
+            properties_by_name[property.to_s] = property
             property
           end
 

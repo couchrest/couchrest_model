@@ -38,16 +38,13 @@ module CouchRest::Model
         end
         arr = value.collect { |data| cast_value(parent, data) }
         # allow casted_by calls to be passed up chain by wrapping in CastedArray
-        value = CastedArray.new(arr, self)
-        value.casted_by = parent
+        CastedArray.new(arr, self, parent)
       elsif (type == Object || type == Hash) && (value.class == Hash)
         # allow casted_by calls to be passed up chain by wrapping in CastedHash
-        value = CouchRest::Model::CastedHash[value]
-        value.casted_by = parent
+        CastedHash[value, self, parent]
       elsif !value.nil?
-        value = cast_value(parent, value)
+        cast_value(parent, value)
       end
-      value
     end
 
     # Cast an individual value, not an array
@@ -71,6 +68,7 @@ module CouchRest::Model
 
       def associate_casted_value_to_parent(parent, value)
         value.casted_by = parent if value.respond_to?(:casted_by)
+        value.casted_by_property = self if value.respond_to?(:casted_by_property)
         value
       end
 

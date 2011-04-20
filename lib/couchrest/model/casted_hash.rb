@@ -3,8 +3,16 @@
 
 module CouchRest::Model
   class CastedHash < Hash
+    include CouchRest::Model::CastedBy
     include CouchRest::Model::Dirty
-    attr_accessor :casted_by
+    attr_accessor :casted_by_property
+
+    def self.[](hash, property, parent = nil)
+      obj = super(hash)
+      obj.casted_by_property = property
+      obj.casted_by = parent unless parent.nil?
+      obj
+    end
 
     # needed for dirty
     def attributes

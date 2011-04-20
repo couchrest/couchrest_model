@@ -1,6 +1,6 @@
 module CouchRest::Model
   module CastedModel
-   
+
     extend ActiveSupport::Concern
 
     included do
@@ -10,8 +10,14 @@ module CouchRest::Model
       include CouchRest::Model::PropertyProtection
       include CouchRest::Model::Associations
       include CouchRest::Model::Validations
+      include CouchRest::Model::CastedBy
       include CouchRest::Model::Dirty
-      # attr_accessor :casted_by
+      class_eval do
+        # Override CastedBy's base_doc?
+        def base_doc?
+          false # Can never be base doc!
+        end
+      end
     end
 
     def initialize(keys = {})
@@ -21,7 +27,6 @@ module CouchRest::Model
     end
 
     def []= key, value
-      couchrest_attribute_will_change!(key) if self[key] != value
       super(key.to_s, value)
     end
 
@@ -29,17 +34,10 @@ module CouchRest::Model
       super(key.to_s)
     end
 
-    # Gets a reference to the top level extended
-    # document that a model is saved inside of
-    def base_doc
-      return nil unless @casted_by
-      @casted_by.base_doc
-    end
-
     # False if the casted model has already
     # been saved in the containing document
     def new?
-      @casted_by.nil? ? true : @casted_by.new?
+      casted_by.nil? ? true : casted_by.new?
     end
     alias :new_record? :new?
 
@@ -68,4 +66,5 @@ module CouchRest::Model
     alias :attributes= :update_attributes_without_saving
 
   end
+
 end

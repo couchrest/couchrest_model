@@ -10,7 +10,6 @@ module CouchRest
     # This applies to both Model::Base and Model::CastedModel
     module Dirty
       extend ActiveSupport::Concern
-      include CouchRest::Model::CastedBy  # needed for base_doc
       include ActiveModel::Dirty
 
       included do
@@ -21,8 +20,8 @@ module CouchRest
       end
 
       def use_dirty?
-        bdoc = base_doc
-        bdoc && !bdoc.disable_dirty
+        doc = base_doc
+        doc && !doc.disable_dirty
       end
 
       def couchrest_attribute_will_change!(attr)
@@ -32,16 +31,7 @@ module CouchRest
       end
 
       def couchrest_parent_will_change!
-        @casted_by.couchrest_attribute_will_change!(casted_by_attribute) if @casted_by
-      end
-
-      private
-
-      # return the attribute name this object is referenced by in the parent
-      def casted_by_attribute
-        return @casted_by_attribute if @casted_by_attribute
-        attr = @casted_by.attributes
-        @casted_by_attribute = attr.keys.detect { |k| attr[k] == self }
+        casted_by.couchrest_attribute_will_change!(casted_by_property.name) if casted_by_property
       end
 
     end

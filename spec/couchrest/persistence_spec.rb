@@ -227,7 +227,7 @@ describe "Model Persistence" do
       @templated['important-field'] = 'not-important'
       @templated.save.should be_true
       t = WithTemplateAndUniqueID.get('very-important')
-      t.should == @templated
+      t.id.should == @templated.id
     end
     
     it "should raise an error when the id is taken" do

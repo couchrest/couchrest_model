@@ -13,7 +13,7 @@ class WithCastedModelMixin < Hash
   property :casted_attribute, WithCastedModelMixin
 end 
 
-class DummyModel < CouchRest::Model::Base
+class DirtyModel < CouchRest::Model::Base
   use_database DB
 
   property :casted_attribute, WithCastedModelMixin
@@ -23,6 +23,16 @@ class DummyModel < CouchRest::Model::Base
   property :sub_models do
     property :title
   end
+end
+
+class DirtyUniqueIdModel < CouchRest::Model::Base
+  use_database DB
+  attr_accessor :code
+  unique_id :code
+  property :title, String, :default => "Sample Title"
+  timestamps!
+
+  def code; self['_id'] || @code; end
 end
 
 describe "Dirty" do
@@ -66,18 +76,21 @@ describe "Dirty" do
     end
 
     it "should report no changes on a hash property with a default value" do
-      @obj = DummyModel.new
+      @obj = DirtyModel.new
       @obj.details.changed?.should be_false
     end
 
-=begin
     # match activerecord behaviour
-    # not currently working - not too important
     it "should report changes on a new object with attributes set" do
       @card = Card.new(:first_name => "matt")
       @card.changed?.should be_true
     end
-=end
+
+    it "should report no changes on new object with 'unique_id' set" do
+      @obj = DirtyUniqueIdModel.new
+      @obj.changed?.should be_false
+      @obj.changes.should be_empty
+    end
 
     it "should report no changes on objects fetched from the database" do
       card_id = Card.create!(:first_name => "matt").id
@@ -156,15 +169,37 @@ describe "Dirty" do
     it "should report changes to casted models" do
       @cat = Cat.create!(:name => "Felix", :favorite_toy => { :name => "Mouse" })
       @cat = Cat.find(@cat.id)
-      @cat.favorite_toy['name'] = 'Feather'
+      @cat.favorite_toy.name = 'Feather'
       @cat.changed?.should be_true
+    end
+
+    it "should report changes to casted model in array" do
+      @obj = Cat.create!(:name => 'felix', :toys => [{:name => "Catnip"}])
+      @obj = Cat.get(@obj.id)
+      @obj.toys.first.name.should eql('Catnip')
+      @obj.toys.first.changed?.should be_false
+      @obj.changed?.should be_false
+      @obj.toys.first.name = "Super Catnip"
+      @obj.toys.first.changed?.should be_true
+      @obj.changed?.should be_true
+    end
+
+    it "should report changes to anonymous casted models in array" do
+      @obj = DirtyModel.create!(:sub_models => [{:title => "Sample"}])
+      @obj = DirtyModel.get(@obj.id)
+      @obj.sub_models.first.title.should eql("Sample")
+      @obj.sub_models.first.changed?.should be_false
+      @obj.changed?.should be_false
+      @obj.sub_models.first.title = "Another Sample"
+      @obj.sub_models.first.changed?.should be_true
+      @obj.changed?.should be_true
     end
 
     # casted arrays
 
     def test_casted_array(change_expected)
-      obj = DummyModel.create!
-      obj = DummyModel.get(obj.id)
+      obj = DirtyModel.create!
+      obj = DirtyModel.get(obj.id)
       array = obj.keywords
       yield array, obj
       if change_expected
@@ -249,8 +284,8 @@ describe "Dirty" do
     # Object, {}  (casted hash)
 
     def test_casted_hash(change_expected)
-      obj = DummyModel.create!
-      obj = DummyModel.get(obj.id)
+      obj = DirtyModel.create!
+      obj = DirtyModel.get(obj.id)
       hash = obj.details
       yield hash, obj
       if change_expected

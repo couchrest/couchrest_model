@@ -18,8 +18,8 @@ module CouchRest
       include CouchRest::Model::Associations
       include CouchRest::Model::Validations
       include CouchRest::Model::Designs
-      include CouchRest::Model::Dirty
       include CouchRest::Model::CastedBy
+      include CouchRest::Model::Dirty
 
       def self.subclasses
         @subclasses ||= []
@@ -72,14 +72,6 @@ module CouchRest
           end
         end
         super
-      end
-
-      ### instance methods
-
-      # Checks if we're the top document
-      # (overrides base_doc? in casted_by.rb)
-      def base_doc?
-        !@casted_by
       end
 
       ## Compatibility with ActiveSupport and older frameworks
