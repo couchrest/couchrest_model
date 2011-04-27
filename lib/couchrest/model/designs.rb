@@ -65,6 +65,17 @@ module CouchRest
           create_view_method(name)
         end
 
+        # Really simple design function that allows a filter
+        # to be added. Filters are simple functions used when listening
+        # to the _changes feed.
+        #
+        # No methods are created here, the design is simply updated.
+        # See the CouchDB API for more information on how to use this.
+        def filter(name, function)
+          filters = (self.model.design_doc['filters'] ||= {})
+          filters[name.to_s] = function
+        end
+
         def create_view_method(name)
           model.class_eval <<-EOS, __FILE__, __LINE__ + 1
             def self.#{name}(opts = {})

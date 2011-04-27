@@ -87,6 +87,20 @@ describe "Design" do
 
     end
 
+    describe "#filter" do
+
+      before :each do
+        @object = @klass.new(DesignModel)
+      end
+
+      it "should add the provided function to the design doc" do
+        @object.filter(:important, "function(doc, req) { return doc.priority == 'high'; }")
+        DesignModel.design_doc['filters'].should_not be_empty
+        DesignModel.design_doc['filters']['important'].should_not be_blank
+      end
+
+    end
+
     describe "#create_view_method" do
       before :each do
         @object = @klass.new(DesignModel)
