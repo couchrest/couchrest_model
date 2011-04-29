@@ -42,8 +42,10 @@ module CouchRest
 
         # Define the name of a method to call to determine the name of
         # the database to use as a proxy.
-        def proxy_database_method=(name); @proxy_database_method = name; end
-        def proxy_database_method; @proxy_database_method; end
+        def proxy_database_method(name = nil)
+          @proxy_database_method = name if name
+          @proxy_database_method
+        end
 
         private
 
@@ -51,7 +53,9 @@ module CouchRest
         # by overwriting it to provide a basic accessor.
         def overwrite_database_reader(model_name)
           class_eval <<-EOS, __FILE__, __LINE__ + 1
-            def database; @database; end
+            def self.database
+              raise StandardError, "#{self.to_s} database must be accessed via '#{model_name}' proxy"
+            end
           EOS
         end
 

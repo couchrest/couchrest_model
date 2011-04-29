@@ -3,8 +3,9 @@ require File.expand_path("../../spec_helper", __FILE__)
 require File.join(FIXTURE_PATH, 'more', 'cat')
 
 class DummyProxyable < CouchRest::Model::Base
-  def proxy_database
-    'db' # Do not use this!
+  proxy_database_method :db
+  def db
+    'db'
   end
 end
 
@@ -41,11 +42,11 @@ describe "Proxyable" do
 
   describe "class methods" do
 
-    before(:each) do
-      @class = DummyProxyable.clone
-    end
 
     describe ".proxy_owner_method" do
+      before(:each) do
+        @class = DummyProxyable.clone
+      end
       it "should provide proxy_owner_method accessors" do
         @class.should respond_to(:proxy_owner_method)
         @class.should respond_to(:proxy_owner_method=)
@@ -56,7 +57,20 @@ describe "Proxyable" do
       end
     end
 
+    describe ".proxy_database_method" do
+      before do
+        @class = Class.new(CouchRest::Model::Base)
+      end
+      it "should be possible to set the proxy database method" do
+        @class.proxy_database_method :db
+        @class.proxy_database_method.should eql(:db)
+      end
+    end
+
     describe ".proxy_for" do
+      before(:each) do
+        @class = DummyProxyable.clone
+      end
 
       it "should be provided" do
         @class.should respond_to(:proxy_for)
@@ -91,6 +105,10 @@ describe "Proxyable" do
     end
 
     describe ".proxied_by" do
+      before do
+        @class = Class.new(CouchRest::Model::Base)
+      end
+
       it "should be provided" do
         @class.should respond_to(:proxied_by)
       end
@@ -117,6 +135,11 @@ describe "Proxyable" do
       it "should raise an error if object already has a proxy" do
         @class.proxied_by(:department)
         lambda { @class.proxied_by(:company) }.should raise_error
+      end
+
+      it "should overwrite the database method to provide an error" do
+        @class.proxied_by(:company)
+        lambda { @class.database }.should raise_error(StandardError, /database must be accessed via/)
       end
     end
   end
