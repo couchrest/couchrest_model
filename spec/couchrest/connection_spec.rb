@@ -85,6 +85,12 @@ describe CouchRest::Model::Base do
         @class.should respond_to(:prepare_database)
       end
 
+      it "should join the database name correctly" do
+        @class.connection[:suffix] = 'db'
+        db = @class.prepare_database('test')
+        db.name.should eql('couchrest_test_db')
+      end
+
     end
 
     describe "protected methods" do
@@ -92,6 +98,13 @@ describe CouchRest::Model::Base do
       describe ".connection_configuration" do
         it "should provide main config by default" do
           @class.send(:connection_configuration).should eql(@class.connection)
+        end
+        it "should load file if available" do
+          @class.connection_config_file = File.join(FIXTURE_PATH, 'config', 'couchdb.yml')
+          hash = @class.send(:connection_configuration)
+          hash[:protocol].should eql('https')
+          hash[:host].should eql('sample.cloudant.com')
+          hash[:join].should eql('_')
         end
       end
 
@@ -101,10 +114,9 @@ describe CouchRest::Model::Base do
         end
         it "should load file if available" do
           @class.connection_config_file = File.join(FIXTURE_PATH, 'config', 'couchdb.yml')
-          puts @class.send(:connection_config_cache).inspect
           hash = @class.send(:load_connection_config_file)
           hash[:development].should_not be_nil
-          @class.server.uri.should eql("https://test:uesr@sample.cloudant.com:443")
+          @class.server.uri.should eql("https://test:user@sample.cloudant.com:443")
         end
 
       end

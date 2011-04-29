@@ -35,6 +35,7 @@ module CouchRest
             :port     => '5984',
             :prefix   => app_name,
             :suffix   => nil,
+            :join     => '_',
             :username => nil,
             :password => nil
           }

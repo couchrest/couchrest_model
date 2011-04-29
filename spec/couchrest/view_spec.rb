@@ -7,11 +7,15 @@ require File.join(FIXTURE_PATH, 'more', 'course')
 describe "Model views" do
 
   class Unattached < CouchRest::Model::Base
-    # Note: no use_database here
     property :title
     property :questions
     property :professor
     view_by :title
+
+    # Force the database to always be nil
+    def self.database
+      nil
+    end
   end
  
 
@@ -195,7 +199,7 @@ describe "Model views" do
     end
   end
   
-  describe "a model class not tied to a database" do
+  describe "a model class with database provided manually" do
     before(:all) do
       reset_test_db!
       @db = DB 

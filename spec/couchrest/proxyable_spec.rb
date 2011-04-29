@@ -13,6 +13,32 @@ end
 
 describe "Proxyable" do
 
+  describe "#proxy_database" do
+
+    before do
+      @class = Class.new(CouchRest::Model::Base)
+      @class.class_eval do 
+        def slug; 'proxy'; end
+      end
+      @obj = @class.new
+    end
+
+    it "should respond to method" do
+      @obj.should respond_to(:proxy_database)
+    end
+
+    it "should provide proxy database from method" do
+      @class.stub!(:proxy_database_method).twice.and_return(:slug)
+      @obj.proxy_database.should be_a(CouchRest::Database)
+      @obj.proxy_database.name.should eql('couchrest_proxy')
+    end
+
+    it "should raise an error if called and no proxy_database_method set" do
+      lambda { @obj.proxy_database }.should raise_error(StandardError, /Please set/)
+    end
+
+  end
+
   describe "class methods" do
 
     before(:each) do
@@ -48,7 +74,6 @@ describe "Proxyable" do
           @obj = DummyProxyable.new
           CouchRest::Model::Proxyable::ModelProxy.should_receive(:new).with(Cat, @obj, 'dummy_proxyable', 'db').and_return(true)
           @obj.should_receive('proxy_database').and_return('db')
-          @obj.should_receive(:respond_to?).with('proxy_database').and_return(true)
           @obj.cats
         end
 
@@ -60,21 +85,7 @@ describe "Proxyable" do
           @obj = DummyProxyable.new
           CouchRest::Model::Proxyable::ModelProxy.should_receive(:new).with(::Document, @obj, 'dummy_proxyable', 'db').and_return(true)
           @obj.should_receive('proxy_database').and_return('db')
-          @obj.should_receive(:respond_to?).with('proxy_database').and_return(true)
           @obj.documents
-        end
-
-        it "should raise an error if the database method is missing" do
-          @class.proxy_for(:cats)
-          @obj = @class.new
-          @obj.should_receive(:respond_to?).with('proxy_database').and_return(false)
-          lambda { @obj.cats }.should raise_error(StandardError, "Missing #proxy_database method for proxy")
-        end
-
-        it "should raise an error if custom database method missing" do
-          @class.proxy_for(:proxy_kittens, :database_method => "foobardom")
-          @obj = @class.new
-          lambda { @obj.proxy_kittens }.should raise_error(StandardError, "Missing #foobardom method for proxy")
         end
       end
     end
@@ -316,7 +327,7 @@ describe "Proxyable" do
 
     it "should allow creation of new entries" do
       inv = @company.proxyable_invoices.new(:client => "Lorena", :total => 35)
-      inv.database.should_not be_nil
+      # inv.database.should_not be_nil
       inv.save.should be_true
       @company.proxyable_invoices.count.should eql(1)
       @company.proxyable_invoices.first.client.should eql("Lorena")

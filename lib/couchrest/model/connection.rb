@@ -3,10 +3,6 @@ module CouchRest
     module Connection
       extend ActiveSupport::Concern
 
-      def database
-        self.class.database
-      end
-
       def server
         self.class.server
       end
@@ -16,15 +12,13 @@ module CouchRest
         # Overwrite the normal use_database method so that a database
         # name can be provided instead of a full connection.
         def use_database(db)
-          @_database_name = db
+          @database = prepare_database(db)
         end
 
-        # Replace CouchRest's database reader with a more advanced
-        # version that will make a best guess at the database you might
-        # want to use. Allows for a string to be provided instead of 
-        # a database object.
+        # Overwrite the default database method so that it always
+        # provides something from the configuration
         def database
-          @database ||= prepare_database(@_database_name)
+          super || (@database ||= prepare_database)
         end
 
         def server
@@ -34,7 +28,7 @@ module CouchRest
         def prepare_database(db = nil)
           unless db.is_a?(CouchRest::Database)
             conf = connection_configuration
-            db = [conf[:prefix], db.to_s, conf[:suffix]].compact.join('_')
+            db = [conf[:prefix], db.to_s, conf[:suffix]].reject{|s| s.to_s.empty?}.join(conf[:join])
             self.server.database!(db)
           else
             db
@@ -51,7 +45,7 @@ module CouchRest
         end
 
         def connection_configuration
-          @server_configuration ||=
+          @connection_configuration ||=
             self.connection.update(
               (load_connection_config_file[environment] || {}).symbolize_keys
             )
@@ -59,9 +53,9 @@ module CouchRest
 
         def load_connection_config_file
           connection_config_cache[connection_config_file] ||=
-            File.exists?(connection_config_file) ?
+            (File.exists?(connection_config_file) ?
               YAML::load(ERB.new(IO.read(connection_config_file)).result) :
-              { }
+              { }).symbolize_keys
         end
 
         def connection_config_cache

@@ -47,14 +47,11 @@ module CouchRest
 
         private
 
-        # Ensure that the model can no longer be used for normal requests
-        # be overwriting the database reader method so that a helpful
-        # error message is displayed.
+        # Ensure that no attempt is made to autoload a database connection
+        # by overwriting it to provide a basic accessor.
         def overwrite_database_reader(model_name)
           class_eval <<-EOS, __FILE__, __LINE__ + 1
-            def database
-              raise StandardError, "#{self.to_s} documents must be accessed via the '#{model_name}' proxy"
-            end
+            def database; @database; end
           EOS
         end
 
