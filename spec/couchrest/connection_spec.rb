@@ -33,6 +33,20 @@ describe CouchRest::Model::Base do
     end
   end
 
+  describe "default configuration" do
+
+    it "should provide environment" do
+      @class.environment.should eql(:development)
+    end
+    it "should provide connection config file" do
+      @class.connection_config_file.should eql(File.join(Dir.pwd, 'config', 'couchdb.yml'))
+    end
+    it "should provided simple connection details" do
+      @class.connection[:prefix].should eql('couchrest')
+    end
+
+  end
+
   describe "class methods" do
 
     describe ".use_database" do
@@ -91,6 +105,11 @@ describe CouchRest::Model::Base do
         db.name.should eql('couchrest_test_db')
       end
 
+      it "should ignore nil values in database name" do
+        @class.connection[:suffix] = nil
+        db = @class.prepare_database('test')
+        db.name.should eql('couchrest_test')
+      end
     end
 
     describe "protected methods" do

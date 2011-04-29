@@ -20,20 +20,13 @@ module CouchRest
           config.mass_assign_any_attribute = false
           config.auto_update_design_doc = true
 
-          config.environment = defined?(Rails) ? Rails.env : :development
-
-          config.connection_config_file =
-            File.join(
-              defined?(Rails) ? Rails.root : Dir.pwd,
-              'config', 'couchdb.yml'
-            )
-
-          app_name = defined?(Rails) ? Rails.application.class.to_s.underscore.gsub(/\/.*/, '') : 'couchrest'
+          config.environment = :development
+          config.connection_config_file = File.join(Dir.pwd, 'config', 'couchdb.yml')
           config.connection = {
             :protocol => 'http',
             :host     => 'localhost',
             :port     => '5984',
-            :prefix   => app_name,
+            :prefix   => 'couchrest',
             :suffix   => nil,
             :join     => '_',
             :username => nil,

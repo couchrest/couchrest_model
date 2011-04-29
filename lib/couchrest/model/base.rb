@@ -4,8 +4,8 @@ module CouchRest
 
       extend ActiveModel::Naming
 
-      include CouchRest::Model::Connection
       include CouchRest::Model::Configuration
+      include CouchRest::Model::Connection
       include CouchRest::Model::Persistence
       include CouchRest::Model::Callbacks
       include CouchRest::Model::DocumentQueries

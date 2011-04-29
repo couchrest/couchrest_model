@@ -47,20 +47,22 @@ module CouchRest
         def connection_configuration
           @connection_configuration ||=
             self.connection.update(
-              (load_connection_config_file[environment] || {}).symbolize_keys
+              (load_connection_config_file[environment.to_sym] || {}).symbolize_keys
             )
         end
 
         def load_connection_config_file
-          connection_config_cache[connection_config_file] ||=
-            (File.exists?(connection_config_file) ?
-              YAML::load(ERB.new(IO.read(connection_config_file)).result) :
+          file = connection_config_file
+          connection_config_cache[file] ||=
+            (File.exists?(file) ?
+              YAML::load(ERB.new(IO.read(file)).result) :
               { }).symbolize_keys
         end
 
         def connection_config_cache
           Thread.current[:connection_config_cache] ||= {}
         end
+
       end
 
     end

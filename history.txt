@@ -1,3 +1,8 @@
+== 1.1.0.beta5
+
+* Major changes:
+  * Database auto configuration, with connection options!
+
 == 1.1.0.beta4
 
 * Major changes:
