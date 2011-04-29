@@ -4,7 +4,13 @@ module CouchRest
     module Proxyable
       extend ActiveSupport::Concern
 
+      def proxy_database
+        raise StandardError, "Please set the #proxy_database_method" if self.class.proxy_database_method.nil?
+        @proxy_database ||= self.class.prepare_database(self.send(self.class.proxy_database_method))
+      end
+
       module ClassMethods
+
 
         # Define a collection that will use the base model for the database connection
         # details.
@@ -13,19 +19,19 @@ module CouchRest
           options[:class_name] ||= assoc_name.to_s.singularize.camelize
           class_eval <<-EOS, __FILE__, __LINE__ + 1
             def #{assoc_name}
-              unless respond_to?('#{db_method}')
-                raise "Missing ##{db_method} method for proxy"
-              end
               @#{assoc_name} ||= CouchRest::Model::Proxyable::ModelProxy.new(::#{options[:class_name]}, self, self.class.to_s.underscore, #{db_method})
             end
           EOS
         end
 
+        # Tell this model which other model to use a base for the database
+        # connection to use.
         def proxied_by(model_name, options = {})
           raise "Model can only be proxied once or ##{model_name} already defined" if method_defined?(model_name) || !proxy_owner_method.nil?
           self.proxy_owner_method = model_name
           attr_accessor :model_proxy
           attr_accessor model_name
+          overwrite_database_reader(model_name)
         end
 
         # Define an a class variable accessor ready to be inherited and unique
@@ -33,6 +39,24 @@ module CouchRest
         # Perhaps there is a shorter way of writing this.
         def proxy_owner_method=(name); @proxy_owner_method = name; end
         def proxy_owner_method; @proxy_owner_method; end
+
+        # Define the name of a method to call to determine the name of
+        # the database to use as a proxy.
+        def proxy_database_method=(name); @proxy_database_method = name; end
+        def proxy_database_method; @proxy_database_method; end
+
+        private
+
+        # Ensure that the model can no longer be used for normal requests
+        # be overwriting the database reader method so that a helpful
+        # error message is displayed.
+        def overwrite_database_reader(model_name)
+          class_eval <<-EOS, __FILE__, __LINE__ + 1
+            def database
+              raise StandardError, "#{self.to_s} documents must be accessed via the '#{model_name}' proxy"
+            end
+          EOS
+        end
 
       end
 

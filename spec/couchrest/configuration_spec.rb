@@ -56,10 +56,52 @@ describe CouchRest::Model::Base do
     end
   end
 
+  describe "default configuration" do
+
+    it "should provide environment" do
+      @class.environment.should eql(:development)
+    end
+    it "should provide connection config file" do
+      @class.connection_config_file.should eql(File.join(Dir.pwd, 'config', 'couchdb.yml'))
+    end
+    it "should provided simple connection details" do
+      @class.connection[:prefix].should eql('couchrest')
+    end
+
+  end
+
+  describe "default configuration with Rails" do
+    before do
+      Rails = mock('Rails') unless defined?(Rails)
+      Rails.stub!(:env).and_return(:dev)
+      Rails.stub!(:root).and_return("/rails/root")
+      app = mock('Application')
+      app.stub!(:class).and_return("SampleCouch::Application")
+      Rails.stub!(:application).and_return(app)
+
+      # New anon class!
+      @class = Class.new()
+      @class.class_eval do
+        include CouchRest::Model::Configuration
+      end
+    end
+
+    it "should provide environment" do
+      @class.environment.should eql(:dev)
+    end
+    it "should provide connection config file" do
+      @class.connection_config_file.should eql(File.join("/rails/root", 'config', 'couchdb.yml'))
+    end
+    it "should provided simple connection details" do
+      @class.connection[:prefix].should eql('sample_couch')
+    end
+
+  end
+
   describe "General examples" do
 
     before(:all) do
-      @default_model_key = 'model'
+      @default_model_key = 'model-type'
     end
 
 

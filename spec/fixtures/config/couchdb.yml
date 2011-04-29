@@ -1,0 +1,10 @@
+
+development:
+  protocol: 'https'
+  host: sample.cloudant.com
+  port: 443
+  prefix: project
+  suffix: text
+  username: test
+  password: user
+

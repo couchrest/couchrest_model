@@ -46,6 +46,7 @@ require "couchrest/model/proxyable"
 require "couchrest/model/collection"
 require "couchrest/model/associations"
 require "couchrest/model/configuration"
+require "couchrest/model/connection"
 require "couchrest/model/designs"
 require "couchrest/model/designs/view"
 
@@ -61,4 +62,6 @@ require "couchrest/model/casted_model"
 require "couchrest/model/base"
 # Add rails support *after* everything has loaded
 
-require "couchrest/railtie"
+if defined?(Rails)
+  require "couchrest/railtie"
+end

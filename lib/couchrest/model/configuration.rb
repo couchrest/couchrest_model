@@ -11,13 +11,33 @@ module CouchRest
         add_config :model_type_key
         add_config :mass_assign_any_attribute
         add_config :auto_update_design_doc
-        add_config :database_config_path
+        add_config :environment
+        add_config :connection
+        add_config :connection_config_file
 
         configure do |config|
           config.model_type_key = 'model' # was 'couchrest-type'
           config.mass_assign_any_attribute = false
           config.auto_update_design_doc = true
-          config.database_config_path = File.join(defined?(Rails) ? Rails.root : Dir.pwd, 'config', 'couchdb.yml')
+
+          config.environment = defined?(Rails) ? Rails.env : :development
+
+          config.connection_config_file =
+            File.join(
+              defined?(Rails) ? Rails.root : Dir.pwd,
+              'config', 'couchdb.yml'
+            )
+
+          app_name = defined?(Rails) ? Rails.application.class.to_s.underscore.gsub(/\/.*/, '') : 'couchrest'
+          config.connection = {
+            :protocol => 'http',
+            :host     => 'localhost',
+            :port     => '5984',
+            :prefix   => app_name,
+            :suffix   => nil,
+            :username => nil,
+            :password => nil
+          }
         end
       end
 
