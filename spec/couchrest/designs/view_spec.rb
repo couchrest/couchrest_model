@@ -74,7 +74,7 @@ describe "Design View" do
       it "should auto generate mapping from name" do
         lambda { @klass.create(DesignViewModel, 'by_title') }.should_not raise_error
         str = @design_doc['views']['by_title']['map']
-        str.should include("((doc['model'] == 'DesignViewModel') && (doc['title'] != null))")
+        str.should include("((doc['#{DesignViewModel.model_type_key}'] == 'DesignViewModel') && (doc['title'] != null))")
         str.should include("emit(doc['title'], 1);")
         str = @design_doc['views']['by_title']['reduce']
         str.should include("return sum(values);")

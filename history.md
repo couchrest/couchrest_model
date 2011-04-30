@@ -1,7 +1,11 @@
-== 1.1.0.beta5
+== 1.1.0.beta5 - 2011-04-30
 
 * Major changes:
   * Database auto configuration, with connection options!
+  * Changed default CouchRest Model type to 'type' to be more consistent with ActiveRecord's reserverd words we're all used to (sorry for the change again!!)
+
+* Minor changes
+  * Added filter option to designs (Used with CouchDB _changes feeds)
 
 == 1.1.0.beta4
 

@@ -140,7 +140,7 @@ module CouchRest
       module ClassMethods
 
         def property(name, *options, &block)
-          raise "Invalid property definition, '#{name}' already used for CouchRest Model type field" if name.to_s == model_type_key.to_s
+          raise "Invalid property definition, '#{name}' already used for CouchRest Model type field" if name.to_s == model_type_key.to_s && CouchRest::Model::Base >= self
           opts = { }
           type = options.shift
           if type.class != Hash

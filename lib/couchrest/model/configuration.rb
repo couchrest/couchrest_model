@@ -16,7 +16,7 @@ module CouchRest
         add_config :connection_config_file
 
         configure do |config|
-          config.model_type_key = 'model' # was 'couchrest-type'
+          config.model_type_key = 'type' # was 'couchrest-type'
           config.mass_assign_any_attribute = false
           config.auto_update_design_doc = true
 

@@ -56,7 +56,11 @@ describe "Model properties" do
   end
 
   it "should raise error if property name coincides with model type key" do
-    lambda { Person.property(Person.model_type_key) }.should raise_error(/already used/)
+    lambda { Cat.property(Cat.model_type_key) }.should raise_error(/already used/)
+  end
+
+  it "should not raise error if property name coincides with model type key on non-model" do
+    lambda { CatToy.property(Cat.model_type_key) }.should_not raise_error
   end
 
   it "should be auto timestamped" do
