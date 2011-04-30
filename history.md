@@ -1,4 +1,6 @@
-== 1.1.0.beta5 - 2011-04-30
+# CouchRest Model Change History
+
+## 1.1.0.beta5 - 2011-04-30
 
 * Major changes:
   * Database auto configuration, with connection options!
@@ -7,7 +9,7 @@
 * Minor changes
   * Added filter option to designs (Used with CouchDB _changes feeds)
 
-== 1.1.0.beta4
+## 1.1.0.beta4
 
 * Major changes:
   * Fast Dirty Tracking! Many thanks to @sobakasu (Andrew Williams)
@@ -19,11 +21,11 @@
   * Added "auto_update_design_doc" configuration option.
   * Using #descending on View object will automatically swap startkey with endkey.
 
-== 1.1.0.beta3
+## 1.1.0.beta3
 
 * Removed
 
-== 1.1.0.beta2
+## 1.1.0.beta2
 
 * Minor enhancements:
   * Time handling improved in accordance with CouchRest 1.1.0. Always set to UTC.
@@ -32,7 +34,7 @@
   * Unique Validation now supports scopes!
   * Added support for #keys with list on Design View.
 
-== 1.1.0.beta
+## 1.1.0.beta
 
 * Epic enhancements:
   * Added "View" object for dynamic view queries
@@ -46,7 +48,7 @@
   * Numeric types can be casted from strings with leading or trailing whitespace (thanks chrisdurtschi)
   * CollectionProxy no longer provided by default with simple views (pending deprication)
 
-== CouchRest Model 1.0.0
+## CouchRest Model 1.0.0
 
 * Major enhancements
   * Support for configuration module and "model_type_key" option for overriding model's type key
@@ -65,7 +67,7 @@ Notes:
   Until these have been resolved (if possible?!) they should not be included. See the
   'active_model_attrs' if you'd like to test.
 
-== CouchRest Model 1.0.0.beta8
+## CouchRest Model 1.0.0.beta8
 
 * Major enhancements
 	* Added model generator
@@ -76,7 +78,7 @@ Notes:
   * Parsing times without zone
   * Using latest rspec (2.0.0.beta.19)
 
-== CouchRest Model 1.0.0.beta7
+## CouchRest Model 1.0.0.beta7
 
 * Major enhancements
   * Renamed ExtendedDocument to CouchRest::Model
@@ -92,7 +94,7 @@ Notes:
   * Removed support for auto_validate! and :length on properties
 
 
-== 1.0.0.beta6
+## 1.0.0.beta6
 
 * Major enhancements
   * Added support for anonymous CastedModels defined in Documents
@@ -106,12 +108,12 @@ Notes:
   * Setting a property of type Array (or keyed hash) must be an array or an error will be raised.
   * Now possible to set Array attribute from hash where keys determine order.
 
-== 1.0.0.beta5
+## 1.0.0.beta5
 
 * Minor enhancements
   * Added 'find' alias for 'get' for easier rails transition
 
-== 1.0.0.beta3
+## 1.0.0.beta3
 
 * Minor enhancements
   * Removed Validation by default, requires too many structure changes (FAIL)
@@ -121,12 +123,12 @@ Notes:
   * Added support for setting type directly on property (Sam Lown)
 
 
-== 1.0.0.beta2
+## 1.0.0.beta2
 
 * Minor enhancements
   * Enable Validation by default and refactored location (Sam Lown)
 
-== 1.0.0.beta
+## 1.0.0.beta
 
 * Major enhancements
   * Separated ExtendedDocument from main CouchRest gem (Sam Lown)
@@ -134,12 +136,12 @@ Notes:
 * Minor enhancements
   * active_support included by default
 
-== 0.37
+## 0.37
 
 * Minor enhancements
   * Added gemspec (needed for Bundler install) (Tapajós)
 
-== 0.36
+## 0.36
 
 * Major enhancements
   * Adds support for continuous replication (sauy7)
@@ -149,7 +151,7 @@ Notes:
 * Minor enhancements
   * Provide a description of the timeout error (John Wood)
 
-== 0.35
+## 0.35
 
 * Major enhancements
   * CouchRest::ExtendedDocument allow chaining the inherit class callback (Kenneth Kalmer) - http://github.com/couchrest/couchrest/issues#issue/8
@@ -165,7 +167,7 @@ Notes:
   * Added an update_doc method to database to handle conflicts during atomic updates. (Pierre Larochelle)
   * Bug fix: http://github.com/couchrest/couchrest/issues/#issue/2 (Luke Burton)
 
-== 0.34
+## 0.34
 
 * Major enhancements
 
@@ -190,7 +192,7 @@ Notes:
   * Fix Initialization of ExtendentDocument model shouldn't failed on a nil value in argument (deepj)
   * Change to use Jeweler and Gemcutter (Marcos Tapajós)
 
-== 0.33
+## 0.33
 
 * Major enhancements
 
@@ -205,7 +207,7 @@ Notes:
   * Created a new abstraction layer for the REST API (Matt Aimonetti)
   * Bug fix: made ExtendedDocument#all compatible with Couch 0.10 (tc)
 
-== 0.32
+## 0.32
 
 * Major enhancements
 
@@ -220,7 +222,7 @@ Notes:
   * Bug fix: the count method on the proxy collection was missing (Daniel Kirsch)
   * Added #amount_pages to a paginated collection. (Matt Aimonetti)
 
-== 0.31
+## 0.31
 
 * Major enhancements
 
@@ -234,7 +236,7 @@ Notes:
   * Optimized ExtendedDocument.count to run about 3x faster (Matt Aimonetti)
   * Added Float casting (Ryan Felton & Matt Aimonetti)
 
-== 0.30
+## 0.30
 
 * Major enhancements
 
