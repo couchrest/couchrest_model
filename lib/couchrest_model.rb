@@ -1,7 +1,6 @@
 require 'active_model'
 require "active_model/callbacks"
 require "active_model/conversion"
-require "active_model/deprecated_error_methods"
 require "active_model/errors"
 require "active_model/naming"
 require "active_model/serialization"
