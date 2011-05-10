@@ -5,26 +5,13 @@ module CouchRest
       extend ActiveSupport::Concern
 
       included do
-        extlib_inheritable_accessor(:properties) unless self.respond_to?(:properties)
-        extlib_inheritable_accessor(:properties_by_name) unless self.respond_to?(:properties_by_name)
+        class_attribute(:properties) unless self.respond_to?(:properties)
+        class_attribute(:properties_by_name) unless self.respond_to?(:properties_by_name)
         self.properties ||= []
         self.properties_by_name ||= {}
         raise "You can only mixin Properties in a class responding to [] and []=, if you tried to mixin CastedModel, make sure your class inherits from Hash or responds to the proper methods" unless (method_defined?(:[]) && method_defined?(:[]=))
       end
 
-      # Returns the Class properties
-      #
-      # ==== Returns
-      # Array:: the list of properties for model's class
-      def properties
-        self.class.properties
-      end
-
-      # Returns all the class's properties as a Hash where the key is the name
-      # of the property.
-      def properties_by_name
-        self.class.properties_by_name
-      end
 
       # Returns the Class properties with their values
       #
