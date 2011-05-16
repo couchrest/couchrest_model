@@ -1,23 +1,20 @@
 require 'rubygems'
 require 'bundler'
-Bundler::GemHelper.install_tasks
-
-require 'rake'
+require 'rspec/core/rake_task'
 require "rake/rdoctask"
 
-require 'rspec'
-require 'rspec/core/rake_task'
+Bundler::GemHelper.install_tasks
 
 desc "Run all specs"
-Rspec::Core::RakeTask.new(:spec) do |spec|
-	spec.rspec_opts = ["--color"]
-	spec.pattern = 'spec/**/*_spec.rb'
+RSpec::Core::RakeTask.new(:spec) do |spec|
+  spec.rspec_opts = ["--color"]
+  spec.pattern = 'spec/**/*_spec.rb'
 end
 
 desc "Print specdocs"
-Rspec::Core::RakeTask.new(:doc) do |spec|
-	spec.rspec_opts = ["--format", "specdoc"]
-	spec.pattern = 'spec/*_spec.rb'
+RSpec::Core::RakeTask.new(:doc) do |spec|
+  spec.rspec_opts = ["--format", "specdoc"]
+  spec.pattern = 'spec/*_spec.rb'
 end
 
 desc "Generate the rdoc"
