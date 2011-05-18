@@ -1,5 +1,15 @@
 # CouchRest Model Change History
 
+## 1.1.0 - 2011-05-XX
+
+* Minor fixes
+  * #as_json now correctly uses ActiveSupports methods.
+  * nil properties are now no longer sent in the document body.
+  * Rails 3.1 support (Peter Williams)
+  * Initialization blocks when creating new models (Peter Williams)
+  * Removed railties dependency (DAddYE)
+
+
 ## 1.1.0.beta5 - 2011-04-30
 
 * Major changes:

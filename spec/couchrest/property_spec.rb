@@ -1,5 +1,6 @@
 # encoding: utf-8
 require File.expand_path('../../spec_helper', __FILE__)
+require File.join(FIXTURE_PATH, 'more', 'article')
 require File.join(FIXTURE_PATH, 'more', 'cat')
 require File.join(FIXTURE_PATH, 'more', 'person')
 require File.join(FIXTURE_PATH, 'more', 'card')
@@ -69,6 +70,24 @@ describe "Model properties" do
     @card.save.should be_true
     @card.created_at.should_not be_nil
     @card.updated_at.should_not be_nil
+  end
+
+  describe "#as_json" do
+
+    it "should provide a simple hash from model" do
+      @card.as_json.class.should eql(Hash)
+    end
+
+    it "should remove properties from Hash if value is nil" do
+      @card.last_name = nil
+      @card.as_json.keys.include?('last_name').should be_false
+    end
+
+    it "should pass options to Active Support's as_json" do
+      @card.last_name = "Aimonetti"
+      @card.as_json(:only => 'last_name').should eql('last_name' => 'Aimonetti')
+    end
+
   end
 
   describe '#read_attribute' do
