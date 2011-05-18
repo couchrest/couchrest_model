@@ -8,6 +8,7 @@
   * Rails 3.1 support (Peter Williams)
   * Initialization blocks when creating new models (Peter Williams)
   * Removed railties dependency (DAddYE)
+  * DesignDoc cache refreshed if a database is deleted.
 
 
 ## 1.1.0.beta5 - 2011-04-30

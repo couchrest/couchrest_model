@@ -108,8 +108,6 @@ module CouchRest
           }
         end
 
-
-
       end # module ClassMethods
 
     end
