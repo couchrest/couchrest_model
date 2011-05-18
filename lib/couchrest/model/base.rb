@@ -49,6 +49,8 @@ module CouchRest
       # * :directly_set_attributes: true when data comes directly from database
       # * :database: provide an alternative database
       #
+      # If a block is provided the new model will be passed into the
+      # block so that it can be populated.
       def initialize(doc = {}, options = {})
         doc = prepare_all_attributes(doc, options)
         # set the instances database, if provided
@@ -57,6 +59,8 @@ module CouchRest
         unless self['_id'] && self['_rev']
           self[self.model_type_key] = self.class.to_s
         end
+        yield self if block_given?
+
         after_initialize if respond_to?(:after_initialize)
       end
 

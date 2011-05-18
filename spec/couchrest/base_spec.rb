@@ -44,6 +44,11 @@ describe "Model Base" do
       @obj.database.should eql('database')
     end
 
+    it "should support initialization block" do 
+      @obj = Basic.new {|b| b.database = 'database'}
+      @obj.database.should eql('database')
+    end
+
   end
  
   describe "ActiveModel compatability Basic" do
