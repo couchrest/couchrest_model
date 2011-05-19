@@ -155,6 +155,10 @@ describe "Design Documents" do
         Article.by_date
         Article.stored_design_doc['_rev'].should eql(orig)
       end
+      it "should recreate the design doc if database deleted" do
+        Article.database.recreate!
+        lambda { Article.by_date }.should_not raise_error(RestClient::ResourceNotFound)
+      end
     end
 
     describe "when auto_update_design_doc false" do

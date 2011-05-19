@@ -51,6 +51,7 @@ require "couchrest/model/designs/view"
 
 # Monkey patches applied to couchrest
 require "couchrest/model/support/couchrest_design"
+require "couchrest/model/support/couchrest_database"
 
 # Core Extensions
 require "couchrest/model/core_extensions/hash"
