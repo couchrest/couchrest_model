@@ -153,7 +153,7 @@ module CouchRest
             def #{attrib}(reload = false)
               return @#{attrib} unless @#{attrib}.nil? or reload
               ary = self.#{options[:foreign_key]}.collect{|i| #{options[:proxy]}.get(i)}
-              @#{attrib} = ::CouchRest::CollectionOfProxy.new(ary, self, '#{options[:foreign_key]}')
+              @#{attrib} = ::CouchRest::Model::CollectionOfProxy.new(ary, find_property('#{options[:foreign_key]}'), self)
             end
           EOS
         end
@@ -161,7 +161,7 @@ module CouchRest
         def create_collection_of_setter(attrib, options)
           class_eval <<-EOS, __FILE__, __LINE__ + 1
             def #{attrib}=(value)
-              @#{attrib} = ::CouchRest::CollectionOfProxy.new(value, self, '#{options[:foreign_key]}')
+              @#{attrib} = ::CouchRest::Model::CollectionOfProxy.new(value, find_property('#{options[:foreign_key]}'), self)
             end
           EOS
         end
@@ -169,67 +169,63 @@ module CouchRest
       end
 
     end
-  end
 
-  # Special proxy for a collection of items so that adding and removing
-  # to the list automatically updates the associated property.
-  class CollectionOfProxy < Array
-    attr_accessor :property
-    attr_accessor :casted_by
+    # Special proxy for a collection of items so that adding and removing
+    # to the list automatically updates the associated property.
+    class CollectionOfProxy < CastedArray
 
-    def initialize(array, casted_by, property)
-      self.property = property
-      self.casted_by = casted_by
-      (array ||= []).compact!
-      casted_by[property.to_s] = [] # replace the original array!
-      array.compact.each do |obj|
-        check_obj(obj)
-        casted_by[property.to_s] << obj.id
+      def initialize(array, property, parent)
+        (array ||= []).compact!
+        super(array, property, parent)
+        casted_by[casted_by_property.to_s] = [] # replace the original array!
+        array.compact.each do |obj|
+          check_obj(obj)
+          casted_by[casted_by_property.to_s] << obj.id
+        end
       end
-      super(array)
-    end
-    
-    def << obj
-      check_obj(obj)
-      casted_by[property.to_s] << obj.id
-      super(obj)
-    end
-    
-    def push(obj)
-      check_obj(obj)
-      casted_by[property.to_s].push obj.id
-      super(obj)
-    end
-    
-    def unshift(obj)
-      check_obj(obj)
-      casted_by[property.to_s].unshift obj.id
-      super(obj)
-    end
+      
+      def << obj
+        check_obj(obj)
+        casted_by[casted_by_property.to_s] << obj.id
+        super(obj)
+      end
+      
+      def push(obj)
+        check_obj(obj)
+        casted_by[casted_by_property.to_s].push obj.id
+        super(obj)
+      end
+      
+      def unshift(obj)
+        check_obj(obj)
+        casted_by[casted_by_property.to_s].unshift obj.id
+        super(obj)
+      end
 
-    def []= index, obj
-      check_obj(obj)
-      casted_by[property.to_s][index] = obj.id
-      super(index, obj)
-    end
+      def []= index, obj
+        check_obj(obj)
+        casted_by[casted_by_property.to_s][index] = obj.id
+        super(index, obj)
+      end
 
-    def pop
-      casted_by[property.to_s].pop
-      super
-    end
-    
-    def shift
-      casted_by[property.to_s].shift
-      super
-    end
+      def pop
+        casted_by[casted_by_property.to_s].pop
+        super
+      end
+      
+      def shift
+        casted_by[casted_by_property.to_s].shift
+        super
+      end
 
-    protected
+      protected
 
-    def check_obj(obj)
-      raise "Object cannot be added to #{casted_by.class.to_s}##{property.to_s} collection unless saved" if obj.new?
+      def check_obj(obj)
+        raise "Object cannot be added to #{casted_by.class.to_s}##{casted_by_property.to_s} collection unless saved" if obj.new?
+      end
+
     end
 
   end
-
 
 end

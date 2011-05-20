@@ -9,6 +9,7 @@
   * Initialization blocks when creating new models (Peter Williams)
   * Removed railties dependency (DAddYE)
   * DesignDoc cache refreshed if a database is deleted.
+  * Fixing dirty tracking on collection_of association.
 
 
 ## 1.1.0.beta5 - 2011-04-30
