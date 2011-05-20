@@ -10,6 +10,7 @@
   * Removed railties dependency (DAddYE)
   * DesignDoc cache refreshed if a database is deleted.
   * Fixing dirty tracking on collection_of association.
+  * Uniqueness Validation views created on initialization, not on demand!
 
 
 ## 1.1.0.beta5 - 2011-04-30

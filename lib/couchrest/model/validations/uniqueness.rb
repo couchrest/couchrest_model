@@ -3,7 +3,7 @@
 module CouchRest
   module Model
     module Validations
-      
+
       # Validates if a field is unique 
       class UniquenessValidator < ActiveModel::EachValidator
 
@@ -11,29 +11,33 @@ module CouchRest
         # or add one if necessary.
         def setup(model)
           @model = model
+          if options[:view].blank?
+            attributes.each do |attribute|
+              opts = merge_view_options(attribute)
+
+              if model.respond_to?(:has_view?) && !model.has_view?(opts[:view_name])
+                opts[:keys] << {:allow_nil => true}
+                model.view_by(*opts[:keys])
+              end
+            end
+          end
         end
 
         def validate_each(document, attribute, value)
-          keys = [attribute]
-          unless options[:scope].nil?
-            keys = (options[:scope].is_a?(Array) ? options[:scope] : [options[:scope]]) + keys
-          end
-          values = keys.map{|k| document.send(k)}
-          values = values.first if values.length == 1
+          opts = merge_view_options(attribute)
 
-          view_name = options[:view].nil? ? "by_#{keys.join('_and_')}" : options[:view]
+          values = opts[:keys].map{|k| document.send(k)}
+          values = values.first if values.length == 1
 
           model = (document.respond_to?(:model_proxy) && document.model_proxy ? document.model_proxy : @model)
           # Determine the base of the search
-          base = options[:proxy].nil? ? model : document.instance_eval(options[:proxy])
+          base = opts[:proxy].nil? ? model : document.instance_eval(opts[:proxy])
 
-          if base.respond_to?(:has_view?) && !base.has_view?(view_name)
-            raise "View #{document.class.name}.#{options[:view]} does not exist!" unless options[:view].nil?
-            keys << {:allow_nil => true}
-            model.view_by(*keys)
+          if base.respond_to?(:has_view?) && !base.has_view?(opts[:view_name])
+            raise "View #{document.class.name}.#{opts[:view_name]} does not exist for validation!"
           end
 
-          rows = base.view(view_name, :key => values, :limit => 2, :include_docs => false)['rows']
+          rows = base.view(opts[:view_name], :key => values, :limit => 2, :include_docs => false)['rows']
           return if rows.empty?
 
           unless document.new?
@@ -45,6 +49,17 @@ module CouchRest
             opts.delete(:scope) # Has meaning with I18n!
             document.errors.add(attribute, :taken, opts)
           end
+        end
+
+        private
+
+        def merge_view_options(attr)
+          keys = [attr]
+          keys.unshift(*options[:scope]) unless options[:scope].nil?
+
+          view_name = options[:view].nil? ? "by_#{keys.join('_and_')}" : options[:view]
+
+          options.merge({:keys => keys, :view_name => view_name})
         end
 
       end
