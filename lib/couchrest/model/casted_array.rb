@@ -50,6 +50,12 @@ module CouchRest::Model
       super
     end
 
+    def build(*args)
+      obj = casted_by_property.build(*args)
+      self.push(obj)
+      obj
+    end
+
     protected
 
     def instantiate_and_cast(obj, change = true)
