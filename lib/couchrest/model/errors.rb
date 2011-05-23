@@ -19,5 +19,7 @@ module CouchRest
         end
       end
     end
+
+    class DocumentNotFound < Errors::CouchRestModelError; end
   end
 end

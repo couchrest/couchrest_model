@@ -87,7 +87,14 @@ module CouchRest
           doc
         end
         alias :find :get
-        
+
+        def get!(id)
+          doc = @klass.get!(id, @database)
+          doc.database = @database if doc && doc.respond_to?(:database)
+          doc
+        end
+        alias :find! :get!
+
         # Views
         
         def has_view?(view)
