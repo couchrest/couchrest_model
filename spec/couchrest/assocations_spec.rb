@@ -101,7 +101,7 @@ describe "Assocations" do
     it "should create an associated property and collection proxy" do
       @invoice.respond_to?('entry_ids').should be_true
       @invoice.respond_to?('entry_ids=').should be_true
-      @invoice.entries.class.should eql(::CouchRest::CollectionOfProxy)
+      @invoice.entries.class.should eql(::CouchRest::Model::CollectionOfProxy)
     end
 
     it "should allow replacement of objects" do
@@ -152,6 +152,33 @@ describe "Assocations" do
       @invoice.entries = [ nil ]
       @invoice.entry_ids.should be_empty
       @invoice.entries.should be_empty
+    end
+
+    # Account for dirty tracking
+    describe "dirty tracking" do
+      it "should register changes on push" do
+        @invoice.changed?.should be_false
+        @invoice.entries << @entries[0]
+        @invoice.changed?.should be_true
+      end
+      it "should register changes on pop" do
+        @invoice.entries << @entries[0]
+        @invoice.save
+        @invoice.changed?.should be_false
+        @invoice.entries.pop
+        @invoice.changed?.should be_true
+      end
+      it "should register id changes on push" do
+        @invoice.entry_ids << @entries[0].id
+        @invoice.changed?.should be_true
+      end
+      it "should register id changes on pop" do
+        @invoice.entry_ids << @entries[0].id
+        @invoice.save
+        @invoice.changed?.should be_false
+        @invoice.entry_ids.pop
+        @invoice.changed?.should be_true
+      end
     end
 
     describe "proxy" do

@@ -64,6 +64,18 @@ module CouchRest::Model
       end
     end
 
+    # Initialize a new instance of a property's type ready to be
+    # used. If a proc is defined for the init method, it will be used instead of 
+    # a normal call to the class.
+    def build(*args)
+      raise StandardError, "Cannot build property without a class" if @type_class.nil?
+      if @init_method.is_a?(Proc)
+        @init_method.call(*args)
+      else
+        @type_class.send(@init_method, *args)
+      end
+    end
+
     private
 
       def associate_casted_value_to_parent(parent, value)

@@ -16,7 +16,11 @@ describe "Validations" do
       before(:all) do
         @objs = ['title 1', 'title 2', 'title 3'].map{|t| WithUniqueValidation.create(:title => t)}
       end
-      
+
+      it "should create a new view if none defined before performing" do
+        WithUniqueValidation.has_view?(:by_title).should be_true
+      end
+
       it "should validate a new unique document" do
         @obj = WithUniqueValidation.create(:title => 'title 4')
         @obj.new?.should_not be_true
@@ -35,6 +39,7 @@ describe "Validations" do
         @obj.should be_valid
       end
 
+
       it "should allow own view to be specified" do
         # validates_uniqueness_of :code, :view => 'all'
         WithUniqueValidationView.create(:title => 'title 1', :code => '1234')
@@ -50,6 +55,13 @@ describe "Validations" do
         }.should raise_error
       end
 
+      it "should not try to create a defined view" do
+        WithUniqueValidationView.validates_uniqueness_of :title, :view => 'fooobar'
+        WithUniqueValidationView.has_view?('fooobar').should be_false
+        WithUniqueValidationView.has_view?('by_title').should be_false
+      end
+
+
       it "should not try to create new view when already defined" do
         @obj = @objs[1]
         @obj.class.should_not_receive('view_by')
@@ -60,6 +72,11 @@ describe "Validations" do
     end
 
     context "with a proxy parameter" do
+
+      it "should create a new view despite proxy" do
+        WithUniqueValidationProxy.has_view?(:by_title).should be_true
+      end
+
       it "should be used" do
         @obj = WithUniqueValidationProxy.new(:title => 'test 6')
         proxy = @obj.should_receive('proxy').and_return(@obj.class)
