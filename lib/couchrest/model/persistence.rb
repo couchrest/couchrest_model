@@ -118,8 +118,8 @@ module CouchRest
         #
         # ==== Returns
         #  returns the reloaded document
-        def create(attributes = {})
-          instance = new(attributes)
+        def create(attributes = {}, &block)
+          instance = new(attributes, &block)
           instance.create
           instance
         end
@@ -128,8 +128,8 @@ module CouchRest
         #
         # ==== Returns
         #  returns the reloaded document or raises an exception
-        def create!(attributes = {})
-          instance = new(attributes)
+        def create!(attributes = {}, &block)
+          instance = new(attributes, &block)
           instance.create!
           instance
         end
