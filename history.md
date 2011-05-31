@@ -5,6 +5,7 @@
 * New Features
   * Properties with a nil value are now no longer sent to the database.
   * Now possible to build new objects via CastedArray#build
+	* Implement #get! and #find! class methods
 
 * Minor fixes
   * #as_json now correctly uses ActiveSupports methods.
