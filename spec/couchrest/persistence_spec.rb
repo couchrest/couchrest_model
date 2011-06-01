@@ -81,6 +81,18 @@ describe "Model Persistence" do
       article.should_not be_new
     end 
     
+    it "yields new instance to block before saving (#create)" do
+      article = Article.create{|a| a.title = 'my create init block test'}
+      article.title.should == 'my create init block test'
+      article.should_not be_new
+    end 
+
+    it "yields new instance to block before saving (#create!)" do
+      article = Article.create{|a| a.title = 'my create bang init block test'}
+      article.title.should == 'my create bang init block test'
+      article.should_not be_new
+    end 
+
     it "should trigger the create callbacks" do
       doc = WithCallBacks.create(:name => 'my other test') 
       doc.run_before_create.should be_true
