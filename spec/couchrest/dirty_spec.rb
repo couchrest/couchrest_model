@@ -241,6 +241,14 @@ describe "Dirty" do
       end
     end
 
+    it "should report changes if an array is popped after reload" do
+      should_change_array do |array, obj|
+        obj.reload
+        obj.keywords.pop
+      end
+    end
+
+
     it "should report no changes if an empty array is popped" do
       should_not_change_array do |array, obj|
         array.clear

@@ -87,7 +87,7 @@ module CouchRest
       #
       # Returns self.
       def reload
-        merge!(self.class.get(id))
+        prepare_all_attributes(database.get(id), :directly_set_attributes => true)
         self
       end
 
