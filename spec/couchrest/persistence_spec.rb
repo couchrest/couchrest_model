@@ -267,7 +267,7 @@ describe "Model Persistence" do
     end
     it "should make it go away" do
       @dobj.destroy
-      lambda{Basic.get!(@dobj.id)}.should raise_error(RestClient::ResourceNotFound)
+      lambda{Basic.get!(@dobj.id)}.should raise_error(CouchRest::Model::DocumentNotFound)
     end
     it "should freeze the object" do
       @dobj.destroy
@@ -277,7 +277,7 @@ describe "Model Persistence" do
     it "trying to save after should fail" do
       @dobj.destroy
       lambda { @dobj.save }.should raise_error(StandardError)
-      lambda{Basic.get!(@dobj.id)}.should raise_error(RestClient::ResourceNotFound)
+      lambda{Basic.get!(@dobj.id)}.should raise_error(CouchRest::Model::DocumentNotFound)
     end
     it "should make destroyed? true" do
       @dobj.destroyed?.should be_false
