@@ -5,6 +5,7 @@ require File.join(FIXTURE_PATH, 'more', 'cat')
 require File.join(FIXTURE_PATH, 'more', 'article')
 require File.join(FIXTURE_PATH, 'more', 'course')
 require File.join(FIXTURE_PATH, 'more', 'card')
+require File.join(FIXTURE_PATH, 'more', 'event')
 
 describe "Model Persistence" do
 
@@ -242,25 +243,34 @@ describe "Model Persistence" do
       @templated.id.should == 'very-important'
     end
   end
-  
+
   describe "destroying an instance" do
     before(:each) do
-      @dobj = Basic.new
+      @dobj = Event.new
       @dobj.save.should be_true
     end
     it "should return true" do
       result = @dobj.destroy
       result.should be_true
     end
-    it "should be resavable" do
-      @dobj.destroy
-      @dobj.rev.should be_nil
-      @dobj.id.should be_nil
-      @dobj.save.should be_true 
-    end
     it "should make it go away" do
       @dobj.destroy
-      lambda{Basic.get!(@dobj.id)}.should raise_error
+      lambda{Basic.get!(@dobj.id)}.should raise_error(RestClient::ResourceNotFound)
+    end
+    it "should freeze the object" do
+      @dobj.destroy
+      # In Ruby 1.9.2 this raises RuntimeError, in 1.8.7 TypeError, D'OH!
+      lambda { @dobj.subject = "Test" }.should raise_error(StandardError)
+    end
+    it "trying to save after should fail" do
+      @dobj.destroy
+      lambda { @dobj.save }.should raise_error(StandardError)
+      lambda{Basic.get!(@dobj.id)}.should raise_error(RestClient::ResourceNotFound)
+    end
+    it "should make destroyed? true" do
+      @dobj.destroyed?.should be_false
+      @dobj.destroy
+      @dobj.destroyed?.should be_true
     end
   end
 

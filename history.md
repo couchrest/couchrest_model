@@ -11,6 +11,8 @@
   * DesignDoc cache refreshed if a database is deleted.
   * Fixing dirty tracking on collection_of association.
   * Uniqueness Validation views created on initialization, not on demand!
+  * #destroy freezes object instead of removing _id and _rev, better for callbacks (pointer by karmi)
+  * #destroyed? method now available
 
 
 ## 1.1.0.beta5 - 2011-04-30

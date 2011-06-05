@@ -54,17 +54,19 @@ module CouchRest
       end
 
       # Deletes the document from the database. Runs the :destroy callbacks.
-      # Removes the <tt>_id</tt> and <tt>_rev</tt> fields, preparing the
-      # document to be saved to a new <tt>_id</tt> if required.
       def destroy
         _run_destroy_callbacks do
           result = database.delete_doc(self)
           if result['ok']
-            self.delete('_rev')
-            self.delete('_id')
+            @_destroyed = true
+            self.freeze
           end
           result['ok']
         end
+      end
+
+      def destroyed?
+        !!@_destroyed
       end
 
       # Update the document's attributes and save. For example:
