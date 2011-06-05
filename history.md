@@ -17,6 +17,7 @@
   * Uniqueness Validation views created on initialization, not on demand!
   * #destroy freezes object instead of removing _id and _rev, better for callbacks (pointer by karmi)
   * #destroyed? method now available
+  * #reload no longer uses Hash#merge! which was causing issues with dirty tracking on casted models. (pointer by kostia)
 
 
 ## 1.1.0.beta5 - 2011-04-30
