@@ -14,8 +14,7 @@ module CouchRest
         elsif [String, TrueClass, Integer, Float, BigDecimal, DateTime, Time, Date, Class].include?(klass)
           send('typecast_to_'+klass.to_s.downcase, value)
         else
-          # Allow the init_method to be defined as a Proc for advanced conversion
-          property.init_method.is_a?(Proc) ? property.init_method.call(value) : klass.send(property.init_method, value)
+          property.build(value)
         end
       end
 

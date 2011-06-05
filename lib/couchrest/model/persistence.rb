@@ -21,8 +21,8 @@ module CouchRest
 
       # Creates the document in the db. Raises an exception
       # if the document is not created properly.
-      def create!
-        self.class.fail_validate!(self) unless self.create
+      def create!(options = {})
+        self.class.fail_validate!(self) unless self.create(options)
       end
 
       # Trigger the callbacks (before, after, around)
@@ -120,8 +120,8 @@ module CouchRest
         #
         # ==== Returns
         #  returns the reloaded document
-        def create(attributes = {})
-          instance = new(attributes)
+        def create(attributes = {}, &block)
+          instance = new(attributes, &block)
           instance.create
           instance
         end
@@ -130,8 +130,8 @@ module CouchRest
         #
         # ==== Returns
         #  returns the reloaded document or raises an exception
-        def create!(attributes = {})
-          instance = new(attributes)
+        def create!(attributes = {}, &block)
+          instance = new(attributes, &block)
           instance.create!
           instance
         end

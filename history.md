@@ -2,9 +2,13 @@
 
 ## 1.1.0 - 2011-05-XX
 
+* New Features
+  * Properties with a nil value are now no longer sent to the database.
+  * Now possible to build new objects via CastedArray#build
+	* Implement #get! and #find! class methods
+
 * Minor fixes
   * #as_json now correctly uses ActiveSupports methods.
-  * nil properties are now no longer sent in the document body.
   * Rails 3.1 support (Peter Williams)
   * Initialization blocks when creating new models (Peter Williams)
   * Removed railties dependency (DAddYE)

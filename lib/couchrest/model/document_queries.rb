@@ -86,9 +86,12 @@ module CouchRest
         # id<String, Integer>:: Document ID
         # db<Database>:: optional option to pass a custom database to use
         def get!(id, db = database)
-          raise "Missing or empty document ID" if id.to_s.empty?
+          raise CouchRest::Model::DocumentNotFound if id.blank?
+
           doc = db.get id
           build_from_database(doc)
+        rescue RestClient::ResourceNotFound
+          raise CouchRest::Model::DocumentNotFound
         end
         alias :find! :get!
         
