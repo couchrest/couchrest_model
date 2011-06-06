@@ -27,21 +27,20 @@ describe "Collections" do
   end
   it "should provide a class method for paginate" do
     articles = Article.paginate(:design_doc => 'Article', :view_name => 'by_date',
-      :per_page => 3, :descending => true, :key => Date.today, :include_docs => true)
+      :per_page => 3, :descending => true, :key => Date.today)
     articles.size.should == 3
-    
+
     articles = Article.paginate(:design_doc => 'Article', :view_name => 'by_date',
-      :per_page => 3, :page => 2, :descending => true, :key => Date.today, :include_docs => true)
+      :per_page => 3, :page => 2, :descending => true, :key => Date.today)
     articles.size.should == 3
-    
+
     articles = Article.paginate(:design_doc => 'Article', :view_name => 'by_date',
-      :per_page => 3, :page => 3, :descending => true, :key => Date.today, :include_docs => true)
+      :per_page => 3, :page => 3, :descending => true, :key => Date.today)
     articles.size.should == 1
   end
   it "should provide a class method for paginated_each" do
     options = { :design_doc => 'Article', :view_name => 'by_date',
-      :per_page => 3, :page => 1, :descending => true, :key => Date.today,
-      :include_docs => true }
+      :per_page => 3, :page => 1, :descending => true, :key => Date.today }
     Article.paginated_each(options) do |a|
       a.should_not be_nil
     end
