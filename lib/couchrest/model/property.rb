@@ -39,7 +39,7 @@ module CouchRest::Model
         arr = value.collect { |data| cast_value(parent, data) }
         # allow casted_by calls to be passed up chain by wrapping in CastedArray
         CastedArray.new(arr, self, parent)
-      elsif (type == Object || type == Hash) && (value.class == Hash)
+      elsif (type == Object || type == Hash) && (value.kind_of?(Hash))
         # allow casted_by calls to be passed up chain by wrapping in CastedHash
         CastedHash[value, self, parent]
       elsif !value.nil?
