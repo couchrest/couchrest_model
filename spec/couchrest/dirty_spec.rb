@@ -257,6 +257,50 @@ describe "Dirty" do
       end
     end
 
+    it "should report changes on deletion from an array" do
+      should_change_array do |array, obj|
+        array << "keyword"
+        obj.save!
+        array.delete_at(0)
+      end
+
+      should_change_array do |array, obj|
+        array << "keyword"
+        obj.save!
+        array.delete("keyword")
+      end
+    end
+
+    it "should report changes on deletion from an array after reload" do
+      should_change_array do |array, obj|
+        array << "keyword"
+        obj.save!
+        obj.reload
+        array.delete_at(0)
+      end
+
+      should_change_array do |array, obj|
+        array << "keyword"
+        obj.save!
+        obj.reload
+        array.delete("keyword")
+      end
+    end
+
+    it "should report no changes on deletion from an empty array" do
+      should_not_change_array do |array, obj|
+        array.clear
+        obj.save!
+        array.delete_at(0)
+      end
+
+      should_not_change_array do |array, obj|
+        array.clear
+        obj.save!
+        array.delete("keyword")
+      end
+    end
+
     it "should report changes if an array is pushed" do
       should_change_array do |array, obj|
         array.push("keyword")
