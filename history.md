@@ -18,8 +18,8 @@
   * #destroy freezes object instead of removing _id and _rev, better for callbacks (pointer by karmi)
   * #destroyed? method now available
   * #reload no longer uses Hash#merge! which was causing issues with dirty tracking on casted models. (pointer by kostia)
-
-
+	* Fixing problem assigning a CastedHash to a property declared as a Hash (Kostiantyn Kahanskyi, gfmtim)
+	
 ## 1.1.0.beta5 - 2011-04-30
 
 * Major changes:
