@@ -86,15 +86,16 @@ end
 class WithTemplateAndUniqueID < CouchRest::Model::Base
   use_database TEST_SERVER.default_database
   unique_id do |model|
-    model['important-field']
+    model.slug
   end
+  property :slug
   property :preset, :default => 'value'
   property :has_no_default
 end
 
 class WithGetterAndSetterMethods < CouchRest::Model::Base
   use_database TEST_SERVER.default_database
-  
+
   property :other_arg
   def arg
     other_arg
@@ -107,7 +108,7 @@ end
 
 class WithAfterInitializeMethod < CouchRest::Model::Base
   use_database TEST_SERVER.default_database
-  
+
   property :some_value
 
   def after_initialize

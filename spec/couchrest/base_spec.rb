@@ -49,8 +49,34 @@ describe "Model Base" do
       @obj.database.should eql('database')
     end
 
+    it "should only set defined properties" do
+      @doc = WithDefaultValues.new(:name => 'test', :foo => 'bar')
+      @doc['name'].should eql('test')
+      @doc['foo'].should be_nil
+    end
+
+    it "should set all properties with :directly_set_attributes option" do
+      @doc = WithDefaultValues.new({:name => 'test', :foo => 'bar'}, :directly_set_attributes => true)
+      @doc['name'].should eql('test')
+      @doc['foo'].should eql('bar')
+    end
+
+    it "should set the model type" do
+      @doc = WithDefaultValues.new()
+      @doc[WithDefaultValues.model_type_key].should eql('WithDefaultValues')
+    end
+
+    it "should call after_initialize method if available" do
+      @doc = WithAfterInitializeMethod.new
+      @doc['some_value'].should eql('value')
+    end
+
+    it "should call after_initialize after block" do
+      @doc = WithAfterInitializeMethod.new {|d| d.some_value = "foo"}
+      @doc['some_value'].should eql('foo')
+    end
   end
- 
+
   describe "ActiveModel compatability Basic" do
 
     before(:each) do 
@@ -109,9 +135,23 @@ describe "Model Base" do
       end
     end
 
+    describe "#destroyed?" do
+      it "should be present" do
+        @obj.should respond_to(:destroyed?)
+      end
+      it "should return false with new object" do
+        @obj.destroyed?.should be_false
+      end
+      it "should return true after destroy" do
+        @obj.save
+        @obj.destroy
+        @obj.destroyed?.should be_true
+      end
+    end
+
 
   end
-  
+
   describe "update attributes without saving" do
     before(:each) do
       a = Article.get "big-bad-danger" rescue nil
@@ -152,7 +192,7 @@ describe "Model Base" do
       }.should_not raise_error
       @art.slug.should == "big-bad-danger"
     end
-    
+
     #it "should not change other attributes if there is an error" do
     #  lambda {
     #    @art.update_attributes_without_saving('slug' => "new-slug", :title => "super danger")        
@@ -160,7 +200,7 @@ describe "Model Base" do
     #  @art['title'].should == "big bad danger"
     #end
   end
-  
+
   describe "update attributes" do
     before(:each) do
       a = Article.get "big-bad-danger" rescue nil
@@ -175,7 +215,7 @@ describe "Model Base" do
       loaded['title'].should == "super danger"
     end
   end
-  
+
   describe "with default" do
     it "should have the default value set at initalization" do
       @obj.preset.should == {:right => 10, :top_align => false}
@@ -232,7 +272,7 @@ describe "Model Base" do
       WithTemplateAndUniqueID.all.map{|o| o.destroy}
       WithTemplateAndUniqueID.database.bulk_delete
       @tmpl = WithTemplateAndUniqueID.new
-      @tmpl2 = WithTemplateAndUniqueID.new(:preset => 'not_value', 'important-field' => '1')
+      @tmpl2 = WithTemplateAndUniqueID.new(:preset => 'not_value', 'slug' => '1')
     end
     it "should have fields set when new" do
       @tmpl.preset.should == 'value'
@@ -253,10 +293,10 @@ describe "Model Base" do
     before(:all) do
       WithTemplateAndUniqueID.all.map{|o| o.destroy}
       WithTemplateAndUniqueID.database.bulk_delete
-      WithTemplateAndUniqueID.new('important-field' => '1').save
-      WithTemplateAndUniqueID.new('important-field' => '2').save
-      WithTemplateAndUniqueID.new('important-field' => '3').save
-      WithTemplateAndUniqueID.new('important-field' => '4').save
+      WithTemplateAndUniqueID.new('slug' => '1').save
+      WithTemplateAndUniqueID.new('slug' => '2').save
+      WithTemplateAndUniqueID.new('slug' => '3').save
+      WithTemplateAndUniqueID.new('slug' => '4').save
     end
     it "should find all" do
       rs = WithTemplateAndUniqueID.all 
@@ -274,9 +314,9 @@ describe "Model Base" do
     end
     
     it ".count should return the number of documents" do
-      WithTemplateAndUniqueID.new('important-field' => '1').save
-      WithTemplateAndUniqueID.new('important-field' => '2').save
-      WithTemplateAndUniqueID.new('important-field' => '3').save
+      WithTemplateAndUniqueID.new('slug' => '1').save
+      WithTemplateAndUniqueID.new('slug' => '2').save
+      WithTemplateAndUniqueID.new('slug' => '3').save
       
       WithTemplateAndUniqueID.count.should == 3
     end
@@ -285,14 +325,14 @@ describe "Model Base" do
   describe "finding the first instance of a model" do
     before(:each) do      
       @db = reset_test_db!
-      WithTemplateAndUniqueID.new('important-field' => '1').save
-      WithTemplateAndUniqueID.new('important-field' => '2').save
-      WithTemplateAndUniqueID.new('important-field' => '3').save
-      WithTemplateAndUniqueID.new('important-field' => '4').save
+      WithTemplateAndUniqueID.new('slug' => '1').save
+      WithTemplateAndUniqueID.new('slug' => '2').save
+      WithTemplateAndUniqueID.new('slug' => '3').save
+      WithTemplateAndUniqueID.new('slug' => '4').save
     end
     it "should find first" do
       rs = WithTemplateAndUniqueID.first
-      rs['important-field'].should == "1"
+      rs['slug'].should == "1"
     end
     it "should return nil if no instances are found" do
       WithTemplateAndUniqueID.all.each {|obj| obj.destroy }
@@ -370,14 +410,7 @@ describe "Model Base" do
     end
   end
 
-  describe "initialization" do
-    it "should call after_initialize method if available" do
-      @doc = WithAfterInitializeMethod.new
-      @doc['some_value'].should eql('value')
-    end
-  end
-  
-  describe "recursive validation on a model" do
+ describe "recursive validation on a model" do
     before :each do
       reset_test_db!
       @cat = Cat.new(:name => 'Sockington')

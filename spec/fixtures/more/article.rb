@@ -22,6 +22,7 @@ class Article < CouchRest::Model::Base
 
   property :date, Date
   property :slug, :read_only => true
+  property :user_id
   property :title
   property :tags, [String]
 

@@ -315,6 +315,28 @@ describe "a casted model retrieved from the database" do
   end
 end
 
+describe "nested models (not casted)" do
+  before(:each) do
+    reset_test_db!
+    @cat = ChildCat.new(:name => 'Stimpy')
+    @cat.mother = {:name => 'Stinky'}
+    @cat.siblings = [{:name => 'Feather'}, {:name => 'Felix'}]
+    @cat.save
+    @cat = ChildCat.get(@cat.id)
+  end
+
+  it "should correctly save single relation" do
+    @cat.mother.name.should eql('Stinky')
+    @cat.mother.casted_by.should eql(@cat)
+  end
+
+  it "should correctly save collection" do
+    @cat.siblings.first.name.should eql("Feather")
+    @cat.siblings.last.casted_by.should eql(@cat)
+  end
+
+end
+
 describe "Property Class" do
 
   it "should provide name as string" do

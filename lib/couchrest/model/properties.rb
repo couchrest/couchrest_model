@@ -80,17 +80,18 @@ module CouchRest
         self.disable_dirty = dirty
       end
 
-      def prepare_all_attributes(doc = {}, options = {})
+      def prepare_all_attributes(attrs = {}, options = {})
         self.disable_dirty = !!options[:directly_set_attributes]
         apply_all_property_defaults
         if options[:directly_set_attributes]
-          directly_set_read_only_attributes(doc)
+          directly_set_read_only_attributes(attrs)
+          directly_set_attributes(attrs, true)
         else
-          doc = remove_protected_attributes(doc)
+          attrs = remove_protected_attributes(attrs)
+          directly_set_attributes(attrs)
         end
-        res = doc.nil? ? doc : directly_set_attributes(doc)
         self.disable_dirty = false
-        res
+        self
       end
 
       def find_property!(property)
@@ -101,16 +102,13 @@ module CouchRest
 
       # Set all the attributes and return a hash with the attributes
       # that have not been accepted.
-      def directly_set_attributes(hash)
-        hash.reject do |attribute_name, attribute_value|
-          if self.respond_to?("#{attribute_name}=")
-            self.send("#{attribute_name}=", attribute_value)
-            true
-          elsif mass_assign_any_attribute # config option
-            self[attribute_name] = attribute_value
-            true
-          else
-            false
+      def directly_set_attributes(hash, mass_assign = false)
+        return if hash.nil?
+        hash.reject do |key, value|
+          if self.respond_to?("#{key}=")
+            self.send("#{key}=", value)
+          elsif mass_assign || mass_assign_any_attribute
+            self[key] = value
           end
         end
       end

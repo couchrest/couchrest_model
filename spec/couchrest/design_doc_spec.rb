@@ -202,7 +202,7 @@ describe "Design Documents" do
   describe "lazily refreshing the design document" do
     before(:all) do
       @db = reset_test_db!
-      WithTemplateAndUniqueID.new('important-field' => '1').save
+      WithTemplateAndUniqueID.new('slug' => '1').save
     end
     it "should not save the design doc twice" do
       WithTemplateAndUniqueID.all

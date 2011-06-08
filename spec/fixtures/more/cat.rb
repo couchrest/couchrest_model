@@ -17,3 +17,7 @@ class Cat < CouchRest::Model::Base
   property :number
 end
 
+class ChildCat < Cat
+  property :mother, Cat
+  property :siblings, [Cat]
+end

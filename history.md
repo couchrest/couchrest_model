@@ -1,11 +1,11 @@
 # CouchRest Model Change History
 
-## 1.1.0 - 2011-05-XX
+## 1.1.0.rc - 2011-06-08
 
 * New Features
   * Properties with a nil value are now no longer sent to the database.
   * Now possible to build new objects via CastedArray#build
-	* Implement #get! and #find! class methods
+  * Implement #get! and #find! class methods
 
 * Minor fixes
   * #as_json now correctly uses ActiveSupports methods.
@@ -18,6 +18,8 @@
   * #destroy freezes object instead of removing _id and _rev, better for callbacks (pointer by karmi)
   * #destroyed? method now available
   * #reload no longer uses Hash#merge! which was causing issues with dirty tracking on casted models. (pointer by kostia)
+  * Non-property mass assignment on #new no longer possible without :directly_set_attributes option.
+  * Using CouchRest 1.1.0.pre3. (No more Hashes!)
 
 
 ## 1.1.0.beta5 - 2011-04-30

@@ -106,14 +106,17 @@ module CouchRest
 
       module ClassMethods
 
-        # Creates a new instance, bypassing attribute protection
+        # Creates a new instance, bypassing attribute protection and
+        # uses the type field to determine which model to use to instanatiate
+        # the new object.
         #
         # ==== Returns
         #  a document instance
         #
-        def build_from_database(doc = {})
-          base = (doc[model_type_key].blank? || doc[model_type_key] == self.to_s) ? self : doc[model_type_key].constantize
-          base.new(doc, :directly_set_attributes => true)
+        def build_from_database(doc = {}, options = {}, &block)
+          src = doc[model_type_key]
+          base = (src.blank? || src == self.to_s) ? self : src.constantize
+          base.new(doc, options.merge(:directly_set_attributes => true), &block)
         end
 
         # Defines an instance and save it directly to the database

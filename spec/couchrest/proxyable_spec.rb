@@ -87,7 +87,7 @@ describe "Proxyable" do
           DummyProxyable.proxy_for(:cats)
           @obj = DummyProxyable.new
           CouchRest::Model::Proxyable::ModelProxy.should_receive(:new).with(Cat, @obj, 'dummy_proxyable', 'db').and_return(true)
-          @obj.should_receive('proxy_database').and_return('db')
+          @obj.should_receive(:proxy_database).and_return('db')
           @obj.cats
         end
 
@@ -165,15 +165,13 @@ describe "Proxyable" do
       end
 
       it "should proxy new call" do
-        Cat.should_receive(:new).and_return({})
-        @obj.should_receive(:proxy_update).and_return(true)
-        @obj.new
+        @obj.should_receive(:proxy_block_update).with(:new, 'attrs', 'opts')
+        @obj.new('attrs', 'opts')
       end
 
       it "should proxy build_from_database" do
-        Cat.should_receive(:build_from_database).and_return({})
-        @obj.should_receive(:proxy_update).with({}).and_return(true)
-        @obj.build_from_database
+        @obj.should_receive(:proxy_block_update).with(:build_from_database, 'attrs', 'opts')
+        @obj.build_from_database('attrs', 'opts')
       end
 
       describe "#method_missing" do
@@ -311,6 +309,15 @@ describe "Proxyable" do
         docs = [{}, {}]
         @obj.should_receive(:proxy_update).twice.with({})
         @obj.send(:proxy_update_all, docs)
+      end
+
+      describe "#proxy_block_update" do
+        it "should proxy block updates" do
+          doc = { }
+          @obj.model.should_receive(:new).and_yield(doc)
+          @obj.should_receive(:proxy_update).with(doc)
+          @obj.send(:proxy_block_update, :new)
+        end
       end
 
     end

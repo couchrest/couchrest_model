@@ -35,11 +35,11 @@ describe "Model Persistence" do
   describe "basic saving and retrieving" do
     it "should work fine" do
       @obj.name = "should be easily saved and retrieved"
-      @obj.save
-      saved_obj = WithDefaultValues.get(@obj.id)
+      @obj.save!
+      saved_obj = WithDefaultValues.get!(@obj.id)
       saved_obj.should_not be_nil
     end
-    
+
     it "should parse the Time attributes automatically" do
       @obj.name = "should parse the Time attributes automatically"
       @obj.set_by_proc.should be_an_instance_of(Time)
@@ -223,34 +223,34 @@ describe "Model Persistence" do
     
     it "should require the field" do
       lambda{@templated.save}.should raise_error
-      @templated['important-field'] = 'very-important'
+      @templated['slug'] = 'very-important'
       @templated.save.should be_true
     end
     
     it "should save with the id" do
-      @templated['important-field'] = 'very-important'
+      @templated['slug'] = 'very-important'
       @templated.save.should be_true
       t = WithTemplateAndUniqueID.get('very-important')
       t.should == @templated
     end
     
     it "should not change the id on update" do
-      @templated['important-field'] = 'very-important'
+      @templated['slug'] = 'very-important'
       @templated.save.should be_true
-      @templated['important-field'] = 'not-important'
+      @templated['slug'] = 'not-important'
       @templated.save.should be_true
       t = WithTemplateAndUniqueID.get('very-important')
       t.id.should == @templated.id
     end
     
     it "should raise an error when the id is taken" do
-      @templated['important-field'] = 'very-important'
+      @templated['slug'] = 'very-important'
       @templated.save.should be_true
-      lambda{WithTemplateAndUniqueID.new('important-field' => 'very-important').save}.should raise_error
+      lambda{WithTemplateAndUniqueID.new('slug' => 'very-important').save}.should raise_error
     end
     
     it "should set the id" do
-      @templated['important-field'] = 'very-important'
+      @templated['slug'] = 'very-important'
       @templated.save.should be_true
       @templated.id.should == 'very-important'
     end
