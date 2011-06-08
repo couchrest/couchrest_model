@@ -92,6 +92,21 @@ module CouchRest
       alias :to_param :id
       alias :new_record? :new?
       alias :new_document? :new?
+
+      # Compare this model with another by confirming to see 
+      # if the IDs and their databases match!
+      #
+      # Camparison of the database is required in case the 
+      # model has been proxied or loaded elsewhere.
+      #
+      # A Basic CouchRest document will only ever compare using 
+      # a Hash comparison on the attributes.
+      def == other
+        return false unless other.is_a?(Base)
+        database == other.database && id == other.id
+      end
+      alias :eql? :==
+
     end
   end
 end

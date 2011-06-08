@@ -142,8 +142,25 @@ describe "Model Base" do
         @obj.destroyed?.should be_true
       end
     end
+  end
 
-
+  describe "comparisons" do
+    describe "#==" do
+      it "should be true on same document" do
+        p = Project.create
+        p.should eql(p)
+      end
+      it "should be true after loading" do
+        p = Project.create
+        p.should eql(Project.get(p.id))
+      end
+      it "should not be true if databases do not match" do
+        p = Project.create
+        p2 = p.dup
+        p2.stub!(:database).and_return('other')
+        p.should_not eql(p2)
+      end
+    end
   end
 
   describe "update attributes without saving" do
