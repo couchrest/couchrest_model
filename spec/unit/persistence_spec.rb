@@ -356,6 +356,27 @@ describe CouchRest::Model::Persistence do
       end
     end
 
+    describe "with contextual validation on ”create”" do
+      it "should validate only within ”create” context" do
+        doc = WithContextualValidationOnCreate.new
+        doc.save.should be_false
+        doc.name = "Alice"
+        doc.save.should be_true
+
+        doc.update_attributes(:name => nil).should be_true
+      end
+    end
+
+    describe "with contextual validation on ”update”" do
+      it "should validate only within ”update” context" do
+        doc = WithContextualValidationOnUpdate.new
+        doc.save.should be_true
+
+        doc.update_attributes(:name => nil).should be_false
+        doc.update_attributes(:name => "Bob").should be_true
+      end
+    end
+
     describe "save" do
       it "should run the after filter after saving" do
         @doc.run_after_save.should be_nil

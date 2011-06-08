@@ -1,9 +1,6 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), "..", "lib"))
 
-MODELS = File.join(File.dirname(__FILE__), "fixtures", "models")
-$LOAD_PATH.unshift(MODELS)
-
 require "bundler/setup"
 require "rubygems"
 require "rspec"
@@ -11,6 +8,9 @@ require "rspec"
 require 'couchrest_model'
 
 unless defined?(FIXTURE_PATH)
+  MODEL_PATH = File.join(File.dirname(__FILE__), "fixtures", "models")
+  $LOAD_PATH.unshift(MODEL_PATH)
+
   FIXTURE_PATH = File.join(File.dirname(__FILE__), '/fixtures')
   SCRATCH_PATH = File.join(File.dirname(__FILE__), '/tmp')
 
@@ -34,7 +34,7 @@ RSpec.configure do |config|
 end
 
 # Require each of the fixture models
-Dir[ File.join(MODELS, "*.rb") ].sort.each { |file| require File.basename(file) }
+Dir[ File.join(MODEL_PATH, "*.rb") ].sort.each { |file| require File.basename(file) }
 
 class Basic < CouchRest::Model::Base
   use_database TEST_SERVER.default_database

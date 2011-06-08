@@ -12,6 +12,8 @@ module CouchRest::Model
       include CouchRest::Model::Callbacks
       include CouchRest::Model::CastedBy
       include CouchRest::Model::Dirty
+      include CouchRest::Model::Callbacks
+
       class_eval do
         # Override CastedBy's base_doc?
         def base_doc?

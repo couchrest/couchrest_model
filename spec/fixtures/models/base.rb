@@ -83,6 +83,17 @@ class WithCallBacks < CouchRest::Model::Base
   end
 end
 
+# Following two fixture classes have __intentionally__ diffent syntax for setting the validation context
+class WithContextualValidationOnCreate < CouchRest::Model::Base
+  property(:name, String)
+  validates(:name, :presence => {:on => :create})
+end
+
+class WithContextualValidationOnUpdate < CouchRest::Model::Base
+  property(:name, String)
+  validates(:name, :presence => true, :on => :update)
+end
+
 class WithTemplateAndUniqueID < CouchRest::Model::Base
   use_database TEST_SERVER.default_database
   unique_id do |model|
