@@ -276,9 +276,9 @@ describe "properties of array of casted models" do
   end
 
   it "should allow attribute to be set from hash with ordered keys and sub-hashes" do
-    @course.questions = { '0' => {:q => "Test1"}, '1' => {:q => 'Test2'} }
-    @course.questions.length.should eql(2)
-    @course.questions.last.q.should eql('Test2')
+    @course.questions = { '10' => {:q => 'Test10'}, '0' => {:q => "Test1"}, '1' => {:q => 'Test2'} }
+    @course.questions.length.should eql(3)
+    @course.questions.last.q.should eql('Test10')
     @course.questions.last.class.should eql(Question)
   end
 
@@ -295,7 +295,7 @@ describe "properties of array of casted models" do
   it "should raise an error if attempting to set single value for array type" do
     lambda {
       @course.questions = Question.new(:q => 'test1')
-    }.should raise_error
+    }.should raise_error(/Expecting an array/)
   end
 
 

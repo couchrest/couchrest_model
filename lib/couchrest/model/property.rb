@@ -26,13 +26,9 @@ module CouchRest::Model
       if type.is_a?(Array)
         if value.nil?
           value = []
-        elsif value.is_a?(Hash)
-          # Assume provided as a Hash where key is index!
-          data = value
-          value = [ ]
-          data.keys.sort.each do |k|
-            value << data[k]
-          end
+        elsif [Hash, HashWithIndifferentAccess].include?(value.class)
+          # Assume provided as a params hash where key is index
+          value = parameter_hash_to_array(value)
         elsif !value.is_a?(Array)
           raise "Expecting an array or keyed hash for property #{parent.class.name}##{self.name}"
         end
@@ -77,6 +73,14 @@ module CouchRest::Model
     end
 
     private
+
+      def parameter_hash_to_array(source)
+        value = [ ]
+        source.keys.each do |k|
+          value[k.to_i] = source[k]
+        end
+        value.compact
+      end
 
       def associate_casted_value_to_parent(parent, value)
         value.casted_by = parent if value.respond_to?(:casted_by)
