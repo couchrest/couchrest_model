@@ -16,8 +16,10 @@ module CouchRest #:nodoc:
 
       end
 
-      def valid?(*) #nodoc
-        _run_validation_callbacks { super }
+      def valid?(context = nil)
+        context ||= (new_record? ? :create : :update)
+        output = super(context)
+        errors.empty? && output
       end
 
     end
