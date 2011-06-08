@@ -1,8 +1,4 @@
-require File.expand_path("../../spec_helper", __FILE__)
-require File.join(FIXTURE_PATH, 'more', 'cat')
-require File.join(FIXTURE_PATH, 'more', 'person')
-require File.join(FIXTURE_PATH, 'more', 'card')
-require File.join(FIXTURE_PATH, 'more', 'course')
+require "spec_helper"
 
 # add a default value
 Card.property :bg_color, :default => '#ccc'

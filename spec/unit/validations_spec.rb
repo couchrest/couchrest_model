@@ -1,14 +1,6 @@
-require File.expand_path("../../spec_helper", __FILE__)
+require "spec_helper"
 
-require File.join(FIXTURE_PATH, 'more', 'cat')
-require File.join(FIXTURE_PATH, 'more', 'article')
-require File.join(FIXTURE_PATH, 'more', 'course')
-require File.join(FIXTURE_PATH, 'more', 'card')
-require File.join(FIXTURE_PATH, 'base')
-
-# TODO Move validations from other specs to here
-
-describe "Validations" do
+describe CouchRest::Model::Validations do
 
   describe "Uniqueness" do
 

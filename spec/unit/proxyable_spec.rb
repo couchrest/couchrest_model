@@ -1,6 +1,4 @@
-require File.expand_path("../../spec_helper", __FILE__)
-
-require File.join(FIXTURE_PATH, 'more', 'cat')
+require "spec_helper"
 
 class DummyProxyable < CouchRest::Model::Base
   proxy_database_method :db
@@ -12,7 +10,7 @@ end
 class ProxyKitten < CouchRest::Model::Base
 end
 
-describe "Proxyable" do
+describe CouchRest::Model::Proxyable do
 
   describe "#proxy_database" do
 

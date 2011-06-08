@@ -1,10 +1,9 @@
-require File.expand_path("../../spec_helper", __FILE__)
+require "spec_helper"
 
 class DesignModel < CouchRest::Model::Base
-  
 end
 
-describe "Design" do
+describe CouchRest::Model::Designs do
 
   it "should accessable from model" do
     DesignModel.respond_to?(:design).should be_true

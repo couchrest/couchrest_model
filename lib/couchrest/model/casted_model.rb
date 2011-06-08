@@ -5,11 +5,11 @@ module CouchRest::Model
 
     included do
       include CouchRest::Model::Configuration
-      include CouchRest::Model::Callbacks
       include CouchRest::Model::Properties
       include CouchRest::Model::PropertyProtection
       include CouchRest::Model::Associations
       include CouchRest::Model::Validations
+      include CouchRest::Model::Callbacks
       include CouchRest::Model::CastedBy
       include CouchRest::Model::Dirty
       class_eval do

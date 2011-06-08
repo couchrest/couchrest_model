@@ -1,13 +1,7 @@
 # encoding: utf-8
-require File.expand_path('../../spec_helper', __FILE__)
-require File.join(FIXTURE_PATH, 'base')
-require File.join(FIXTURE_PATH, 'more', 'cat')
-require File.join(FIXTURE_PATH, 'more', 'article')
-require File.join(FIXTURE_PATH, 'more', 'course')
-require File.join(FIXTURE_PATH, 'more', 'card')
-require File.join(FIXTURE_PATH, 'more', 'event')
+require 'spec_helper'
 
-describe "Model Persistence" do
+describe CouchRest::Model::Persistence do
 
   before(:each) do
     @obj = WithDefaultValues.new

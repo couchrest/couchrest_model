@@ -1,4 +1,4 @@
-require File.expand_path("../../spec_helper", __FILE__)
+require "spec_helper"
 
 class UnattachedDoc < CouchRest::Model::Base
   # Note: no use_database here

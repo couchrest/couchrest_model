@@ -1,5 +1,6 @@
-require File.join(FIXTURE_PATH, 'more', 'client')
-require File.join(FIXTURE_PATH, 'more', 'sale_entry')
+require 'client'
+require 'sale_entry'
+
 class SaleInvoice < CouchRest::Model::Base  
   use_database DB
 

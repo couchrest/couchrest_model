@@ -1,7 +1,5 @@
 # encoding: utf-8
-require File.expand_path('../../spec_helper', __FILE__)
-require File.join(FIXTURE_PATH, 'more', 'sale_invoice')
-
+require 'spec_helper'
 
 describe "Assocations" do
 

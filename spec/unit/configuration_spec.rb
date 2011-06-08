@@ -1,8 +1,7 @@
 # encoding: utf-8
-require File.expand_path('../../spec_helper', __FILE__)
-require File.join(FIXTURE_PATH, 'more', 'cat')
+require "spec_helper"
 
-describe CouchRest::Model::Base do
+describe CouchRest::Model::Configuration do
 
   before do
     @class = Class.new(CouchRest::Model::Base)

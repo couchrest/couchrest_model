@@ -1,10 +1,7 @@
 # encoding: utf-8
+require 'spec_helper'
 
-require File.expand_path("../../spec_helper", __FILE__)
-require File.join(FIXTURE_PATH, 'base')
-require File.join(FIXTURE_PATH, 'more', 'article')
-
-describe "Design Documents" do
+describe CouchRest::Model::DesignDoc do
 
   before :all do
     reset_test_db!

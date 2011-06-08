@@ -6,9 +6,9 @@ class Invoice < CouchRest::Model::Base
   property :client_name
   property :employee_name
   property :location
-  
+
   # Validation
   validates_presence_of :client_name, :employee_name
   validates_presence_of :location, :message => "Hey stupid!, you forgot the location"
-  
+
 end

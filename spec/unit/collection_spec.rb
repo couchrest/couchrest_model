@@ -1,5 +1,4 @@
-require File.expand_path("../../spec_helper", __FILE__)
-require File.join(FIXTURE_PATH, 'more', 'article')
+require "spec_helper"
 
 describe "Collections" do
 

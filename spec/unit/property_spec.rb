@@ -1,18 +1,7 @@
 # encoding: utf-8
-require File.expand_path('../../spec_helper', __FILE__)
-require File.join(FIXTURE_PATH, 'more', 'article')
-require File.join(FIXTURE_PATH, 'more', 'cat')
-require File.join(FIXTURE_PATH, 'more', 'person')
-require File.join(FIXTURE_PATH, 'more', 'card')
-require File.join(FIXTURE_PATH, 'more', 'invoice')
-require File.join(FIXTURE_PATH, 'more', 'service')
-require File.join(FIXTURE_PATH, 'more', 'event')
-require File.join(FIXTURE_PATH, 'more', 'user')
-require File.join(FIXTURE_PATH, 'more', 'course')
-require File.join(FIXTURE_PATH, "more", "key_chain")
+require 'spec_helper'
 
-
-describe "Model properties" do
+describe CouchRest::Model::Property do
 
   before(:each) do
     reset_test_db!

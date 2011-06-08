@@ -1,3 +1,5 @@
+require 'cat'
+
 class Person < Hash
   include ::CouchRest::Model::CastedModel
   property :pet, Cat

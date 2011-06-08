@@ -1,5 +1,5 @@
-require File.join(FIXTURE_PATH, 'more', 'question')
-require File.join(FIXTURE_PATH, 'more', 'person')
+require 'question'
+require 'person'
 
 class Course < CouchRest::Model::Base
   use_database TEST_SERVER.default_database

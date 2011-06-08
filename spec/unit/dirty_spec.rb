@@ -1,10 +1,4 @@
-require File.expand_path("../../spec_helper", __FILE__)
-
-require File.join(FIXTURE_PATH, 'more', 'cat')
-require File.join(FIXTURE_PATH, 'more', 'article')
-require File.join(FIXTURE_PATH, 'more', 'course')
-require File.join(FIXTURE_PATH, 'more', 'card')
-require File.join(FIXTURE_PATH, 'base')
+require "spec_helper"
 
 class WithCastedModelMixin < Hash
   include CouchRest::Model::CastedModel
