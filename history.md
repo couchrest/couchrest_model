@@ -6,6 +6,7 @@
   * Properties with a nil value are now no longer sent to the database.
   * Now possible to build new objects via CastedArray#build
 	* Implement #get! and #find! class methods
+	* Now is possible delete particular elements in casted array(Kostiantyn Kahanskyi)
 
 * Minor fixes
   * #as_json now correctly uses ActiveSupports methods.
