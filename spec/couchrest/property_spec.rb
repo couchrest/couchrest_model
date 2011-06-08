@@ -9,6 +9,7 @@ require File.join(FIXTURE_PATH, 'more', 'service')
 require File.join(FIXTURE_PATH, 'more', 'event')
 require File.join(FIXTURE_PATH, 'more', 'user')
 require File.join(FIXTURE_PATH, 'more', 'course')
+require File.join(FIXTURE_PATH, "more", "key_chain")
 
 
 describe "Model properties" do
@@ -237,6 +238,16 @@ describe "Model properties" do
     end
   end
 
+end
+
+describe "properties of hash of casted models" do
+  it "should be able to assign a casted hash to a hash property" do
+    chain = KeyChain.new
+    keys = {"House" => "8==$", "Office" => "<>==U"}
+    chain.keys = keys
+    chain.keys = chain.keys
+    chain.keys.should == keys
+  end
 end
 
 describe "properties of array of casted models" do

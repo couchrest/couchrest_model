@@ -244,6 +244,7 @@ module CouchRest
           else
             options = { :limit => per_page, :skip => per_page * (page - 1) }
           end
+          options[:include_docs] = true
           view_options.merge(options)
         end
 

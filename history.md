@@ -6,6 +6,7 @@
   * Properties with a nil value are now no longer sent to the database.
   * Now possible to build new objects via CastedArray#build
   * Implement #get! and #find! class methods
+  * Now is possible delete particular elements in casted array(Kostiantyn Kahanskyi)
 
 * Minor fixes
   * #as_json now correctly uses ActiveSupports methods.
@@ -20,7 +21,7 @@
   * #reload no longer uses Hash#merge! which was causing issues with dirty tracking on casted models. (pointer by kostia)
   * Non-property mass assignment on #new no longer possible without :directly_set_attributes option.
   * Using CouchRest 1.1.0.pre3. (No more Hashes!)
-
+  * Fixing problem assigning a CastedHash to a property declared as a Hash (Kostiantyn Kahanskyi, gfmtim)
 
 ## 1.1.0.beta5 - 2011-04-30
 
