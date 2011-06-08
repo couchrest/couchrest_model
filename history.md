@@ -1,6 +1,12 @@
 # CouchRest Model Change History
 
-## 1.1.0.rc - 2011-06-08
+## 1.1.0 - 2011-06-XX
+
+* Minor Fixes
+  * Validation callbacks now support context (thanks kostia)
+  * Document comparisons now performed using database and document ID (pointer by neocsr)
+
+## 1.1.0.rc1 - 2011-06-08
 
 * New Features
   * Properties with a nil value are now no longer sent to the database.
