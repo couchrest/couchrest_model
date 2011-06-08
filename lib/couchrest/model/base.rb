@@ -7,7 +7,6 @@ module CouchRest
       include CouchRest::Model::Configuration
       include CouchRest::Model::Connection
       include CouchRest::Model::Persistence
-      include CouchRest::Model::Callbacks
       include CouchRest::Model::DocumentQueries
       include CouchRest::Model::Views
       include CouchRest::Model::DesignDoc
@@ -21,6 +20,7 @@ module CouchRest
       include CouchRest::Model::Designs
       include CouchRest::Model::CastedBy
       include CouchRest::Model::Dirty
+      include CouchRest::Model::Callbacks
 
       def self.subclasses
         @subclasses ||= []
