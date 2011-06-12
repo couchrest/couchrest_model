@@ -44,7 +44,7 @@ module CouchRest::Model
     alias :new_record? :new?
 
     def persisted?
-      !new?
+      !new? && !destroyed?
     end
 
     # The to_param method is needed for rails to generate resourceful routes.
