@@ -82,7 +82,7 @@ module CouchRest
       end
 
       def persisted?
-        !new?
+        !new? && !destroyed?
       end
 
       def to_key
