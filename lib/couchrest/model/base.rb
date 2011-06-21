@@ -1,13 +1,12 @@
 module CouchRest
   module Model
-    class Base < Document
+    class Base < CouchRest::Document
 
       extend ActiveModel::Naming
 
       include CouchRest::Model::Configuration
       include CouchRest::Model::Connection
       include CouchRest::Model::Persistence
-      include CouchRest::Model::Callbacks
       include CouchRest::Model::DocumentQueries
       include CouchRest::Model::Views
       include CouchRest::Model::DesignDoc
@@ -18,9 +17,11 @@ module CouchRest
       include CouchRest::Model::PropertyProtection
       include CouchRest::Model::Associations
       include CouchRest::Model::Validations
+      include CouchRest::Model::Callbacks
       include CouchRest::Model::Designs
       include CouchRest::Model::CastedBy
       include CouchRest::Model::Dirty
+      include CouchRest::Model::Callbacks
 
       def self.subclasses
         @subclasses ||= []
@@ -51,14 +52,15 @@ module CouchRest
       #
       # If a block is provided the new model will be passed into the
       # block so that it can be populated.
-      def initialize(doc = {}, options = {})
-        doc = prepare_all_attributes(doc, options)
-        # set the instances database, if provided
+      def initialize(attributes = {}, options = {})
+        super()
+        prepare_all_attributes(attributes, options)
+        # set the instance's database, if provided
         self.database = options[:database] unless options[:database].nil?
-        super(doc)
         unless self['_id'] && self['_rev']
           self[self.model_type_key] = self.class.to_s
         end
+
         yield self if block_given?
 
         after_initialize if respond_to?(:after_initialize)
@@ -79,18 +81,8 @@ module CouchRest
         super
       end
 
-      ## Compatibility with ActiveSupport and older frameworks
-
-      # Hack so that CouchRest::Document, which descends from Hash,
-      # doesn't appear to Rails routing as a Hash of options
-      def is_a?(klass)
-        return false if klass == Hash
-        super
-      end
-      alias :kind_of? :is_a?
-
       def persisted?
-        !new?
+        !new? && !destroyed?
       end
 
       def to_key
@@ -100,6 +92,21 @@ module CouchRest
       alias :to_param :id
       alias :new_record? :new?
       alias :new_document? :new?
+
+      # Compare this model with another by confirming to see 
+      # if the IDs and their databases match!
+      #
+      # Camparison of the database is required in case the 
+      # model has been proxied or loaded elsewhere.
+      #
+      # A Basic CouchRest document will only ever compare using 
+      # a Hash comparison on the attributes.
+      def == other
+        return false unless other.is_a?(Base)
+        database == other.database && id == other.id
+      end
+      alias :eql? :==
+
     end
   end
 end

@@ -21,8 +21,8 @@ module CouchRest
 
       # Creates the document in the db. Raises an exception
       # if the document is not created properly.
-      def create!
-        self.class.fail_validate!(self) unless self.create
+      def create!(options = {})
+        self.class.fail_validate!(self) unless self.create(options)
       end
 
       # Trigger the callbacks (before, after, around)
@@ -54,17 +54,19 @@ module CouchRest
       end
 
       # Deletes the document from the database. Runs the :destroy callbacks.
-      # Removes the <tt>_id</tt> and <tt>_rev</tt> fields, preparing the
-      # document to be saved to a new <tt>_id</tt> if required.
       def destroy
         _run_destroy_callbacks do
           result = database.delete_doc(self)
           if result['ok']
-            self.delete('_rev')
-            self.delete('_id')
+            @_destroyed = true
+            self.freeze
           end
           result['ok']
         end
+      end
+
+      def destroyed?
+        !!@_destroyed
       end
 
       # Update the document's attributes and save. For example:
@@ -85,7 +87,7 @@ module CouchRest
       #
       # Returns self.
       def reload
-        merge!(self.class.get(id))
+        prepare_all_attributes(database.get(id), :directly_set_attributes => true)
         self
       end
 
@@ -104,22 +106,25 @@ module CouchRest
 
       module ClassMethods
 
-        # Creates a new instance, bypassing attribute protection
+        # Creates a new instance, bypassing attribute protection and
+        # uses the type field to determine which model to use to instanatiate
+        # the new object.
         #
         # ==== Returns
         #  a document instance
         #
-        def build_from_database(doc = {})
-          base = (doc[model_type_key].blank? || doc[model_type_key] == self.to_s) ? self : doc[model_type_key].constantize
-          base.new(doc, :directly_set_attributes => true)
+        def build_from_database(doc = {}, options = {}, &block)
+          src = doc[model_type_key]
+          base = (src.blank? || src == self.to_s) ? self : src.constantize
+          base.new(doc, options.merge(:directly_set_attributes => true), &block)
         end
 
         # Defines an instance and save it directly to the database
         #
         # ==== Returns
         #  returns the reloaded document
-        def create(attributes = {})
-          instance = new(attributes)
+        def create(attributes = {}, &block)
+          instance = new(attributes, &block)
           instance.create
           instance
         end
@@ -128,8 +133,8 @@ module CouchRest
         #
         # ==== Returns
         #  returns the reloaded document or raises an exception
-        def create!(attributes = {})
-          instance = new(attributes)
+        def create!(attributes = {}, &block)
+          instance = new(attributes, &block)
           instance.create!
           instance
         end

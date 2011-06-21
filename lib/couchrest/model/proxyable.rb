@@ -73,12 +73,12 @@ module CouchRest
         end
 
         # Base
-        def new(*args)
-          proxy_update(model.new(*args))
+        def new(attrs = {}, options = {}, &block)
+          proxy_block_update(:new, attrs, options, &block)
         end
 
-        def build_from_database(doc = {})
-          proxy_update(model.build_from_database(doc))
+        def build_from_database(attrs = {}, options = {}, &block)
+          proxy_block_update(:build_from_database, attrs, options, &block)
         end
 
         def method_missing(m, *args, &block)
@@ -167,6 +167,13 @@ module CouchRest
         def proxy_update_all(docs)
           docs.each do |doc|
             proxy_update(doc)
+          end
+        end
+
+        def proxy_block_update(method, *args, &block)
+          model.send(method, *args) do |doc|
+            proxy_update(doc)
+            yield doc if block_given?
           end
         end
 

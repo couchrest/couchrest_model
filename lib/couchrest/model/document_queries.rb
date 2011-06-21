@@ -1,13 +1,10 @@
 module CouchRest
   module Model
     module DocumentQueries
-      
-      def self.included(base)
-        base.extend(ClassMethods)
-      end
-      
+      extend ActiveSupport::Concern
+
       module ClassMethods
-        
+
         # Load all documents that have the model_type_key's field equal to the
         # name of the current class. Take the standard set of
         # CouchRest::Database#view options.
@@ -73,7 +70,7 @@ module CouchRest
           end
         end
         alias :find :get
-        
+
         # Load a document from the database by id
         # An exception will be raised if the document isn't found
         #
@@ -86,9 +83,12 @@ module CouchRest
         # id<String, Integer>:: Document ID
         # db<Database>:: optional option to pass a custom database to use
         def get!(id, db = database)
-          raise "Missing or empty document ID" if id.to_s.empty?
+          raise CouchRest::Model::DocumentNotFound if id.blank?
+
           doc = db.get id
           build_from_database(doc)
+        rescue RestClient::ResourceNotFound
+          raise CouchRest::Model::DocumentNotFound
         end
         alias :find! :get!
         

@@ -5,13 +5,15 @@ module CouchRest::Model
 
     included do
       include CouchRest::Model::Configuration
-      include CouchRest::Model::Callbacks
       include CouchRest::Model::Properties
       include CouchRest::Model::PropertyProtection
       include CouchRest::Model::Associations
       include CouchRest::Model::Validations
+      include CouchRest::Model::Callbacks
       include CouchRest::Model::CastedBy
       include CouchRest::Model::Dirty
+      include CouchRest::Model::Callbacks
+
       class_eval do
         # Override CastedBy's base_doc?
         def base_doc?
@@ -42,7 +44,7 @@ module CouchRest::Model
     alias :new_record? :new?
 
     def persisted?
-      !new?
+      !new? && !destroyed?
     end
 
     # The to_param method is needed for rails to generate resourceful routes.
