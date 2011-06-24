@@ -1,6 +1,6 @@
 require "spec_helper"
 
-class WithCastedModelMixin < Hash
+class WithCastedModelMixin
   include CouchRest::Model::CastedModel
   property :name
   property :details, Object, :default => {}

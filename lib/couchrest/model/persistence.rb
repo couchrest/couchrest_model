@@ -28,7 +28,8 @@ module CouchRest
       # Trigger the callbacks (before, after, around)
       # only if the document isn't new
       def update(options = {})
-        raise "Calling #{self.class.name}#update on document that has not been created!" if self.new?
+        raise "Cannot save a destroyed document!" if destroyed?
+        raise "Calling #{self.class.name}#update on document that has not been created!" if new?
         return false unless perform_validations(options)
         return true if !self.disable_dirty && !self.changed?
         _run_update_callbacks do
@@ -67,6 +68,10 @@ module CouchRest
 
       def destroyed?
         !!@_destroyed
+      end
+
+      def persisted?
+        !new? && !destroyed?
       end
 
       # Update the document's attributes and save. For example:

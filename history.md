@@ -2,6 +2,9 @@
 
 ## 1.1.0 - 2011-06-XX
 
+* Major Fixes
+  * CastedModel no longer requires a Hash. Automatically includes all required methods.
+
 * Minor Fixes
   * Validation callbacks now support context (thanks kostia)
   * Document comparisons now performed using database and document ID (pointer by neocsr)

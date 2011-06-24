@@ -81,10 +81,6 @@ module CouchRest
         super
       end
 
-      def persisted?
-        !new?
-      end
-
       def to_key
         new? ? nil : [id]
       end

@@ -168,7 +168,7 @@ module CouchRest
             # check if this property is going to casted
             type = options.delete(:type) || options.delete(:cast_as)
             if block_given?
-              type = Class.new(Hash) do
+              type = Class.new do
                 include CastedModel
               end
               if block.arity == 1 # Traditional, with options

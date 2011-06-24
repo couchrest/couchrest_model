@@ -1,9 +1,9 @@
 module CouchRest::Model
   module CastedModel
-
     extend ActiveSupport::Concern
 
     included do
+      include CouchRest::Attributes
       include CouchRest::Model::Configuration
       include CouchRest::Model::Properties
       include CouchRest::Model::PropertyProtection
@@ -19,21 +19,15 @@ module CouchRest::Model
         def base_doc?
           false # Can never be base doc!
         end
+
+        # Initialize a new Casted Model. Accepts the same
+        # options as CouchRest::Model::Base for preparing and initializing
+        # attributes.
+        def initialize(keys = {}, options = {})
+          super()
+          prepare_all_attributes(keys, options)
+        end
       end
-    end
-
-    def initialize(keys = {})
-      raise StandardError unless self.is_a? Hash
-      prepare_all_attributes(keys)
-      super()
-    end
-
-    def []= key, value
-      super(key.to_s, value)
-    end
-
-    def [] key
-      super(key.to_s)
     end
 
     # False if the casted model has already

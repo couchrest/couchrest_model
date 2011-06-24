@@ -1,6 +1,6 @@
 
-class CatToy < Hash
-  include ::CouchRest::Model::CastedModel
+class CatToy
+  include CouchRest::Model::CastedModel
 
   property :name
 

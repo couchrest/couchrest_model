@@ -1,7 +1,7 @@
 # encoding: utf-8
 require "spec_helper"
 
-class WithCastedModelMixin < Hash
+class WithCastedModelMixin
   include CouchRest::Model::CastedModel
   property :name
   property :no_value
@@ -9,11 +9,17 @@ class WithCastedModelMixin < Hash
   property :casted_attribute, WithCastedModelMixin
 end
 
+class OldFashionedMixin < Hash
+  include CouchRest::Model::CastedModel
+  property :name
+end
+
 class DummyModel < CouchRest::Model::Base
   use_database TEST_SERVER.default_database
   raise "Default DB not set" if TEST_SERVER.default_database.nil?
   property :casted_attribute, WithCastedModelMixin
   property :keywords,         [String]
+  property :old_casted_attribute, OldFashionedMixin
   property :sub_models do |child|
     child.property :title
   end
@@ -22,7 +28,7 @@ class DummyModel < CouchRest::Model::Base
   end
 end
 
-class WithCastedCallBackModel < Hash
+class WithCastedCallBackModel
   include CouchRest::Model::CastedModel
   property :name
   property :run_before_validation
@@ -152,6 +158,33 @@ describe CouchRest::Model::CastedModel do
     it "should raise an error if save or update_attributes called" do
       expect { @casted_obj.casted_attribute.save }.to raise_error(NoMethodError)
       expect { @casted_obj.casted_attribute.update_attributes(:name => "Fubar") }.to raise_error(NoMethodError)
+    end
+  end
+
+  # Basic testing for an old fashioned casted hash
+  describe "old hash casted as attribute" do
+    before :each do
+      @obj = DummyModel.new(:old_casted_attribute => {:name => 'Testing'})
+      @casted_obj = @obj.old_casted_attribute
+    end
+    it "should be available from its parent" do
+      @casted_obj.should be_an_instance_of(OldFashionedMixin)
+    end
+
+    it "should have the getters defined" do
+      @casted_obj.name.should == 'Testing'
+    end
+
+    it "should know who casted it" do
+      @casted_obj.casted_by.should == @obj
+    end
+
+    it "should know which property casted it" do
+      @casted_obj.casted_by_property.should == @obj.properties.detect{|p| p.to_s == 'old_casted_attribute'}
+    end
+
+    it "should return nil for the unknown attribute" do
+      @casted_obj["unknown"].should be_nil
     end
   end
 
