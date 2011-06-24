@@ -1,0 +1,21 @@
+development: &development
+  protocol: 'http'
+  host: localhost
+  port: 5984
+  prefix: <%= app_name %>
+  suffix: development
+  username:
+  password:
+
+test:
+  <<: *development
+  suffix: test
+
+production:
+  protocol: 'https'
+  host: localhost
+  port: 5984
+  prefix: <%= app_name %>
+  suffix: production
+  username: root
+  password: 123

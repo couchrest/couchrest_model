@@ -110,14 +110,22 @@ describe "Model Base" do
     describe "#persisted?" do
       context "when the document is new" do
         it "returns false" do
-          @obj.persisted?.should == false
+          @obj.persisted?.should be_false
         end
       end
 
       context "when the document is not new" do
         it "returns id" do
           @obj.save
-          @obj.persisted?.should == true 
+          @obj.persisted?.should be_true 
+        end
+      end
+      
+      context "when the document is destroyed" do
+        it "returns false" do
+          @obj.save
+          @obj.destroy
+          @obj.persisted?.should be_false
         end
       end
     end

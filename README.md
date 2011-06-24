@@ -70,6 +70,10 @@ The example config above for example would use a database called "project_test".
 
 ## Generators
 
+### Configuration
+
+    $ rails generate couchrest_model:config
+
 ### Model
 
     $ rails generate model person --orm=couchrest_model

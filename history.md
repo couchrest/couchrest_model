@@ -8,6 +8,7 @@
 * Minor Fixes
   * Validation callbacks now support context (thanks kostia)
   * Document comparisons now performed using database and document ID (pointer by neocsr)
+  * Automatic config generation now supported (thanks lucasrenan)
 
 ## 1.1.0.rc1 - 2011-06-08
 
