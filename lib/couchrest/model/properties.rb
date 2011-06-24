@@ -149,15 +149,13 @@ module CouchRest
         # These properties are casted as Time objects, so they should always
         # be set to UTC.
         def timestamps!
-          class_eval <<-EOS, __FILE__, __LINE__
-            property(:updated_at, Time, :read_only => true, :protected => true, :auto_validation => false)
-            property(:created_at, Time, :read_only => true, :protected => true, :auto_validation => false)
+          property(:updated_at, Time, :read_only => true, :protected => true, :auto_validation => false)
+          property(:created_at, Time, :read_only => true, :protected => true, :auto_validation => false)
 
-            set_callback :save, :before do |object|
-              write_attribute('updated_at', Time.now)
-              write_attribute('created_at', Time.now) if object.new?
-            end
-          EOS
+          set_callback :save, :before do |object|
+            write_attribute('updated_at', Time.now)
+            write_attribute('created_at', Time.now) if object.new?
+          end
         end
 
         protected
@@ -191,42 +189,32 @@ module CouchRest
 
           # defines the getter for the property (and optional aliases)
           def create_property_getter(property)
-            # meth = property.name
-            class_eval <<-EOS, __FILE__, __LINE__ + 1
-              def #{property.name}
-                read_attribute('#{property.name}')
-              end
-            EOS
+            define_method(property.name) do
+              read_attribute(property.name)
+            end
 
             if ['boolean', TrueClass.to_s.downcase].include?(property.type.to_s.downcase)
-              class_eval <<-EOS, __FILE__, __LINE__
-                def #{property.name}?
-                  value = read_attribute('#{property.name}')
-                  !(value.nil? || value == false)
-                end
-              EOS
+              define_method("#{property.name}?") do
+                value = read_attribute(property.name)
+                !(value.nil? || value == false)
+              end
             end
 
             if property.alias
-              class_eval <<-EOS, __FILE__, __LINE__ + 1
-                alias #{property.alias.to_sym} #{property.name.to_sym}
-              EOS
+              alias_method(property.alias, property.name.to_sym)
             end
           end
 
           # defines the setter for the property (and optional aliases)
           def create_property_setter(property)
-            property_name = property.name
-            class_eval <<-EOS
-              def #{property_name}=(value)
-                write_attribute('#{property_name}', value)
-              end
-            EOS
+            name = property.name
+
+            define_method("#{name}=") do |value|
+              write_attribute(name, value)
+            end
 
             if property.alias
-              class_eval <<-EOS
-                alias #{property.alias.to_sym}= #{property_name.to_sym}=
-              EOS
+              alias_method "#{property.alias}=", "#{name}="
             end
           end
 

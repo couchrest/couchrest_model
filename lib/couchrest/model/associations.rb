@@ -183,19 +183,19 @@ module CouchRest
           casted_by[casted_by_property.to_s] << obj.id
         end
       end
-      
+
       def << obj
         check_obj(obj)
         casted_by[casted_by_property.to_s] << obj.id
         super(obj)
       end
-      
+
       def push(obj)
         check_obj(obj)
         casted_by[casted_by_property.to_s].push obj.id
         super(obj)
       end
-      
+
       def unshift(obj)
         check_obj(obj)
         casted_by[casted_by_property.to_s].unshift obj.id
@@ -212,7 +212,7 @@ module CouchRest
         casted_by[casted_by_property.to_s].pop
         super
       end
-      
+
       def shift
         casted_by[casted_by_property.to_s].shift
         super

@@ -1,7 +1,7 @@
 require 'client'
 require 'sale_entry'
 
-class SaleInvoice < CouchRest::Model::Base  
+class SaleInvoice < CouchRest::Model::Base
   use_database DB
 
   belongs_to :client
