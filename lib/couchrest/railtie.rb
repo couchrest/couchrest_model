@@ -2,10 +2,13 @@ require "rails"
 require "active_model/railtie"
 
 module CouchRest
-  # = Active Record Railtie
   class ModelRailtie < Rails::Railtie
-    config.generators.orm :couchrest_model
-    config.generators.test_framework  :test_unit, :fixture => false
+    def self.generator
+      config.respond_to?(:app_generators) ? :app_generators : :generators
+    end
+    
+    config.send(generator).orm :couchrest_model
+    config.send(generator).test_framework  :test_unit, :fixture => false
 
     initializer "couchrest_model.configure_default_connection" do
       CouchRest::Model::Base.configure do |conf|
