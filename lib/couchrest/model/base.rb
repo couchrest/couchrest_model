@@ -99,7 +99,12 @@ module CouchRest
       # a Hash comparison on the attributes.
       def == other
         return false unless other.is_a?(Base)
-        database == other.database && id == other.id
+        if id.nil? && other.id.nil?
+          # no ids? assume comparing nested and revert to hash comparison
+          to_hash == other.to_hash
+        else
+          database == other.database && id == other.id
+        end
       end
       alias :eql? :==
 

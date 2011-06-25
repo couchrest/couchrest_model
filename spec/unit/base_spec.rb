@@ -154,19 +154,38 @@ describe "Model Base" do
 
   describe "comparisons" do
     describe "#==" do
-      it "should be true on same document" do
-        p = Project.create
-        p.should eql(p)
+      context "on saved document" do
+        it "should be true on same document" do
+          p = Project.create
+          p.should eql(p)
+        end
+        it "should be true after loading" do
+          p = Project.create
+          p.should eql(Project.get(p.id))
+        end
+        it "should not be true if databases do not match" do
+          p = Project.create
+          p2 = p.dup
+          p2.stub!(:database).and_return('other')
+          p.should_not eql(p2)
+        end
+        it "should always be false if one document not saved" do
+          p = Project.create(:name => 'test')
+          o = Project.new(:name => 'test')
+          p.should_not eql(o)
+        end
       end
-      it "should be true after loading" do
-        p = Project.create
-        p.should eql(Project.get(p.id))
-      end
-      it "should not be true if databases do not match" do
-        p = Project.create
-        p2 = p.dup
-        p2.stub!(:database).and_return('other')
-        p.should_not eql(p2)
+      context "with new documents" do
+        it "should be true when attributes match" do
+          p = Project.new(:name => 'test')
+          o = Project.new(:name => 'test')
+          p.should eql(o)
+        end
+        it "should not be true when attributes don't match" do
+          p = Project.new(:name => 'test')
+          o = Project.new(:name => 'testing')
+          p.should_not eql(o)
+        end
       end
     end
   end
