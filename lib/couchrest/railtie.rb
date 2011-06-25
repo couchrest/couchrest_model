@@ -6,7 +6,7 @@ module CouchRest
     def self.generator
       config.respond_to?(:app_generators) ? :app_generators : :generators
     end
-    
+
     config.send(generator).orm :couchrest_model
     config.send(generator).test_framework  :test_unit, :fixture => false
 

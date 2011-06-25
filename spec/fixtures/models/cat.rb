@@ -1,6 +1,6 @@
 
 class CatToy
-  include CouchRest::Model::CastedModel
+  include CouchRest::Model::Embeddable
 
   property :name
 

@@ -1,4 +1,4 @@
-class Membership < Hash
-  include CouchRest::Model::CastedModel
+class Membership
+  include CouchRest::Model::Embeddable
 
 end

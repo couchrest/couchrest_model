@@ -69,6 +69,17 @@ describe "Model Base" do
       @doc = WithAfterInitializeMethod.new {|d| d.some_value = "foo"}
       @doc['some_value'].should eql('foo')
     end
+
+    it "should call after_initialize callback if available" do
+      klass = Class.new(CouchRest::Model::Base)
+      klass.class_eval do # for ruby 1.8.7
+        property :name
+        after_initialize :set_name
+        def set_name; self.name = "foobar"; end
+      end
+      @doc = klass.new
+      @doc.name.should eql("foobar")
+    end
   end
 
   describe "ActiveModel compatability Basic" do

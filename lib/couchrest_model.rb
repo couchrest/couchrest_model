@@ -33,7 +33,6 @@ require "couchrest/model/property_protection"
 require "couchrest/model/properties"
 require "couchrest/model/casted_array"
 require "couchrest/model/casted_hash"
-require "couchrest/model/casted_model"
 require "couchrest/model/validations"
 require "couchrest/model/callbacks"
 require "couchrest/model/document_queries"
@@ -58,7 +57,7 @@ require "couchrest/model/core_extensions/hash"
 require "couchrest/model/core_extensions/time_parsing"
 
 # Base libraries
-require "couchrest/model/casted_model"
+require "couchrest/model/embeddable"
 require "couchrest/model/base"
 
 # Add rails support *after* everything has loaded

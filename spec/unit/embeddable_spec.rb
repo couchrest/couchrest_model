@@ -2,7 +2,7 @@
 require "spec_helper"
 
 class WithCastedModelMixin
-  include CouchRest::Model::CastedModel
+  include CouchRest::Model::Embeddable
   property :name
   property :no_value
   property :details, Object, :default => {}
@@ -29,7 +29,7 @@ class DummyModel < CouchRest::Model::Base
 end
 
 class WithCastedCallBackModel
-  include CouchRest::Model::CastedModel
+  include CouchRest::Model::Embeddable
   property :name
   property :run_before_validation
   property :run_after_validation
@@ -50,19 +50,7 @@ class CastedCallbackDoc < CouchRest::Model::Base
   property :callback_model, WithCastedCallBackModel
 end
 
-describe CouchRest::Model::CastedModel do
-
-  describe "A non hash class including CastedModel" do
-    it "should fail raising and include error" do
-      lambda do
-        class NotAHashButWithCastedModelMixin
-          include CouchRest::CastedModel
-          property :name
-        end
-
-      end.should raise_error
-    end
-  end
+describe CouchRest::Model::Embeddable do
 
   describe "isolated" do
     before(:each) do
@@ -81,7 +69,16 @@ describe CouchRest::Model::CastedModel do
     it "should always return base_doc? as false" do
       @obj.base_doc?.should be_false
     end
-
+    it "should call after_initialize callback if available" do
+      klass = Class.new do
+        include CouchRest::Model::CastedModel
+        after_initialize :set_name
+        property :name
+        def set_name; self.name = "foobar"; end
+      end
+      @obj = klass.new
+      @obj.name.should eql("foobar")
+    end
   end
 
   describe "casted as an attribute, but without a value" do

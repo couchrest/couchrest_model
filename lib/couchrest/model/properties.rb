@@ -167,7 +167,7 @@ module CouchRest
             type = options.delete(:type) || options.delete(:cast_as)
             if block_given?
               type = Class.new do
-                include CastedModel
+                include Embeddable
               end
               if block.arity == 1 # Traditional, with options
                 type.class_eval { yield type }

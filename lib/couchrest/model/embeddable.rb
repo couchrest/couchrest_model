@@ -1,5 +1,5 @@
 module CouchRest::Model
-  module CastedModel
+  module Embeddable
     extend ActiveSupport::Concern
 
     included do
@@ -26,6 +26,7 @@ module CouchRest::Model
         def initialize(keys = {}, options = {})
           super()
           prepare_all_attributes(keys, options)
+          run_callbacks(:initialize) { self }
         end
       end
     end
@@ -61,6 +62,14 @@ module CouchRest::Model
     end
     alias :attributes= :update_attributes_without_saving
 
+  end # End Embeddable
+
+  # Provide backwards compatability with previous versions (pre 1.1.0)
+  module CastedModel
+    extend ActiveSupport::Concern
+    included do
+      include CouchRest::Model::Embeddable
+    end
   end
 
 end

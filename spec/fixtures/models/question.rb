@@ -1,6 +1,6 @@
-class Question < Hash
-  include ::CouchRest::Model::CastedModel
-  
+class Question
+  include ::CouchRest::Model::Embeddable
+
   property :q
   property :a
 

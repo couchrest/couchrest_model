@@ -2,8 +2,9 @@
 
 ## 1.1.0 - 2011-06-25
 
-* Major Fixes
+* Major Alterations
   * CastedModel no longer requires a Hash. Automatically includes all required methods.
+  * CastedModel module renamed to Embeddable (old still works!)
 
 * Minor Fixes
   * Validation callbacks now support context (thanks kostia)

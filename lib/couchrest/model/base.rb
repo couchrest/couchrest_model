@@ -47,8 +47,8 @@ module CouchRest
       #
       # Options supported:
       #
-      # * :directly_set_attributes: true when data comes directly from database
-      # * :database: provide an alternative database
+      # * :directly_set_attributes, true when data comes directly from database
+      # * :database, provide an alternative database
       #
       # If a block is provided the new model will be passed into the
       # block so that it can be populated.
@@ -64,6 +64,7 @@ module CouchRest
         yield self if block_given?
 
         after_initialize if respond_to?(:after_initialize)
+        run_callbacks(:initialize) { self }
       end
 
 
