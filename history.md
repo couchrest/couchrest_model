@@ -1,6 +1,6 @@
 # CouchRest Model Change History
 
-## 1.1.0 - 2011-06-XX
+## 1.1.0 - 2011-06-25
 
 * Major Fixes
   * CastedModel no longer requires a Hash. Automatically includes all required methods.
