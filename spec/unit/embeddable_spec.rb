@@ -79,6 +79,17 @@ describe CouchRest::Model::Embeddable do
       @obj = klass.new
       @obj.name.should eql("foobar")
     end
+    it "should allow override of initialize with super" do
+      klass = Class.new do
+        include CouchRest::Model::Embeddable
+        after_initialize :set_name
+        property :name
+        def set_name; self.name = "foobar"; end
+        def initialize(attrs = {}); super(); end
+      end
+      @obj = klass.new
+      @obj.name.should eql("foobar")
+    end
   end
 
   describe "casted as an attribute, but without a value" do

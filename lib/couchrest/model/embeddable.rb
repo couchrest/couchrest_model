@@ -2,8 +2,10 @@ module CouchRest::Model
   module Embeddable
     extend ActiveSupport::Concern
 
+    # Include Attributes early to ensure super() will work
+    include CouchRest::Attributes
+
     included do
-      include CouchRest::Attributes
       include CouchRest::Model::Configuration
       include CouchRest::Model::Properties
       include CouchRest::Model::PropertyProtection
@@ -20,15 +22,16 @@ module CouchRest::Model
           false # Can never be base doc!
         end
 
-        # Initialize a new Casted Model. Accepts the same
-        # options as CouchRest::Model::Base for preparing and initializing
-        # attributes.
-        def initialize(keys = {}, options = {})
-          super()
-          prepare_all_attributes(keys, options)
-          run_callbacks(:initialize) { self }
-        end
       end
+    end
+
+    # Initialize a new Casted Model. Accepts the same
+    # options as CouchRest::Model::Base for preparing and initializing
+    # attributes.
+    def initialize(keys = {}, options = {})
+      super()
+      prepare_all_attributes(keys, options)
+      run_callbacks(:initialize) { self }
     end
 
     # False if the casted model has already

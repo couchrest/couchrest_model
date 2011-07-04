@@ -1,5 +1,11 @@
 # CouchRest Model Change History
 
+## 1.1.1 - 2011-07-04
+
+* Minor fix
+  * Bumping CouchRest version dependency for important initialize method fix.
+  * Ensuring super on Embeddable#initialize can be called.
+
 ## 1.1.0 - 2011-06-25
 
 * Major Alterations

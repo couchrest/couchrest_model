@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  s.add_dependency(%q<couchrest>, "1.1.0")
+  s.add_dependency(%q<couchrest>, "1.1.1")
   s.add_dependency(%q<mime-types>, "~> 1.15")
   s.add_dependency(%q<activemodel>, "~> 3.0")
   s.add_dependency(%q<tzinfo>, "~> 0.3.22")
