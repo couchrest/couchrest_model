@@ -442,14 +442,17 @@ describe "Property Class" do
       ary.last.should eql(Date.new(2011, 05, 22))
     end
 
-    it "should raise and error if value is array when type is not" do
-      property = CouchRest::Model::Property.new(:test, Date)
+    it "should cast an object that provides an array" do
+      prop = Class.new do
+        attr_accessor :ary
+        def initialize(val); self.ary = val; end
+        def as_json; ary; end
+      end
+      property = CouchRest::Model::Property.new(:test, prop)
       parent = mock("FooClass")
-      lambda {
-        cast = property.cast(parent, [Date.new(2010, 6, 1)])
-      }.should raise_error
+      cast = property.cast(parent, [1, 2])
+      cast.ary.should eql([1, 2])
     end
-
 
     it "should set parent as casted_by object in CastedArray" do
       property = CouchRest::Model::Property.new(:test, [Object])

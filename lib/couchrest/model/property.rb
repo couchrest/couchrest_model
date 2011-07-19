@@ -43,9 +43,8 @@ module CouchRest::Model
       end
     end
 
-    # Cast an individual value, not an array
+    # Cast an individual value
     def cast_value(parent, value)
-      raise "An array inside an array cannot be casted, use Embeddable module" if value.is_a?(Array)
       value = typecast_value(value, self)
       associate_casted_value_to_parent(parent, value)
     end

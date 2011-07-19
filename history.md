@@ -1,5 +1,10 @@
 # CouchRest Model Change History
 
+## 1.1.2 - 2011-07-XX
+
+* Minor fix
+  * Removing restriction that prohibited objects that cast as an array to be loaded.
+
 ## 1.1.1 - 2011-07-04
 
 * Minor fix
