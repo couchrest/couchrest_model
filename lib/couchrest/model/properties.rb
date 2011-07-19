@@ -12,8 +12,10 @@ module CouchRest
         raise "You can only mixin Properties in a class responding to [] and []=, if you tried to mixin CastedModel, make sure your class inherits from Hash or responds to the proper methods" unless (method_defined?(:[]) && method_defined?(:[]=))
       end
 
-      def as_json(options = nil)
-        Hash[self].reject{|k,v| v.nil?}.as_json(options)
+      # Provide an attribute hash ready to be sent to CouchDB but with
+      # all the nil attributes removed.
+      def as_couch_json
+        super.delete_if{|k,v| v.nil?}
       end
 
       # Returns the Class properties with their values

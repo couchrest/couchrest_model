@@ -62,15 +62,23 @@ describe CouchRest::Model::Property do
     @card.updated_at.should_not be_nil
   end
 
-  describe "#as_json" do
+  describe "#as_couch_json" do
 
     it "should provide a simple hash from model" do
-      @card.as_json.class.should eql(Hash)
+      @card.as_couch_json.class.should eql(Hash)
     end
 
     it "should remove properties from Hash if value is nil" do
       @card.last_name = nil
-      @card.as_json.keys.include?('last_name').should be_false
+      @card.as_couch_json.keys.include?('last_name').should be_false
+    end
+
+  end
+
+  describe "#as_json" do
+
+    it "should provide a simple hash from model" do
+      @card.as_json.class.should eql(Hash)
     end
 
     it "should pass options to Active Support's as_json" do
