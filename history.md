@@ -1,10 +1,11 @@
 # CouchRest Model Change History
 
-## 1.1.2 - 2011-07-XX
+## 1.1.2 - 2011-07-23
 
 * Minor fixes
   * Upgrade to couchrest 1.1.2
   * Override as_couch_json to ensure nil values not stored
+  * Removing restriction that prohibited objects that cast as an array to be loaded.
 
 ## 1.1.1 - 2011-07-04
 
