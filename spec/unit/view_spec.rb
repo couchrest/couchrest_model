@@ -173,7 +173,22 @@ describe CouchRest::Model::Views do
     end
 
   end
-  
+
+  describe "#method_missing for find_by methods" do
+    before(:all) { reset_test_db! }
+
+    specify { Course.should respond_to :find_by_title_and_active }
+    specify { Course.should respond_to :by_title }
+
+    specify "#method should work in ruby 1.9, but not 1.8" do
+      if RUBY_VERSION >= "1.9"
+        Course.method(:find_by_title_and_active).should be_a Method
+      else
+        expect { Course.method(:find_by_title_and_active) }.to raise_error(NameError)
+      end
+    end
+  end
+
   describe "a ducktype view" do
     before(:all) do
       reset_test_db!

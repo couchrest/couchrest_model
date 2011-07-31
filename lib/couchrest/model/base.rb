@@ -82,6 +82,21 @@ module CouchRest
         super
       end
 
+      # compatbility for 1.8, it does not use respond_to_missing?
+      # thing is, when using it like this only, doing method(:find_by_view)
+      # will throw an error
+      def self.respond_to?(m, include_private = false)
+        super || respond_to_missing?(m, include_private)
+      end
+
+      # ruby 1.9 feature
+      # this allows ruby to know that the method is defined using
+      # method_missing, and as such, method(:find_by_view) will actually
+      # give a Method back, and not throw an error like in 1.8!
+      def self.respond_to_missing?(m, include_private = false)
+        has_view?(m) || has_view?(m.to_s[/^find_(by_.+)/, 1])
+      end
+
       def to_key
         new? ? nil : [id]
       end
