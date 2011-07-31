@@ -85,11 +85,13 @@ end
 
 # Following two fixture classes have __intentionally__ diffent syntax for setting the validation context
 class WithContextualValidationOnCreate < CouchRest::Model::Base
+  use_database TEST_SERVER.default_database
   property(:name, String)
   validates(:name, :presence => {:on => :create})
 end
 
 class WithContextualValidationOnUpdate < CouchRest::Model::Base
+  use_database TEST_SERVER.default_database
   property(:name, String)
   validates(:name, :presence => true, :on => :update)
 end
