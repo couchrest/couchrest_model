@@ -1,5 +1,9 @@
 # CouchRest Model Change History
 
+## 1.1.3
+	
+	* CouchRest::Model::Base.respond_to_missing? and respond_to? (Kim Burgestrand)
+
 ## 1.1.2 - 2011-07-23
 
 * Minor fixes
