@@ -106,13 +106,21 @@ module CouchRest
       # that have not been accepted.
       def directly_set_attributes(hash, mass_assign = false)
         return if hash.nil?
+
+        multi_parameter_attributes = []        
+        
         hash.reject do |key, value|
-          if self.respond_to?("#{key}=")
-            self.send("#{key}=", value)
+          if key.to_s.include?("(")
+            multi_parameter_attributes << [ key, value ]
+            false
+          elsif self.respond_to?("#{key}=")
+            self.send("#{key}=", value) 
           elsif mass_assign || mass_assign_any_attribute
             self[key] = value
           end
         end
+        
+        assign_multiparameter_attributes(multi_parameter_attributes, hash) unless multi_parameter_attributes.length == 0
       end
 
       def directly_set_read_only_attributes(hash)
@@ -125,7 +133,43 @@ module CouchRest
         end
       end
 
-
+      def assign_multiparameter_attributes(pairs, attrib_hash)
+        execute_callstack_for_multiparameter_attributes(
+          extract_callstack_for_multiparameter_attributes(pairs), 
+          attrib_hash
+        )
+        
+      end
+      def execute_callstack_for_multiparameter_attributes(callstack, attrib_hash)
+        callstack.each do |name, values_with_empty_parameters|
+          if self.respond_to?("#{name}=")
+            s = send("#{name}=", values_with_empty_parameters) 
+            unless s.is_a?(Hash)
+              attrib_hash.reject! do |key, value|
+                key.include?(name.to_s)
+              end
+            end
+          end
+        end
+        attrib_hash
+      end
+      
+      def extract_callstack_for_multiparameter_attributes(pairs)
+        attributes = { }
+        
+        pairs.each do |pair|
+          multiparameter_name, value = pair
+          attribute_name = multiparameter_name.split("(").first
+          attributes[attribute_name] = {} unless attributes.include?(attribute_name)
+          attributes[attribute_name][find_parameter_name(multiparameter_name)] ||= value
+        end
+        attributes
+      end
+      
+      def find_parameter_name(multiparameter_name)
+        position = multiparameter_name.scan(/\(([0-9]*).*\)/).first.first.to_i
+        {1 => :year, 2 => :month, 3 => :day, 4 => :hour, 5 => :min, 6 => :sec}[position]
+      end
 
       module ClassMethods
 
