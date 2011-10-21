@@ -120,7 +120,7 @@ module CouchRest
           end
         end
         
-        assign_multiparameter_attributes(multi_parameter_attributes, hash) unless multi_parameter_attributes.length == 0
+        assign_multiparameter_attributes(multi_parameter_attributes, hash) unless multi_parameter_attributes.empty?
       end
 
       def directly_set_read_only_attributes(hash)
@@ -133,25 +133,22 @@ module CouchRest
         end
       end
 
-      def assign_multiparameter_attributes(pairs, attrib_hash)
+      def assign_multiparameter_attributes(pairs, hash)
         execute_callstack_for_multiparameter_attributes(
-          extract_callstack_for_multiparameter_attributes(pairs), 
-          attrib_hash
-        )
+          extract_callstack_for_multiparameter_attributes(pairs), hash
+          )
         
       end
-      def execute_callstack_for_multiparameter_attributes(callstack, attrib_hash)
+      def execute_callstack_for_multiparameter_attributes(callstack, hash)
         callstack.each do |name, values_with_empty_parameters|
           if self.respond_to?("#{name}=")
-            s = send("#{name}=", values_with_empty_parameters) 
-            unless s.is_a?(Hash)
-              attrib_hash.reject! do |key, value|
-                key.include?(name.to_s)
-              end
+            casted_attrib = send("#{name}=", values_with_empty_parameters) 
+            unless casted_attrib.is_a?(Hash)
+              hash.reject { |key, value| key.include?(name.to_s)}
             end
           end
         end
-        attrib_hash
+        hash
       end
       
       def extract_callstack_for_multiparameter_attributes(pairs)
