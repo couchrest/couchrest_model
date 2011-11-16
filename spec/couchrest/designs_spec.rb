@@ -84,7 +84,23 @@ describe "Design" do
         @object.should_receive(:create_view_method).with('test')
         @object.view('test')
       end
+    end
 
+    context "for model with auto_update_design_doc disabled " do 
+      class ::DesignModelAutoUpdateDesignDocDisabled < ::CouchRest::Model::Base
+        self.auto_update_design_doc = false
+      end
+
+      describe "#view" do 
+        before :each do
+          @object = @klass.new(DesignModelAutoUpdateDesignDocDisabled)
+        end
+
+        it "does not attempt to create view" do 
+          CouchRest::Model::Designs::View.should_not_receive(:create)
+          @object.view('test')
+        end
+      end
     end
 
     describe "#filter" do

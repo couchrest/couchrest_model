@@ -58,10 +58,11 @@ module CouchRest
           self.model = model
         end
 
-        # Define a view and generate a method that will provide a new 
-        # View instance when requested.
+        # Generate a method that will provide a new View instance when
+        # requested.  This will also define the view in CouchDB unless
+        # auto_update_design_doc is disabled.
         def view(name, opts = {})
-          View.create(model, name, opts)
+          View.create(model, name, opts) if model.auto_update_design_doc
           create_view_method(name)
         end
 
