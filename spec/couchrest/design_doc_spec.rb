@@ -162,39 +162,68 @@ describe "Design Documents" do
     end
 
     describe "when auto_update_design_doc false" do
-  
-      before :all do
-        Article.auto_update_design_doc = false
-        Article.save_design_doc!
-      end
+      # We really do need a new class for each of example. If we try
+      # to use the same class the examples interact with each in ways
+      # that can hide failures because the design document gets cached
+      # at the class level.
+      let(:model_class) {
+        class_name = "#{example.metadata[:full_description].gsub(/\s+/,'_').camelize}Model"
+        doc = CouchRest::Document.new("_id" => "_design/#{class_name}")
+        doc["language"] = "javascript"
+        doc["views"] = {"all" => {"map" => 
+                                  "function(doc) {
+                                 if (doc['type'] == 'Article') {
+                                   emit(doc['_id'],1);
+                                 }
+                               }"},
+                         "by_name" => {"map" => 
+                                       "function(doc) {
+                                     if ((doc['type'] == '#{class_name}') && (doc['name'] != null)) {
+                                       emit(doc['name'], null);
+                                     }",
+                                      "reduce" => 
+                                      "function(keys, values, rereduce) {
+                                        return sum(values);
+                                      }"}}
+        
+        DB.save_doc doc
 
-      after :all do
-        Article.auto_update_design_doc = true
-      end
+        eval <<-KLASS
+          class ::#{class_name} < CouchRest::Model::Base
+            use_database DB
+            self.auto_update_design_doc = false
+            design do 
+              view :by_name
+            end
+            property :name, String
+          end
+        KLASS
 
-      it "will not send a request for the saved design doc" do
-        Article.should_not_receive(:stored_design_doc)
-        Article.by_date
-      end
+        class_name.constantize
+      }
 
       it "will not update stored design doc if view changed" do
-        Article.by_date
-        orig = Article.stored_design_doc
-        design = Article.design_doc
-        view = design['views']['by_date']['map']
-        design['views']['by_date']['map'] = view + '  '
-        Article.by_date
-        Article.stored_design_doc['_rev'].should eql(orig['_rev'])
+        model_class.by_name
+        orig = model_class.stored_design_doc
+        design = model_class.design_doc
+        view = design['views']['by_name']['map']
+        design['views']['by_name']['map'] = view + '  '
+        model_class.by_name
+        model_class.stored_design_doc['_rev'].should eql(orig['_rev'])
       end
 
       it "will update stored design if forced" do
-        Article.by_date
-        orig = Article.stored_design_doc
-        design = Article.design_doc
-        view = design['views']['by_date']['map']
-        design['views']['by_date']['map'] = view + '  '
-        Article.save_design_doc!
-        Article.stored_design_doc['_rev'].should_not eql(orig['_rev'])
+        model_class.by_name
+        orig = model_class.stored_design_doc
+        design = model_class.design_doc
+        view = design['views']['by_name']['map']
+        design['views']['by_name']['map'] = view + '  '
+        model_class.save_design_doc!
+        model_class.stored_design_doc['_rev'].should_not eql(orig['_rev'])
+      end
+
+      it "is able to use predefined views" do 
+        model_class.by_name(key: "special").all
       end
     end
   end

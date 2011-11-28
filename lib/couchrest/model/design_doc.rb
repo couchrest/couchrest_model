@@ -7,7 +7,11 @@ module CouchRest
       module ClassMethods
 
         def design_doc
-          @design_doc ||= ::CouchRest::Design.new(default_design_doc)
+          @design_doc ||= if auto_update_design_doc
+                            ::CouchRest::Design.new(default_design_doc)
+                          else
+                            stored_design_doc
+                          end
         end
 
         def design_doc_id
