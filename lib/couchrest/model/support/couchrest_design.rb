@@ -18,7 +18,7 @@ CouchRest::Design.class_eval do
     flatten =
       lambda {|r|
         (recurse = lambda {|v|
-          if v.is_a?(Hash)
+          if v.is_a?(Hash) || v.is_a?(CouchRest::Document)
             v.to_a.map{|v| recurse.call(v)}.flatten
           elsif v.is_a?(Array)
             v.flatten.map{|v| recurse.call(v)}

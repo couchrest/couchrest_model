@@ -50,6 +50,16 @@ module CouchRest::Model
       super
     end
 
+    def delete(obj)
+      couchrest_parent_will_change! if use_dirty? && self.length > 0
+      super(obj)
+    end
+
+    def delete_at(index)
+      couchrest_parent_will_change! if use_dirty? && self.length > 0
+      super(index)
+    end
+
     def build(*args)
       obj = casted_by_property.build(*args)
       self.push(obj)

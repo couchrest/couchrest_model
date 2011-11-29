@@ -1,11 +1,16 @@
+$LOAD_PATH.unshift(File.dirname(__FILE__))
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), "..", "lib"))
+
 require "bundler/setup"
 require "rubygems"
-require "rspec" # Satisfies Autotest and anyone else not using the Rake tasks
+require "rspec"
 
-require File.join(File.dirname(__FILE__), '..','lib','couchrest_model')
-# check the following file to see how to use the spec'd features.
+require 'couchrest_model'
 
 unless defined?(FIXTURE_PATH)
+  MODEL_PATH = File.join(File.dirname(__FILE__), "fixtures", "models")
+  $LOAD_PATH.unshift(MODEL_PATH)
+
   FIXTURE_PATH = File.join(File.dirname(__FILE__), '/fixtures')
   SCRATCH_PATH = File.join(File.dirname(__FILE__), '/tmp')
 
@@ -15,6 +20,21 @@ unless defined?(FIXTURE_PATH)
   TEST_SERVER.default_database = TESTDB
   DB = TEST_SERVER.database(TESTDB)
 end
+
+RSpec.configure do |config|
+  config.before(:all) { reset_test_db! }
+
+  config.after(:all) do
+    cr = TEST_SERVER
+    test_dbs = cr.databases.select { |db| db =~ /^#{TESTDB}/ }
+    test_dbs.each do |db|
+      cr.database(db).delete! rescue nil
+    end
+  end
+end
+
+# Require each of the fixture models
+Dir[ File.join(MODEL_PATH, "*.rb") ].sort.each { |file| require File.basename(file) }
 
 class Basic < CouchRest::Model::Base
   use_database TEST_SERVER.default_database
@@ -27,17 +47,6 @@ def reset_test_db!
   DB
 end
 
-RSpec.configure do |config|
-  config.before(:all) { reset_test_db! }
-  
-  config.after(:all) do
-    cr = TEST_SERVER
-    test_dbs = cr.databases.select { |db| db =~ /^#{TESTDB}/ }
-    test_dbs.each do |db|
-      cr.database(db).delete! rescue nil
-    end
-  end
-end
 
 def couchdb_lucene_available?
   lucene_path = "http://localhost:5985/"

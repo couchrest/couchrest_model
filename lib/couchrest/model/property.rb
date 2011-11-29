@@ -27,19 +27,15 @@ module CouchRest::Model
         if value.nil?
           value = []
         elsif [Hash, HashWithIndifferentAccess].include?(value.class)
-          # Assume provided as a Hash where key is index!
-          data = value
-          value = [ ]
-          data.keys.sort.each do |k|
-            value << data[k]
-          end
+          # Assume provided as a params hash where key is index
+          value = parameter_hash_to_array(value)
         elsif !value.is_a?(Array)
           raise "Expecting an array or keyed hash for property #{parent.class.name}##{self.name}"
         end
         arr = value.collect { |data| cast_value(parent, data) }
         # allow casted_by calls to be passed up chain by wrapping in CastedArray
         CastedArray.new(arr, self, parent)
-      elsif (type == Object || type == Hash) && (value.class == Hash)
+      elsif (type == Object || type == Hash) && (value.is_a?(Hash))
         # allow casted_by calls to be passed up chain by wrapping in CastedHash
         CastedHash[value, self, parent]
       elsif !value.nil?
@@ -47,9 +43,8 @@ module CouchRest::Model
       end
     end
 
-    # Cast an individual value, not an array
+    # Cast an individual value
     def cast_value(parent, value)
-      raise "An array inside an array cannot be casted, use CastedModel" if value.is_a?(Array)
       value = typecast_value(value, self)
       associate_casted_value_to_parent(parent, value)
     end
@@ -77,6 +72,14 @@ module CouchRest::Model
     end
 
     private
+
+      def parameter_hash_to_array(source)
+        value = [ ]
+        source.keys.each do |k|
+          value[k.to_i] = source[k]
+        end
+        value.compact
+      end
 
       def associate_casted_value_to_parent(parent, value)
         value.casted_by = parent if value.respond_to?(:casted_by)

@@ -12,8 +12,10 @@ module CouchRest
         raise "You can only mixin Properties in a class responding to [] and []=, if you tried to mixin CastedModel, make sure your class inherits from Hash or responds to the proper methods" unless (method_defined?(:[]) && method_defined?(:[]=))
       end
 
-      def as_json(options = nil)
-        Hash[self].reject{|k,v| v.nil?}.as_json(options)
+      # Provide an attribute hash ready to be sent to CouchDB but with
+      # all the nil attributes removed.
+      def as_couch_json
+        super.delete_if{|k,v| v.nil?}
       end
 
       # Returns the Class properties with their values
@@ -80,17 +82,18 @@ module CouchRest
         self.disable_dirty = dirty
       end
 
-      def prepare_all_attributes(doc = {}, options = {})
+      def prepare_all_attributes(attrs = {}, options = {})
         self.disable_dirty = !!options[:directly_set_attributes]
         apply_all_property_defaults
         if options[:directly_set_attributes]
-          directly_set_read_only_attributes(doc)
+          directly_set_read_only_attributes(attrs)
+          directly_set_attributes(attrs, true)
         else
-          doc = remove_protected_attributes(doc)
+          attrs = remove_protected_attributes(attrs)
+          directly_set_attributes(attrs)
         end
-        res = doc.nil? ? doc : directly_set_attributes(doc)
         self.disable_dirty = false
-        res
+        self
       end
 
       def find_property!(property)
@@ -101,16 +104,13 @@ module CouchRest
 
       # Set all the attributes and return a hash with the attributes
       # that have not been accepted.
-      def directly_set_attributes(hash)
-        hash.reject do |attribute_name, attribute_value|
-          if self.respond_to?("#{attribute_name}=")
-            self.send("#{attribute_name}=", attribute_value)
-            true
-          elsif mass_assign_any_attribute # config option
-            self[attribute_name] = attribute_value
-            true
-          else
-            false
+      def directly_set_attributes(hash, mass_assign = false)
+        return if hash.nil?
+        hash.reject do |key, value|
+          if self.respond_to?("#{key}=")
+            self.send("#{key}=", value)
+          elsif mass_assign || mass_assign_any_attribute
+            self[key] = value
           end
         end
       end
@@ -151,15 +151,13 @@ module CouchRest
         # These properties are casted as Time objects, so they should always
         # be set to UTC.
         def timestamps!
-          class_eval <<-EOS, __FILE__, __LINE__
-            property(:updated_at, Time, :read_only => true, :protected => true, :auto_validation => false)
-            property(:created_at, Time, :read_only => true, :protected => true, :auto_validation => false)
+          property(:updated_at, Time, :read_only => true, :protected => true, :auto_validation => false)
+          property(:created_at, Time, :read_only => true, :protected => true, :auto_validation => false)
 
-            set_callback :save, :before do |object|
-              write_attribute('updated_at', Time.now)
-              write_attribute('created_at', Time.now) if object.new?
-            end
-          EOS
+          set_callback :save, :before do |object|
+            write_attribute('updated_at', Time.now)
+            write_attribute('created_at', Time.now) if object.new?
+          end
         end
 
         protected
@@ -170,8 +168,8 @@ module CouchRest
             # check if this property is going to casted
             type = options.delete(:type) || options.delete(:cast_as)
             if block_given?
-              type = Class.new(Hash) do
-                include CastedModel
+              type = Class.new do
+                include Embeddable
               end
               if block.arity == 1 # Traditional, with options
                 type.class_eval { yield type }
@@ -193,42 +191,32 @@ module CouchRest
 
           # defines the getter for the property (and optional aliases)
           def create_property_getter(property)
-            # meth = property.name
-            class_eval <<-EOS, __FILE__, __LINE__ + 1
-              def #{property.name}
-                read_attribute('#{property.name}')
-              end
-            EOS
+            define_method(property.name) do
+              read_attribute(property.name)
+            end
 
             if ['boolean', TrueClass.to_s.downcase].include?(property.type.to_s.downcase)
-              class_eval <<-EOS, __FILE__, __LINE__
-                def #{property.name}?
-                  value = read_attribute('#{property.name}')
-                  !(value.nil? || value == false)
-                end
-              EOS
+              define_method("#{property.name}?") do
+                value = read_attribute(property.name)
+                !(value.nil? || value == false)
+              end
             end
 
             if property.alias
-              class_eval <<-EOS, __FILE__, __LINE__ + 1
-                alias #{property.alias.to_sym} #{property.name.to_sym}
-              EOS
+              alias_method(property.alias, property.name.to_sym)
             end
           end
 
           # defines the setter for the property (and optional aliases)
           def create_property_setter(property)
-            property_name = property.name
-            class_eval <<-EOS
-              def #{property_name}=(value)
-                write_attribute('#{property_name}', value)
-              end
-            EOS
+            name = property.name
+
+            define_method("#{name}=") do |value|
+              write_attribute(name, value)
+            end
 
             if property.alias
-              class_eval <<-EOS
-                alias #{property.alias.to_sym}= #{property_name.to_sym}=
-              EOS
+              alias_method "#{property.alias}=", "#{name}="
             end
           end
 

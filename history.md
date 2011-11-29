@@ -1,10 +1,41 @@
 # CouchRest Model Change History
 
-## 1.1.0 - 2011-05-XX
+## 1.1.3
+	
+	* CouchRest::Model::Base.respond_to_missing? and respond_to? (Kim Burgestrand)
+
+## 1.1.2 - 2011-07-23
+
+* Minor fixes
+  * Upgrade to couchrest 1.1.2
+  * Override as_couch_json to ensure nil values not stored
+  * Removing restriction that prohibited objects that cast as an array to be loaded.
+
+## 1.1.1 - 2011-07-04
+
+* Minor fix
+  * Bumping CouchRest version dependency for important initialize method fix.
+  * Ensuring super on Embeddable#initialize can be called.
+
+## 1.1.0 - 2011-06-25
+
+* Major Alterations
+  * CastedModel no longer requires a Hash. Automatically includes all required methods.
+  * CastedModel module renamed to Embeddable (old still works!)
+
+* Minor Fixes
+  * Validation callbacks now support context (thanks kostia)
+  * Document comparisons now performed using database and document ID (pointer by neocsr)
+  * Automatic config generation now supported (thanks lucasrenan)
+  * Comparing documents resorts to Hash comparison if both IDs are nil. (pointer by kostia)
+
+## 1.1.0.rc1 - 2011-06-08
 
 * New Features
   * Properties with a nil value are now no longer sent to the database.
   * Now possible to build new objects via CastedArray#build
+  * Implement #get! and #find! class methods
+  * Now is possible delete particular elements in casted array(Kostiantyn Kahanskyi)
 
 * Minor fixes
   * #as_json now correctly uses ActiveSupports methods.
@@ -14,7 +45,12 @@
   * DesignDoc cache refreshed if a database is deleted.
   * Fixing dirty tracking on collection_of association.
   * Uniqueness Validation views created on initialization, not on demand!
-
+  * #destroy freezes object instead of removing _id and _rev, better for callbacks (pointer by karmi)
+  * #destroyed? method now available
+  * #reload no longer uses Hash#merge! which was causing issues with dirty tracking on casted models. (pointer by kostia)
+  * Non-property mass assignment on #new no longer possible without :directly_set_attributes option.
+  * Using CouchRest 1.1.0.pre3. (No more Hashes!)
+  * Fixing problem assigning a CastedHash to a property declared as a Hash (Kostiantyn Kahanskyi, gfmtim)
 
 ## 1.1.0.beta5 - 2011-04-30
 
