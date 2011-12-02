@@ -7,7 +7,11 @@ module CouchRest
       module ClassMethods
 
         def design_doc
-          @design_doc ||= ::CouchRest::Design.new(default_design_doc)
+          @design_doc ||= if auto_update_design_doc
+                            ::CouchRest::Design.new(default_design_doc)
+                          else
+                            stored_design_doc || ::CouchRest::Design.new(default_design_doc)
+                          end
         end
 
         def design_doc_id
@@ -75,16 +79,25 @@ module CouchRest
           # If auto updates enabled, check checksum cache
           return design_doc if auto_update_design_doc && design_doc_cache_checksum(db) == checksum
 
-          # Load up the stored doc (if present), update, and save
-          saved = stored_design_doc(db)
-          if saved
-            if force || saved['couchrest-hash'] != checksum
-              saved.merge!(design_doc)
-              db.save_doc(saved)
+          retries = 1
+          begin
+            # Load up the stored doc (if present), update, and save
+            saved = stored_design_doc(db)
+            if saved
+              if force || saved['couchrest-hash'] != checksum
+                saved.merge!(design_doc)
+                db.save_doc(saved)
+                @design_doc = saved  # update memo to point to the document we actually saved
+              end
+            else
+              design_doc.delete('_rev') # This is a new document and so doesn't have a revision yet
+              db.save_doc(design_doc)
             end
-          else
-            db.save_doc(design_doc)
-            design_doc.delete('_rev') # Prevent conflicts, never store rev as DB specific
+          rescue RestClient::Conflict
+            # if we get a conflict retry the operation...
+            raise if retries < 1
+            retries -= 1
+            retry
           end
 
           # Ensure checksum cached for next attempt if using auto updates

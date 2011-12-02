@@ -72,9 +72,12 @@ module CouchRest
         # <tt>spec/couchrest/more/extended_doc_spec.rb</tt>.
 
         def view_by(*keys)
+          return unless auto_update_design_doc
+
           opts = keys.pop if keys.last.is_a?(Hash)
           opts ||= {}
           ducktype = opts.delete(:ducktype)
+
           unless ducktype || opts[:map]
             opts[:guards] ||= []
             opts[:guards].push "(doc['#{model_type_key}'] == '#{self.to_s}')"
