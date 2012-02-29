@@ -99,6 +99,32 @@ describe "Dirty" do
       @card.first_name_changed?.should be_true
     end
 
+    it 'should report changes if the record is modified by attributes' do
+      @card = Card.new
+      @card.attributes = {:first_name => 'danny'}
+      @card.changed?.should be_true
+      @card.first_name_changed?.should be_true
+    end
+
+    it 'should report no changes if the record is modified with an invalid property by attributes' do
+      @card = Card.new
+      @card.attributes = {:middle_name => 'danny'}
+      @card.changed?.should be_false
+      @card.first_name_changed?.should be_false
+    end
+
+    it "should report no changes if the record is modified with update_attributes" do
+      @card = Card.new
+      @card.update_attributes(:first_name => 'henry')
+      @card.changed?.should be_false
+    end
+
+    it "should report no changes if the record is modified with an invalid property by update_attributes" do
+      @card = Card.new
+      @card.update_attributes(:middle_name => 'peter')
+      @card.changed?.should be_false
+    end
+
     it "should report no changes for unmodified records" do
       card_id = Card.create!(:first_name => "matt").id
       @card = Card.find(card_id)
@@ -431,6 +457,40 @@ describe "Dirty" do
 
     end
 
+  end
+
+
+  describe "when mass_assign_any_attribute true" do
+    before(:each) do
+      # dupe Card class so that no other tests are effected
+      card_class = Card.dup
+      card_class.class_eval do
+        mass_assign_any_attribute true
+      end
+      @card = card_class.new(:first_name => 'Sam')
+    end
+
+    it "should report no changes if the record is modified with update_attributes" do
+      @card.update_attributes(:other_name => 'henry')
+      @card.changed?.should be_false
+    end
+
+    it "should report not new if the record is modified with update_attributes" do
+      @card.update_attributes(:other_name => 'henry')
+      @card.new?.should be_false
+    end
+
+    it 'should report changes when updated with attributes' do
+      @card.save
+      @card.attributes = {:test => 'fooobar'}
+      @card.changed?.should be_true
+    end
+
+    it 'should report changes when updated with a known property' do
+      @card.save
+      @card.first_name = 'Danny'
+      @card.changed?.should be_true
+    end
   end
 
 end

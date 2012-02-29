@@ -148,6 +148,26 @@ describe CouchRest::Model::Property do
         @card['test'].should be_nil
       end
 
+     it 'should not allow them to be updated with update_attributes' do
+       @card.update_attributes(:test => 'fooobar')
+       @card['test'].should be_nil
+     end
+
+     it 'should not have a different revision after update_attributes' do
+       @card.save
+       rev = @card.rev
+       @card.update_attributes(:test => 'fooobar')
+       @card.rev.should eql(rev)
+     end
+
+     it 'should not have a different revision after save' do
+       @card.save
+       rev = @card.rev
+       @card.attributes = {:test => 'fooobar'}
+       @card.save
+       @card.rev.should eql(rev)
+     end
+
     end
 
     describe "when mass_assign_any_attribute true" do
@@ -164,9 +184,28 @@ describe CouchRest::Model::Property do
         @card.attributes = {:test => 'fooobar'}
         @card['test'].should eql('fooobar')
       end
+
+      it 'should allow them to be updated with update_attributes' do
+        @card.update_attributes(:test => 'fooobar')
+        @card['test'].should eql('fooobar')
+      end
+
+      it 'should have a different revision after update_attributes' do
+        @card.save
+        rev = @card.rev
+        @card.update_attributes(:test => 'fooobar')
+        @card.rev.should_not eql(rev)
+      end
+
+      it 'should have a different revision after save' do
+        @card.save
+        rev = @card.rev
+        @card.attributes = {:test => 'fooobar'}
+        @card.save
+        @card.rev.should_not eql(rev)
+      end
     end
   end
-
 
   describe "mass assignment protection" do
 

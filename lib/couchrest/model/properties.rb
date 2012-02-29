@@ -117,6 +117,7 @@ module CouchRest
             self.send("#{key}=", value) 
           elsif mass_assign || mass_assign_any_attribute
             self[key] = value
+            couchrest_attribute_will_change!self[key]
           end
         end
         
