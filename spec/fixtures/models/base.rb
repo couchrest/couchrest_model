@@ -161,4 +161,8 @@ class WithScopedUniqueValidation < CouchRest::Model::Base
   validates_uniqueness_of :title, :scope => :parent_id
 end
 
-
+class WithDateAndTime < CouchRest::Model::Base
+  use_database TEST_SERVER.default_database
+  property :exec_date, Date
+  property :exec_time, Time
+end
