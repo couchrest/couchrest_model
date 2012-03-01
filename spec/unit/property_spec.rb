@@ -181,29 +181,30 @@ describe CouchRest::Model::Property do
       end
 
       it 'should allow them to be updated' do
-        @card.attributes = {:test => 'fooobar'}
-        @card['test'].should eql('fooobar')
+        @card.attributes = {:testing => 'fooobar'}
+        @card['testing'].should eql('fooobar')
       end
 
       it 'should allow them to be updated with update_attributes' do
-        @card.update_attributes(:test => 'fooobar')
-        @card['test'].should eql('fooobar')
+        @card.update_attributes(:testing => 'fooobar')
+        @card['testing'].should eql('fooobar')
       end
 
       it 'should have a different revision after update_attributes' do
         @card.save
         rev = @card.rev
-        @card.update_attributes(:test => 'fooobar')
+        @card.update_attributes(:testing => 'fooobar')
         @card.rev.should_not eql(rev)
       end
 
       it 'should have a different revision after save' do
         @card.save
         rev = @card.rev
-        @card.attributes = {:test => 'fooobar'}
+        @card.attributes = {:testing => 'fooobar'}
         @card.save
         @card.rev.should_not eql(rev)
       end
+
     end
   end
 

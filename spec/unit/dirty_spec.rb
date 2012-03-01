@@ -482,7 +482,7 @@ describe "Dirty" do
 
     it 'should report changes when updated with attributes' do
       @card.save
-      @card.attributes = {:test => 'fooobar'}
+      @card.attributes = {:testing => 'fooobar'}
       @card.changed?.should be_true
     end
 
@@ -491,6 +491,13 @@ describe "Dirty" do
       @card.first_name = 'Danny'
       @card.changed?.should be_true
     end
+
+    it "should not report changes if property is updated with same value" do
+      @card.update_attributes :testing => 'fooobar'
+      @card.attributes = {'testing' => 'fooobar'}
+      @card.changed?.should be_false
+    end
+
   end
 
 end

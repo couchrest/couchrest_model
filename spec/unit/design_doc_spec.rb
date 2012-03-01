@@ -164,63 +164,49 @@ describe CouchRest::Model::DesignDoc do
       # that can hide failures because the design document gets cached
       # at the class level.
       let(:model_class) {
-        class_name = "#{example.metadata[:full_description].gsub(/\s+/,'_').camelize}Model"
-        doc = CouchRest::Document.new("_id" => "_design/#{class_name}")
-        doc["language"] = "javascript"
-        doc["views"] = {"all" => {"map" => 
-                                  "function(doc) {
-                                 if (doc['type'] == 'Article') {
-                                   emit(doc['_id'],1);
-                                 }
-                               }"},
-                         "by_name" => {"map" => 
-                                       "function(doc) {
-                                     if ((doc['type'] == '#{class_name}') && (doc['name'] != null)) {
-                                       emit(doc['name'], null);
-                                     }",
-                                      "reduce" => 
-                                      "function(keys, values, rereduce) {
-                                        return sum(values);
-                                      }"}}
-        
-        DB.save_doc doc
-
-        eval <<-KLASS
-          class ::#{class_name} < CouchRest::Model::Base
-            use_database DB
-            self.auto_update_design_doc = false
-            design do 
-              view :by_name
-            end
-            property :name, String
+        model_class = Article.dup
+        model_class.class_eval do
+          self.auto_update_design_doc = false
+          design do
+            view :by_title
           end
-        KLASS
-
-        class_name.constantize
+        end
+        doc = DB.get("_design/Article")
+        DB.delete_doc doc if doc
+        doc = CouchRest::Document.new("_id" => "_design/Article")
+        doc["language"] = "javascript"
+        doc["views"] = {"all"     => {"map" => "function(doc) { if (doc['type'] == 'Article') { emit(doc['_id'],1); } }"},
+                        "by_title" => {"map" => 
+                                  "function(doc) {
+                                     if ((doc['type'] == 'Article') && (doc['title'] != null)) {
+                                       emit(doc['title'], null);
+                                     }", "reduce" => "function(k,v,r) { return sum(v); }"}}
+        DB.save_doc doc
+        model_class
       }
 
       it "will not update stored design doc if view changed" do
-        model_class.by_name
-        orig = model_class.stored_design_doc
+        model_class.by_title # Perform the view
+        orig   = model_class.stored_design_doc
         design = model_class.design_doc
-        view = design['views']['by_name']['map']
-        design['views']['by_name']['map'] = view + '  '
+        view   = design['views']['by_title']['map']
+        design['views']['by_title']['map'] = view + '  '
         model_class.by_name
         model_class.stored_design_doc['_rev'].should eql(orig['_rev'])
       end
 
       it "will update stored design if forced" do
-        model_class.by_name
+        model_class.by_title
         orig = model_class.stored_design_doc
         design = model_class.design_doc
-        view = design['views']['by_name']['map']
-        design['views']['by_name']['map'] = view + '  '
+        view = design['views']['by_title']['map']
+        design['views']['by_title']['map'] = view + '  '
         model_class.save_design_doc!
         model_class.stored_design_doc['_rev'].should_not eql(orig['_rev'])
       end
 
       it "is able to use predefined views" do 
-        model_class.by_name(key: "special").all
+        lambda { model_class.by_title.key("special").all }.should_not raise_error
       end
     end
   end

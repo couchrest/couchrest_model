@@ -25,7 +25,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency(%q<couchrest>, "~> 1.1.2")
   s.add_dependency(%q<mime-types>, "~> 1.15")
-  s.add_dependency(%q<activemodel>, "~> 3.0")
+  s.add_dependency(%q<activemodel>, "~> 3.1.0")
   s.add_dependency(%q<tzinfo>, "~> 0.3.22")
   s.add_development_dependency(%q<rspec>, "~> 2.6.0")
   s.add_development_dependency(%q<json>, ["~> 1.5.1"])

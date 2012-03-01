@@ -7,11 +7,7 @@ module CouchRest
       module ClassMethods
 
         def design_doc
-          @design_doc ||= if auto_update_design_doc
-                            ::CouchRest::Design.new(default_design_doc)
-                          else
-                            stored_design_doc || ::CouchRest::Design.new(default_design_doc)
-                          end
+          @design_doc ||= ::CouchRest::Design.new(auto_update_design_doc ? default_design_doc : (stored_design_doc || default_design_doc))
         end
 
         def design_doc_id
@@ -79,26 +75,20 @@ module CouchRest
           # If auto updates enabled, check checksum cache
           return design_doc if auto_update_design_doc && design_doc_cache_checksum(db) == checksum
 
-          retries = 1
-          begin
-            # Load up the stored doc (if present), update, and save
-            saved = stored_design_doc(db)
-            if saved
-              if force || saved['couchrest-hash'] != checksum
-                saved.merge!(design_doc)
-                db.save_doc(saved)
-                @design_doc = saved  # update memo to point to the document we actually saved
-              end
-            else
-              design_doc.delete('_rev') # This is a new document and so doesn't have a revision yet
+          # Load up the stored doc (if present), update, and save
+          saved = stored_design_doc(db)
+          if saved
+            if force || saved['couchrest-hash'] != checksum
+              # Update the remote design with ours, but allow us access to views that already exist
+              @design_doc = ::CouchRest::Design.new(saved.merge(design_doc))
               db.save_doc(design_doc)
             end
-          rescue RestClient::Conflict
-            # if we get a conflict retry the operation...
-            raise if retries < 1
-            retries -= 1
-            retry
+          else
+            db.save_doc(design_doc)
           end
+
+          # Never store revision! Design *must* be reloaded before each save.
+          design_doc.delete('_rev')
 
           # Ensure checksum cached for next attempt if using auto updates
           set_design_doc_cache_checksum(db, checksum) if auto_update_design_doc

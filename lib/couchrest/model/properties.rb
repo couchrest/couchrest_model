@@ -107,8 +107,8 @@ module CouchRest
       def directly_set_attributes(hash, mass_assign = false)
         return if hash.nil?
 
-        multi_parameter_attributes = []        
-        
+        multi_parameter_attributes = []
+
         hash.reject do |key, value|
           if key.to_s.include?("(")
             multi_parameter_attributes << [ key, value ]
@@ -116,11 +116,11 @@ module CouchRest
           elsif self.respond_to?("#{key}=")
             self.send("#{key}=", value) 
           elsif mass_assign || mass_assign_any_attribute
+            couchrest_attribute_will_change!(key) if use_dirty? && self[key] != value
             self[key] = value
-            couchrest_attribute_will_change!self[key]
           end
         end
-        
+
         assign_multiparameter_attributes(multi_parameter_attributes, hash) unless multi_parameter_attributes.empty?
       end
 
@@ -137,8 +137,7 @@ module CouchRest
       def assign_multiparameter_attributes(pairs, hash)
         execute_callstack_for_multiparameter_attributes(
           extract_callstack_for_multiparameter_attributes(pairs), hash
-          )
-        
+        )
       end
       def execute_callstack_for_multiparameter_attributes(callstack, hash)
         callstack.each do |name, values_with_empty_parameters|
@@ -151,10 +150,10 @@ module CouchRest
         end
         hash
       end
-      
+
       def extract_callstack_for_multiparameter_attributes(pairs)
         attributes = { }
-        
+
         pairs.each do |pair|
           multiparameter_name, value = pair
           attribute_name = multiparameter_name.split("(").first
@@ -163,7 +162,7 @@ module CouchRest
         end
         attributes
       end
-      
+
       def find_parameter_name(multiparameter_name)
         position = multiparameter_name.scan(/\(([0-9]*).*\)/).first.first.to_i
         {1 => :year, 2 => :month, 3 => :day, 4 => :hour, 5 => :min, 6 => :sec}[position]

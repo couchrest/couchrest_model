@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 class PlainParent
-  class_inheritable_accessor :foo
+  class_attribute :foo
   self.foo = :bar
 end
 
@@ -9,7 +9,7 @@ class PlainChild < PlainParent
 end
 
 class ExtendedParent < CouchRest::Model::Base
-  class_inheritable_accessor :foo
+  class_attribute :foo
   self.foo = :bar
 end
 
