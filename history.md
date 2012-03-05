@@ -1,8 +1,10 @@
 # CouchRest Model Change History
 
 ## 1.1.3
-	
-	* CouchRest::Model::Base.respond_to_missing? and respond_to? (Kim Burgestrand)
+
+  * CouchRest::Model::Base.respond_to_missing? and respond_to? (Kim Burgestrand)
+  * Time#as_json now insists on using xmlschema with 3 fraction digits by default.
+  * Added time_fraction_digits configuration object
 
 ## 1.1.2 - 2011-07-23
 
