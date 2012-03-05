@@ -14,11 +14,13 @@ module CouchRest
         add_config :environment
         add_config :connection
         add_config :connection_config_file
+        add_config :time_fraction_digits
 
         configure do |config|
           config.model_type_key = 'type' # was 'couchrest-type'
           config.mass_assign_any_attribute = false
           config.auto_update_design_doc = true
+          config.time_fraction_digits = 3
 
           config.environment = :development
           config.connection_config_file = File.join(Dir.pwd, 'config', 'couchdb.yml')
