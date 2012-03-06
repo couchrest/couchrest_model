@@ -49,10 +49,7 @@ module CouchRest
       # for each key. It doesn't save the document at the end. Raises a NoMethodError if the corresponding methods are
       # missing. In case of error, no attributes are changed.
       def update_attributes_without_saving(hash)
-        # Remove any protected and update all the rest. Any attributes
-        # which do not have a property will simply be ignored.
-        attrs = remove_protected_attributes(hash)
-        directly_set_attributes(attrs)
+        set_attributes_from_parameters(hash)
       end
       alias :attributes= :update_attributes_without_saving
 
@@ -86,11 +83,9 @@ module CouchRest
         self.disable_dirty = !!options[:directly_set_attributes]
         apply_all_property_defaults
         if options[:directly_set_attributes]
-          directly_set_read_only_attributes(attrs)
-          directly_set_attributes(attrs, true)
-        else
-          attrs = remove_protected_attributes(attrs)
           directly_set_attributes(attrs)
+        else
+          set_attribute_from_parameters(attrs)
         end
         self.disable_dirty = false
         self
@@ -102,13 +97,28 @@ module CouchRest
         prop
       end
 
-      # Set all the attributes and return a hash with the attributes
-      # that have not been accepted.
-      def directly_set_attributes(hash, mass_assign = false)
-        return if hash.nil?
+      # Set *all* of the attributes as they are provided from the hash.
+      # If a matching property is found, it will be set using write_attribute method.
+      # Other keys will be set to the model's attributes hash directly.
+      # Meant to be used when receiving data from the Database.
+      def directly_set_attributes(hash)
+        property_list = self.properties.map{|p| p.name}
+        hash.each do |key, value|
+          if property_list.include?(key)
+            write_attribute(key, value)
+          else
+            self[key] = value
+          end
+        end
+      end
 
-        multi_parameter_attributes = []        
-        
+      # Remove any protected and update all the rest. Any attributes
+      # which do not have a property will simply be ignored.
+      def set_attributes_from_parameters(hash, mass_assign = false)
+        return if hash.nil?
+        hash = remove_protected_attributes(hash)
+        multi_parameter_attributes = []
+
         hash.reject do |key, value|
           if key.to_s.include?("(")
             multi_parameter_attributes << [ key, value ]
@@ -120,26 +130,16 @@ module CouchRest
             couchrest_attribute_will_change!self[key]
           end
         end
-        
-        assign_multiparameter_attributes(multi_parameter_attributes, hash) unless multi_parameter_attributes.empty?
-      end
 
-      def directly_set_read_only_attributes(hash)
-        property_list = self.properties.map{|p| p.name}
-        hash.each do |attribute_name, attribute_value|
-          next if self.respond_to?("#{attribute_name}=")
-          if property_list.include?(attribute_name)
-            write_attribute(attribute_name, hash.delete(attribute_name))
-          end
-        end
+        assign_multiparameter_attributes(multi_parameter_attributes, hash) unless multi_parameter_attributes.empty?
       end
 
       def assign_multiparameter_attributes(pairs, hash)
         execute_callstack_for_multiparameter_attributes(
           extract_callstack_for_multiparameter_attributes(pairs), hash
-          )
-        
+        )
       end
+
       def execute_callstack_for_multiparameter_attributes(callstack, hash)
         callstack.each do |name, values_with_empty_parameters|
           if self.respond_to?("#{name}=")
