@@ -220,7 +220,7 @@ describe CouchRest::Model::DesignDoc do
       end
 
       it "is able to use predefined views" do 
-        model_class.by_name(key: "special").all
+        model_class.by_name(:key => "special").all
       end
     end
   end
