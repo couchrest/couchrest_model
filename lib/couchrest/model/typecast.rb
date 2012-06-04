@@ -123,7 +123,7 @@ module CouchRest
 
         # Creates a Date instance from a Hash with keys :year, :month, :day
         def typecast_hash_to_date(value)
-          Date.new(*extract_time(value)[0, 3])
+          Date.new(*extract_time(value)[0, 3].map(&:to_i))
         end
 
         # Creates a Time instance from a Hash with keys :year, :month, :day,
