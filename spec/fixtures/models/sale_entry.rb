@@ -3,7 +3,9 @@ class SaleEntry < CouchRest::Model::Base
 
   property :description
   property :price
-  
-  view_by :description
+
+  design do
+    view :by_description
+  end
   
 end

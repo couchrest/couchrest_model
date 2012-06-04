@@ -19,14 +19,13 @@ module CouchRest
     module Designs
       extend ActiveSupport::Concern
 
+
       module ClassMethods
 
         # Add views and other design document features
         # to the current model.
-        def design(*args, &block)
-          mapper = DesignMapper.new(self)
-          mapper.create_view_method(:all)
-
+        def design(prefix = nil, &block)
+          mapper = DesignMapper.new(self, prefix)
           mapper.instance_eval(&block) if block_given?
         end
 
@@ -49,20 +48,44 @@ module CouchRest
 
       end
 
-      # 
+
       class DesignMapper
 
-        attr_accessor :model
+        # Basic mapper attributes
+        attr_accessor :model, :method, :prefix
 
-        def initialize(model)
-          self.model = model
+        # Temporary variable storing the design doc
+        attr_accessor :design_doc
+
+        def initialize(model, prefix = nil)
+          self.model  = model
+          self.prefix = prefix
+          self.method = (prefix ? "#{prefix}_" : '') + 'design_doc'
+
+          # Only create the all method for the master design
+          create_view_method(:all) if prefix.nil?
+
+          # Create design doc method in model, then call it so we have a copy
+          create_design_doc_method
+          self.design_doc = model.send(method)
+
+          # Some defaults
+          design_doc.auto_update = model.auto_update_design_doc
+        end
+
+        def disable_auto_update
+          design_doc.auto_update = false
+        end
+
+        def enable_auto_update
+          design_doc.auto_update = true
         end
 
         # Generate a method that will provide a new View instance when
         # requested.  This will also define the view in CouchDB unless
         # auto_update_design_doc is disabled.
         def view(name, opts = {})
-          View.create(model, name, opts) if model.auto_update_design_doc
+          View.create(model, design_doc, name, opts)
           create_view_method(name)
         end
 
@@ -73,14 +96,33 @@ module CouchRest
         # No methods are created here, the design is simply updated.
         # See the CouchDB API for more information on how to use this.
         def filter(name, function)
-          filters = (self.model.design_doc['filters'] ||= {})
+          filters = (design_doc['filters'] ||= {})
           filters[name.to_s] = function
         end
 
-        def create_view_method(name)
+        # Convenience wrapper to access model's type key option.
+        def model_type_key
+          model.model_type_key
+        end
+
+        protected
+
+        def create_design_doc_method
+          model.class_eval <<-EOS, __FILE__, __LINE__ + 1
+            def self.#{method}
+              @_#{method} ||= ::CouchRest::Model::Designs::Design.new(self, #{prefix ? '"'+prefix.to_s+'"' : ''})
+            end
+          EOS
+        end
+
+        def create_view_method(name, prefix = nil)
+          prefix = prefix ? "#{prefix}_" : ''
           model.class_eval <<-EOS, __FILE__, __LINE__ + 1
             def self.#{name}(opts = {})
-              CouchRest::Model::Designs::View.new(self, opts, '#{name}')
+              #{method}.view(opts, '#{name}')
+            end
+            def self.find_#{name}(*key)
+              #{name}.key(*key).first()
             end
           EOS
         end

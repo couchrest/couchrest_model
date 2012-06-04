@@ -36,20 +36,17 @@ require "couchrest/model/casted_hash"
 require "couchrest/model/validations"
 require "couchrest/model/callbacks"
 require "couchrest/model/document_queries"
-require "couchrest/model/views"
-require "couchrest/model/design_doc"
 require "couchrest/model/extended_attachments"
 require "couchrest/model/class_proxy"
 require "couchrest/model/proxyable"
-require "couchrest/model/collection"
 require "couchrest/model/associations"
 require "couchrest/model/configuration"
 require "couchrest/model/connection"
 require "couchrest/model/designs"
+require "couchrest/model/designs/design_doc"
 require "couchrest/model/designs/view"
 
 # Monkey patches applied to couchrest
-require "couchrest/model/support/couchrest_design"
 require "couchrest/model/support/couchrest_database"
 
 # Core Extensions

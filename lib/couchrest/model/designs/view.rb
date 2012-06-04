@@ -14,11 +14,11 @@ module CouchRest
       class View
         include Enumerable
 
-        attr_accessor :owner, :model, :name, :query, :result
+        attr_accessor :owner, :model, :design_doc, :name, :query, :result
 
         # Initialize a new View object. This method should not be called from
         # outside CouchRest Model.
-        def initialize(parent, new_query = {}, name = nil)
+        def initialize(design_doc, parent, new_query = {}, name = nil)
           if parent.is_a?(Class) && parent < CouchRest::Model::Base
             raise "Name must be provided for view to be initialized" if name.nil?
             self.model    = parent
@@ -383,10 +383,6 @@ module CouchRest
           self.class.new(self, new_query)
         end
 
-        def design_doc
-          model.design_doc
-        end
-
         def can_reduce?
           !design_doc['views'][name]['reduce'].blank?
         end
@@ -402,27 +398,27 @@ module CouchRest
           # Remove the reduce value if its not needed to prevent CouchDB errors
           query.delete(:reduce) unless can_reduce?
 
-          model.save_design_doc(use_database)
+          design_doc.sync(use_database)
 
-          self.result = model.design_doc.view_on(use_database, name, query.reject{|k,v| v.nil?})
+          self.result = design_doc.view_on(use_database, name, query.reject{|k,v| v.nil?})
         end
 
         # Class Methods
         class << self
           # Simplified view creation. A new view will be added to the 
-          # provided model's design document using the name and options.
+          # provided design document using the name and options.
           #
           # If the view name starts with "by_" and +:by+ is not provided in 
           # the options, the new view's map method will be interpreted and
           # generated automatically. For example:
           #
-          #   View.create(Meeting, "by_date_and_name")
+          #   View.create(Meeting, design, "by_date_and_name")
           #
           # Will create a view that searches by the date and name properties. 
           # Explicity setting the attributes to use is possible using the 
           # +:by+ option. For example:
           #
-          #   View.create(Meeting, "by_date_and_name", :by => [:date, :firstname, :lastname])
+          #   View.create(Meeting, design, "by_date_and_name", :by => [:date, :firstname, :lastname])
           #
           # The view name is the same, but three keys would be used in the
           # subsecuent index.
@@ -437,39 +433,45 @@ module CouchRest
           # like to enable this, set the <tt>:allow_blank</tt> option to false. The default
           # is true, empty strings are permited in the indexes.
           #
-          def create(model, name, opts = {})
+          def create(model, design_doc, name, opts = {})
 
-            unless opts[:map]
-              if opts[:by].nil? && name.to_s =~ /^by_(.+)/
-                opts[:by] = $1.split(/_and_/)
-              end
+            # Don't create the map or reduce method if auto updates are disabled
+            if design_doc.auto_update
+              unless !opts[:map]
+                if opts[:by].nil? && name.to_s =~ /^by_(.+)/
+                  opts[:by] = $1.split(/_and_/)
+                end
 
-              raise "View cannot be created without recognised name, :map or :by options" if opts[:by].nil?
+                raise "View cannot be created without recognised name, :map or :by options" if opts[:by].nil?
 
-              opts[:allow_blank] = opts[:allow_blank].nil? ? true : opts[:allow_blank]
-              opts[:guards] ||= []
-              opts[:guards].push "(doc['#{model.model_type_key}'] == '#{model.to_s}')"
+                opts[:allow_blank] = opts[:allow_blank].nil? ? true : opts[:allow_blank]
+                opts[:guards] ||= []
+                opts[:guards].push "(doc['#{model.model_type_key}'] == '#{model.to_s}')"
 
-              keys = opts[:by].map{|o| "doc['#{o}']"}
-              emit = keys.length == 1 ? keys.first : "[#{keys.join(', ')}]"
-              opts[:guards] += keys.map{|k| "(#{k} != null)"} unless opts[:allow_nil]
-              opts[:guards] += keys.map{|k| "(#{k} != '')"} unless opts[:allow_blank]
-              opts[:map] = <<-EOF
-                function(doc) {
-                  if (#{opts[:guards].join(' && ')}) {
-                    emit(#{emit}, 1);
+                keys = opts[:by].map{|o| "doc['#{o}']"}
+                emit = keys.length == 1 ? keys.first : "[#{keys.join(', ')}]"
+                opts[:guards] += keys.map{|k| "(#{k} != null)"} unless opts[:allow_nil]
+                opts[:guards] += keys.map{|k| "(#{k} != '')"} unless opts[:allow_blank]
+                opts[:map] = <<-EOF
+                  function(doc) {
+                    if (#{opts[:guards].join(' && ')}) {
+                      emit(#{emit}, 1);
+                    }
                   }
-                }
-              EOF
-              opts[:reduce] = <<-EOF
-                function(key, values, rereduce) {
-                  return sum(values);
-                }
-              EOF
+                EOF
+                opts[:reduce] = <<-EOF
+                  function(key, values, rereduce) {
+                    return sum(values);
+                  }
+                EOF
+              end
+            else
+              # Assume there is always a map method
+              view['map'] = true
             end
 
-            model.design_doc['views'] ||= {}
-            view = model.design_doc['views'][name.to_s] = { }
+            design_doc['views'] ||= {}
+            view = design_doc['views'][name.to_s] = { }
             view['map'] = opts[:map]
             view['reduce'] = opts[:reduce] if opts[:reduce]
             view

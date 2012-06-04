@@ -18,10 +18,13 @@ class Course < CouchRest::Model::Base
   property :very_active, :type => TrueClass
   property :klass, :type => Class
 
-  view_by :title
-  view_by :title, :active
-  view_by :dept, :ducktype => true
+  design do
+    view :by_title
+    view :by_title_and_active
 
-  view_by :active, :map => "function(d) { if (d['#{model_type_key}'] == 'Course' && d['active']) { emit(d['updated_at'], 1); }}", :reduce => "function(k,v,r) { return sum(v); }"
+    view :by_dept, :ducktype => true
+
+    view :by_active, :map => "function(d) { if (d['#{model_type_key}'] == 'Course' && d['active']) { emit(d['updated_at'], 1); }}", :reduce => "function(k,v,r) { return sum(v); }"
+  end
 
 end

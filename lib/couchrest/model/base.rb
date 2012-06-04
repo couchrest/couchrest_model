@@ -8,12 +8,9 @@ module CouchRest
       include CouchRest::Model::Connection
       include CouchRest::Model::Persistence
       include CouchRest::Model::DocumentQueries
-      include CouchRest::Model::Views
-      include CouchRest::Model::DesignDoc
       include CouchRest::Model::ExtendedAttachments
       include CouchRest::Model::ClassProxy
       include CouchRest::Model::Proxyable
-      include CouchRest::Model::Collection
       include CouchRest::Model::PropertyProtection
       include CouchRest::Model::Associations
       include CouchRest::Model::Validations
@@ -64,36 +61,6 @@ module CouchRest
 
         after_initialize if respond_to?(:after_initialize)
         run_callbacks(:initialize) { self }
-      end
-
-
-      # Temp solution to make the view_by methods available
-      def self.method_missing(m, *args, &block)
-        if has_view?(m)
-          query = args.shift || {}
-          return view(m, query, *args, &block)
-        elsif m.to_s =~ /^find_(by_.+)/
-          view_name = $1
-          if has_view?(view_name)
-            return first_from_view(view_name, *args)
-          end
-        end
-        super
-      end
-
-      # compatbility for 1.8, it does not use respond_to_missing?
-      # thing is, when using it like this only, doing method(:find_by_view)
-      # will throw an error
-      def self.respond_to?(m, include_private = false)
-        super || respond_to_missing?(m, include_private)
-      end
-
-      # ruby 1.9 feature
-      # this allows ruby to know that the method is defined using
-      # method_missing, and as such, method(:find_by_view) will actually
-      # give a Method back, and not throw an error like in 1.8!
-      def self.respond_to_missing?(m, include_private = false)
-        has_view?(m) || has_view?(m.to_s[/^find_(by_.+)/, 1])
       end
 
       def to_key
