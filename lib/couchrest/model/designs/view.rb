@@ -19,6 +19,7 @@ module CouchRest
         # Initialize a new View object. This method should not be called from
         # outside CouchRest Model.
         def initialize(design_doc, parent, new_query = {}, name = nil)
+          self.design_doc = design_doc
           if parent.is_a?(Class) && parent < CouchRest::Model::Base
             raise "Name must be provided for view to be initialized" if name.nil?
             self.model    = parent
@@ -380,7 +381,7 @@ module CouchRest
         end
 
         def update_query(new_query = {})
-          self.class.new(self, new_query)
+          self.class.new(design_doc, self, new_query)
         end
 
         def can_reduce?
@@ -405,20 +406,20 @@ module CouchRest
 
         # Class Methods
         class << self
-          # Simplified view creation. A new view will be added to the 
+          # Simplified view definition. A new view will be added to the 
           # provided design document using the name and options.
           #
           # If the view name starts with "by_" and +:by+ is not provided in 
           # the options, the new view's map method will be interpreted and
           # generated automatically. For example:
           #
-          #   View.create(Meeting, design, "by_date_and_name")
+          #   View.define(Meeting, design, "by_date_and_name")
           #
           # Will create a view that searches by the date and name properties. 
           # Explicity setting the attributes to use is possible using the 
           # +:by+ option. For example:
           #
-          #   View.create(Meeting, design, "by_date_and_name", :by => [:date, :firstname, :lastname])
+          #   View.define(Meeting, design, "by_date_and_name", :by => [:date, :firstname, :lastname])
           #
           # The view name is the same, but three keys would be used in the
           # subsecuent index.
@@ -433,11 +434,19 @@ module CouchRest
           # like to enable this, set the <tt>:allow_blank</tt> option to false. The default
           # is true, empty strings are permited in the indexes.
           #
-          def create(model, design_doc, name, opts = {})
-
+          def define(model, design_doc, name, opts = {})
             # Don't create the map or reduce method if auto updates are disabled
             if design_doc.auto_update
-              unless !opts[:map]
+              # Is this an all view?
+              if name.to_s == 'all'
+                opts[:map] = <<-EOF
+                  function(doc) {
+                    if (doc['#{model.model_type_key}'] == '#{model.to_s}') {
+                      emit(doc._id, null);
+                    }
+                  }
+                EOF
+              elsif !opts[:map]
                 if opts[:by].nil? && name.to_s =~ /^by_(.+)/
                   opts[:by] = $1.split(/_and_/)
                 end
@@ -467,7 +476,7 @@ module CouchRest
               end
             else
               # Assume there is always a map method
-              view['map'] = true
+              opts['map'] ||= true
             end
 
             design_doc['views'] ||= {}

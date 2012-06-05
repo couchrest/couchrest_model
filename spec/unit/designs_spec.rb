@@ -184,9 +184,12 @@ describe CouchRest::Model::Designs do
       end
 
       it "should create a method that returns quick access find_by method" do
-        @object.design_doc.should_receive(:view).with({}, 'test_view').and_return(nil)
+        view = mock("View")
+        view.stub(:key).and_return(view)
+        view.stub(:first).and_return(true)
+        @object.design_doc.should_receive(:view).with({}, 'by_test_view').and_return(view)
         @object.send(:create_view_method, 'by_test_view')
-        lambda { DesignModel.find_by_test_view('test') }.should_not raise_error
+        lambda { DesignModel.find_by_test_view('test').should be_true }.should_not raise_error
       end
 
     end

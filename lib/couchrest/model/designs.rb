@@ -27,6 +27,8 @@ module CouchRest
         def design(prefix = nil, &block)
           mapper = DesignMapper.new(self, prefix)
           mapper.instance_eval(&block) if block_given?
+          # Create an 'all' view, using the previous settings.
+          mapper.view :all if prefix.nil?
         end
 
         # Override the default page pagination value:
@@ -62,9 +64,6 @@ module CouchRest
           self.prefix = prefix
           self.method = (prefix ? "#{prefix}_" : '') + 'design_doc'
 
-          # Only create the all method for the master design
-          create_view_method(:all) if prefix.nil?
-
           # Create design doc method in model, then call it so we have a copy
           create_design_doc_method
           self.design_doc = model.send(method)
@@ -81,11 +80,10 @@ module CouchRest
           design_doc.auto_update = true
         end
 
-        # Generate a method that will provide a new View instance when
-        # requested.  This will also define the view in CouchDB unless
-        # auto_update_design_doc is disabled.
+        # Add the specified view to the design doc the definition was made in
+        # and create quick access methods in the model.
         def view(name, opts = {})
-          View.create(model, design_doc, name, opts)
+          View.define(model, design_doc, name, opts)
           create_view_method(name)
         end
 
@@ -110,7 +108,7 @@ module CouchRest
         def create_design_doc_method
           model.class_eval <<-EOS, __FILE__, __LINE__ + 1
             def self.#{method}
-              @_#{method} ||= ::CouchRest::Model::Designs::Design.new(self, #{prefix ? '"'+prefix.to_s+'"' : ''})
+              @_#{method} ||= ::CouchRest::Model::Designs::Design.new(self, #{prefix ? '"'+prefix.to_s+'"' : 'nil'})
             end
           EOS
         end
@@ -119,7 +117,7 @@ module CouchRest
           prefix = prefix ? "#{prefix}_" : ''
           model.class_eval <<-EOS, __FILE__, __LINE__ + 1
             def self.#{name}(opts = {})
-              #{method}.view(opts, '#{name}')
+              #{method}.view('#{name}', opts)
             end
             def self.find_#{name}(*key)
               #{name}.key(*key).first()

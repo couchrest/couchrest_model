@@ -3,7 +3,7 @@ class Article < CouchRest::Model::Base
   unique_id :slug
 
   design do
-    view :by_date, :descending => true
+    view :by_date # Default options not supported: :descending => true
     view :by_user_id_and_date
 
     view :by_tags,

@@ -104,6 +104,7 @@ class WithTemplateAndUniqueID < CouchRest::Model::Base
   property :slug
   property :preset, :default => 'value'
   property :has_no_default
+  design
 end
 
 class WithGetterAndSetterMethods < CouchRest::Model::Base
