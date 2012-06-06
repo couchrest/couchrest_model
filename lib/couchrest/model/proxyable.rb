@@ -70,6 +70,8 @@ module CouchRest
           @owner      = owner
           @owner_name = owner_name
           @database   = database
+
+          create_view_methods
         end
 
         # Base
@@ -81,39 +83,18 @@ module CouchRest
           proxy_block_update(:build_from_database, attrs, options, &block)
         end
 
-        def method_missing(m, *args, &block)
-          if has_view?(m)
-            if model.respond_to?(m)
-              return model.send(m, *args).proxy(self)
-            else
-              query = args.shift || {}
-              return view(m, query, *args, &block)
-            end
-          elsif m.to_s =~ /^find_(by_.+)/
-            view_name = $1
-            if has_view?(view_name)
-              return first_from_view(view_name, *args) 
-            end
-          end
-          super
-        end
-
-        # DocumentQueries
-
-        def all(opts = {}, &block)
-          proxy_update_all(@model.all({:database => @database}.merge(opts), &block))
-        end
+        # From DocumentQueries (The old fashioned way)
 
         def count(opts = {})
-          @model.count({:database => @database}.merge(opts))
+          all(opts).count
         end
 
         def first(opts = {})
-          proxy_update(@model.first({:database => @database}.merge(opts)))
+          all(opts).first
         end
 
         def last(opts = {})
-          proxy_update(@model.last({:database => @database}.merge(opts)))
+          all(opts).last
         end
 
         def get(id)
@@ -121,37 +102,22 @@ module CouchRest
         end
         alias :find :get
 
-        # Views
-
-        def has_view?(view)
-          @model.has_view?(view)
-        end
-
-        def view_by(*args)
-          @model.view_by(*args)
-        end
-
-        def view(name, query={}, &block)
-          proxy_update_all(@model.view(name, {:database => @database}.merge(query), &block))
-        end
-
-        def first_from_view(name, *args)
-          # add to first hash available, or add to end
-          (args.last.is_a?(Hash) ? args.last : (args << {}).last)[:database] = @database
-          proxy_update(@model.first_from_view(name, *args))
-        end
-
-        # DesignDoc
-        def design_doc
-          @model.design_doc
-        end
-
-        def save_design_doc(db = nil)
-          @model.save_design_doc(db || @database)
-        end
-
-
         protected
+
+        def create_view_methods
+          model.design_docs.each do |doc|
+            doc.view_names.each do |name|
+              class_eval <<-EOS, __FILE__, __LINE__ + 1
+                def self.#{name}(opts = {})
+                  #{name}({:proxy => self}.merge(opts))
+                end
+                def self.find_#{name}(*key)
+                  #{name}.key(*key).first()
+                end
+              EOS
+            end
+          end
+        end
 
         # Update the document's proxy details, specifically, the fields that
         # link back to the original document.

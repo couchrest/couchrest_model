@@ -37,7 +37,7 @@ module CouchRest
             # Load up the last copy. We never overwrite the remote copy
             # as it may contain views that are not used or known about by
             # our model.
-            doc = load_from_database(database)
+            doc = load_from_database(db)
 
             if !doc || doc['couchrest-hash'] != checksum
               # We need to save something
@@ -56,6 +56,7 @@ module CouchRest
           self
         end
 
+
         def checksum
           sum = self['couchrest-hash']
           if sum && (@_original_hash == to_hash)
@@ -67,6 +68,18 @@ module CouchRest
 
         def database
           model.database
+        end
+
+        # Override the default #uri method for one that accepts
+        # the current database.
+        # This is used by the caching code.
+        def uri(db = database)
+          "#{db.root}/#{self['_id']}"
+        end
+
+        # Helper method to provide a list of all the views
+        def view_names
+          self['views'].keys
         end
 
         protected
@@ -106,13 +119,6 @@ module CouchRest
               }).call(r)
             }
           self['couchrest-hash'] = Digest::MD5.hexdigest(flatten.call(base).sort.join(''))
-        end
-
-        # Override the default #uri method for one that accepts
-        # the current database.
-        # This is used by the caching code.
-        def uri(db)
-          "#{db.root}/#{self['_id']}"
         end
 
         def cache

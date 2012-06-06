@@ -5,7 +5,9 @@ class UnattachedDoc < CouchRest::Model::Base
   property :title
   property :questions
   property :professor
-  view_by :title
+  design do
+    view :title
+  end
 end
 
 

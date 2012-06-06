@@ -9,6 +9,7 @@ describe CouchRest::Model::Designs::Design do
   end
 
   class DesignSampleModel < CouchRest::Model::Base
+    use_database DB
     property :name
     property :surname
     design do
@@ -77,9 +78,14 @@ describe CouchRest::Model::Designs::Design do
       describe "with real model" do
 
         before :all do
+          reset_test_db!
           @mod = DesignSampleModel
           @doc = @mod.design_doc
           @db  = @mod.database
+        end
+
+        it "should not have been saved up until sync called" do
+          lambda { @mod.database.get(@doc['_id']) }.should raise_error(RestClient::ResourceNotFound)
         end
 
         it "should save a non existant design" do
@@ -129,6 +135,13 @@ describe CouchRest::Model::Designs::Design do
           @doc['views'].should_not have_key('test')
         end
 
+        it "should be re-created if database destroyed" do
+          @doc.sync  # saved
+          reset_test_db!
+          @db.should_receive(:save_doc).with(@doc)
+          @doc.sync
+        end
+
       end
 
     end
@@ -164,6 +177,21 @@ describe CouchRest::Model::Designs::Design do
         @doc = @mod.design_doc
         @mod.should_receive(:database)
         @doc.database
+      end
+    end
+
+
+    describe "#uri" do
+      it "should provide complete url" do
+        @doc = DesignSampleModel.design_doc
+        @doc.uri.should eql("#{DesignSampleModel.database.root}/_design/DesignSampleModel")
+      end
+    end
+
+    describe "#view_names" do
+      it "should provide a list of all the views available" do
+        @doc = DesignSampleModel.design_doc
+        @doc.view_names.should eql(['by_name', 'all'])
       end
     end
 

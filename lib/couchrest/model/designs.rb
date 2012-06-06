@@ -48,6 +48,10 @@ module CouchRest
           @_default_per_page || 25
         end
 
+        def design_docs
+          @_design_docs ||= []
+        end
+
       end
 
 
@@ -67,6 +71,9 @@ module CouchRest
           # Create design doc method in model, then call it so we have a copy
           create_design_doc_method
           self.design_doc = model.send(method)
+
+          # Ensure model has up to date list of design docs
+          model.design_docs << design_doc unless model.design_docs.include?(design_doc)
 
           # Some defaults
           design_doc.auto_update = model.auto_update_design_doc

@@ -310,8 +310,8 @@ module CouchRest
 
         # Set the view's proxy that will be used instead of the model
         # for any future searches. As soon as this enters the
-        # new object's initializer it will be removed and replace
-        # the model object.
+        # new view's initializer it will be removed and set as the model
+        # object.
         #
         # See the Proxyable mixin for more details.
         #
