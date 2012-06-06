@@ -476,7 +476,7 @@ module CouchRest
               end
             else
               # Assume there is always a map method
-              opts['map'] ||= true
+              opts[:map] ||= true
             end
 
             design_doc['views'] ||= {}

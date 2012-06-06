@@ -133,6 +133,40 @@ describe CouchRest::Model::Designs::Design do
 
     end
 
+    describe "checksum" do
+
+      before :all do
+        @mod = DesignSampleModel
+        @doc = @mod.design_doc
+      end
+
+      it "should return fresh checksum when not calculated earlier" do
+        @doc.checksum.should_not be_blank
+      end
+
+      it "should provide same checksum without refresh on re-request" do
+        chk = @doc.checksum
+        @doc.should_not_receive(:chaecksum!)
+        @doc.checksum.should eql(chk)
+      end
+
+      it "should provide new checksum if the design has changed" do
+        chk = @doc.checksum
+        @doc['views']['all']['map'] += '// comment'
+        @doc.checksum.should_not eql(chk)
+      end
+
+    end
+
+    describe "database" do
+      it "should provide model's database" do
+        @mod = DesignSampleModel
+        @doc = @mod.design_doc
+        @mod.should_receive(:database)
+        @doc.database
+      end
+    end
+
   end
 
 

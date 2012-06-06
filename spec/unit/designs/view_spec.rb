@@ -16,6 +16,7 @@ describe "Design View" do
   describe "(unit tests)" do
 
     before :each do
+      @mod   = DesignViewModel
       @klass = CouchRest::Model::Designs::View
     end
 
@@ -30,14 +31,15 @@ describe "Design View" do
       describe "with CouchRest Model" do
 
         it "should setup attributes" do
-          @obj = @klass.new(DesignViewModel, {}, 'test_view')
-          @obj.model.should eql(DesignViewModel)
+          @obj = @klass.new(@mod.design_doc, @mod, {}, 'test_view')
+          @obj.design_doc.should eql(@mod.design_doc)
+          @obj.model.should eql(@mod)
           @obj.name.should eql('test_view')
           @obj.query.should be_empty
         end
 
         it "should complain if there is no name" do
-          lambda { @klass.new(DesignViewModel, {}, nil) }.should raise_error
+          lambda { @klass.new(@mod.design_doc, @mod, {}, nil) }.should raise_error(/Name must be provided/)
         end
 
       end
@@ -45,12 +47,12 @@ describe "Design View" do
       describe "with previous view instance" do
 
         before :each do
-          first = @klass.new(DesignViewModel, {}, 'test_view')
-          @obj = @klass.new(first, {:foo => :bar})
+          first = @klass.new(@mod.design_doc, @mod, {}, 'test_view')
+          @obj = @klass.new(@mod.design_doc, first, {:foo => :bar})
         end
 
         it "should copy attributes" do
-          @obj.model.should eql(DesignViewModel)
+          @obj.model.should eql(@mod)
           @obj.name.should eql('test_view')
           @obj.query.should eql({:foo => :bar})
         end
@@ -59,42 +61,63 @@ describe "Design View" do
 
     end
 
-    describe ".create" do
+    describe ".define" do
 
-      before :each do
-        @design_doc = {}
-        DesignViewModel.stub!(:design_doc).and_return(@design_doc)
+      describe "with no auto update" do
+        before :each do
+          @design_doc = { }
+          @design_doc.stub!(:auto_update).and_return(false)
+        end
+
+        it "should set map view to true" do
+          @klass.define(DesignViewModel, @design_doc, 'test_view')
+          @design_doc['views']['test_view']['map'].should eql(true)
+          @design_doc['views']['test_view']['reduce'].should be_false
+        end
+
+        it "should set reduce to true if set" do
+          @klass.define(DesignViewModel, @design_doc, 'test_view', :reduce => true)
+          @design_doc['views']['test_view']['map'].should eql(true)
+          @design_doc['views']['test_view']['reduce'].should eql(true)
+        end
       end
 
-      it "should add a basic view" do
-        @klass.create(DesignViewModel, 'test_view', :map => 'foo')
-        @design_doc['views']['test_view'].should_not be_nil
-      end
+      describe "with auto update" do
 
-      it "should auto generate mapping from name" do
-        lambda { @klass.create(DesignViewModel, 'by_title') }.should_not raise_error
-        str = @design_doc['views']['by_title']['map']
-        str.should include("((doc['#{DesignViewModel.model_type_key}'] == 'DesignViewModel') && (doc['title'] != null))")
-        str.should include("emit(doc['title'], 1);")
-        str = @design_doc['views']['by_title']['reduce']
-        str.should include("return sum(values);")
-      end
+        before :each do
+          @design_doc = { }
+          @design_doc.stub!(:auto_update).and_return(true)
+        end
 
-      it "should auto generate mapping from name with and" do
-        @klass.create(DesignViewModel, 'by_title_and_name')
-        str = @design_doc['views']['by_title_and_name']['map']
-        str.should include("(doc['title'] != null) && (doc['name'] != null)")
-        str.should include("emit([doc['title'], doc['name']], 1);")
-        str = @design_doc['views']['by_title_and_name']['reduce']
-        str.should include("return sum(values);")
-      end
+        it "should add a basic view" do
+          @klass.define(DesignViewModel, @design_doc, 'test_view', :map => 'foo')
+          @design_doc['views']['test_view'].should_not be_nil
+        end
 
+        it "should auto generate mapping from name" do
+          lambda { @klass.define(DesignViewModel, @design_doc, 'by_title') }.should_not raise_error
+          str = @design_doc['views']['by_title']['map']
+          str.should include("((doc['#{DesignViewModel.model_type_key}'] == 'DesignViewModel') && (doc['title'] != null))")
+          str.should include("emit(doc['title'], 1);")
+          str = @design_doc['views']['by_title']['reduce']
+          str.should include("return sum(values);")
+        end
+
+        it "should auto generate mapping from name with and" do
+          @klass.define(DesignViewModel, @design_doc, 'by_title_and_name')
+          str = @design_doc['views']['by_title_and_name']['map']
+          str.should include("(doc['title'] != null) && (doc['name'] != null)")
+          str.should include("emit([doc['title'], doc['name']], 1);")
+          str = @design_doc['views']['by_title_and_name']['reduce']
+          str.should include("return sum(values);")
+        end
+      end
     end
 
     describe "instance methods" do
 
       before :each do
-        @obj = @klass.new(DesignViewModel, {}, 'test_view')
+        @obj = @klass.new(@mod.design_doc, @mod, {}, 'test_view')
       end
 
       describe "#rows" do
@@ -532,13 +555,6 @@ describe "Design View" do
         end
       end
 
-      describe "#design_doc" do
-        it "should call design_doc on model" do
-          @obj.model.should_receive(:design_doc)
-          @obj.send(:design_doc)
-        end
-      end
-
       describe "#can_reduce?" do
         it "should check and prove true" do
           @obj.should_receive(:name).and_return('test_view')
@@ -557,8 +573,8 @@ describe "Design View" do
           # disable real execution!
           @design_doc = mock("DesignDoc")
           @design_doc.stub!(:view_on)
-          @obj.model.stub!(:save_design_doc)
-          @obj.model.stub!(:design_doc).and_return(@design_doc)
+          @design_doc.stub!(:sync)
+          @obj.stub!(:design_doc).and_return(@design_doc)
         end
 
         it "should return previous result if set" do
@@ -582,7 +598,7 @@ describe "Design View" do
 
         it "should call to save the design document" do
           @obj.should_receive(:can_reduce?).and_return(false)
-          @obj.model.should_receive(:save_design_doc).with(DB)
+          @design_doc.should_receive(:sync).with(DB)
           @obj.send(:execute)
         end
 
@@ -595,9 +611,9 @@ describe "Design View" do
 
         it "should remove nil values from query" do
           @obj.should_receive(:can_reduce?).and_return(true)
-          @obj.stub!(:use_database).and_return('database')
+          @obj.stub!(:use_database).and_return(@mod.database)
           @obj.query = {:reduce => true, :limit => nil, :skip => nil}
-          @design_doc.should_receive(:view_on).with('database', 'test_view', {:reduce => true})
+          @design_doc.should_receive(:view_on).with(@mod.database, 'test_view', {:reduce => true})
           @obj.send(:execute)
         end
 
