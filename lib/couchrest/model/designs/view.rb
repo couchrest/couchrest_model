@@ -20,15 +20,16 @@ module CouchRest
         # outside CouchRest Model.
         def initialize(design_doc, parent, new_query = {}, name = nil)
           self.design_doc = design_doc
+          proxy = new_query.delete(:proxy)
           if parent.is_a?(Class) && parent < CouchRest::Model::Base
             raise "Name must be provided for view to be initialized" if name.nil?
-            self.model    = parent
+            self.model    = (proxy || parent)
             self.owner    = parent
             self.name     = name.to_s
             # Default options:
             self.query    = { }
           elsif parent.is_a?(self.class)
-            self.model    = (new_query.delete(:proxy) || parent.model)
+            self.model    = (proxy || parent.model)
             self.owner    = parent.owner
             self.name     = parent.name
             self.query    = parent.query.dup
@@ -406,6 +407,12 @@ module CouchRest
 
         # Class Methods
         class << self
+
+          def define_and_create(design_doc, name, opts = {})
+            define(design_doc, name, opts)
+            create_model_methods(design_doc, name, opts)
+          end
+
           # Simplified view definition. A new view will be added to the 
           # provided design document using the name and options.
           #
@@ -434,9 +441,10 @@ module CouchRest
           # like to enable this, set the <tt>:allow_blank</tt> option to false. The default
           # is true, empty strings are permited in the indexes.
           #
-          def define(model, design_doc, name, opts = {})
+          def define(design_doc, name, opts = {})
             # Don't create the map or reduce method if auto updates are disabled
             if design_doc.auto_update
+              model = design_doc.model
               # Is this an all view?
               if name.to_s == 'all'
                 opts[:map] = <<-EOF
@@ -484,6 +492,19 @@ module CouchRest
             view['map'] = opts[:map]
             view['reduce'] = opts[:reduce] if opts[:reduce]
             view
+          end
+
+
+          def create_model_methods(design_doc, name, opts = {})
+            method = design_doc.method_name
+            design_doc.model.instance_eval <<-EOS, __FILE__, __LINE__ + 1
+              def #{name}(opts = {})
+                #{method}.view('#{name}', opts)
+              end
+              def find_#{name}(*key)
+                #{name}.key(*key).first()
+              end
+            EOS
           end
 
         end

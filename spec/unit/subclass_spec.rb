@@ -17,13 +17,17 @@ end
 
 class OnlineCourse < Course
   property :url
-  view_by :url
+  design do
+    view :by_url
+  end
 end
 
 class Animal < CouchRest::Model::Base
   use_database TEST_SERVER.default_database
   property :name
-  view_by :name
+  design do
+    view :by_name
+  end
 end
 
 class Dog < Animal; end

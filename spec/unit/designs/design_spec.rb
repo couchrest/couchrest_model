@@ -20,6 +20,24 @@ describe CouchRest::Model::Designs::Design do
     end
   end
 
+  describe "class methods" do
+
+    before :all do
+      @klass = CouchRest::Model::Designs::Design
+    end
+
+    describe ".method_name" do
+      it "should return standard method name" do
+        @klass.method_name.should eql('design_doc')
+      end
+
+      it "should add prefix to standard method name" do
+        @klass.method_name('stats').should eql('stats_design_doc')
+      end
+    end
+
+  end
+
   describe "base methods" do
 
     before :each do
@@ -30,8 +48,9 @@ describe CouchRest::Model::Designs::Design do
 
 
     describe "initialisation without prefix" do
-      it "should associate model" do
+      it "should associate model and set method name" do
         @obj.model.should eql(@model)
+        @obj.method_name.should eql("design_doc")
       end
 
       it "should generate correct id" do
@@ -45,8 +64,10 @@ describe CouchRest::Model::Designs::Design do
 
     describe "initialisation with prefix" do
 
-      it "should associate model" do
+      it "should associate model and set method name" do
+        @obj = CouchRest::Model::Designs::Design.new(@model, 'stats')
         @obj.model.should eql(@model)
+        @obj.method_name.should eql("stats_design_doc")
       end
 
       it "should generate correct id with prefix" do
@@ -56,15 +77,6 @@ describe CouchRest::Model::Designs::Design do
 
     end
 
-
-    describe "view method" do
-
-      it "should instantiate a new view and pass options" do
-        CouchRest::Model::Designs::View.should_receive(:new).with(@obj, @model, {}, 'by_test')
-        @obj.view('by_test', {})
-      end
-
-    end
 
 
     describe "sync method" do
@@ -188,10 +200,65 @@ describe CouchRest::Model::Designs::Design do
       end
     end
 
+    describe "#view" do
+      it "should instantiate a new view and pass options" do
+        CouchRest::Model::Designs::View.should_receive(:new).with(@obj, @model, {}, 'by_test')
+        @obj.view('by_test', {})
+      end
+    end
+
     describe "#view_names" do
       it "should provide a list of all the views available" do
         @doc = DesignSampleModel.design_doc
         @doc.view_names.should eql(['by_name', 'all'])
+      end
+    end
+
+    describe "#has_view?" do
+      before :each do
+        @doc = DesignSampleModel.design_doc
+      end
+
+      it "should tell us if a view exists" do
+        @doc.has_view?('by_name').should be_true
+      end
+
+      it "should tell us if a view exists as symbol" do
+        @doc.has_view?(:by_name).should be_true
+      end
+
+      it "should tell us if a view does not exist" do
+        @doc.has_view?(:by_foobar).should be_false
+      end
+    end
+
+    describe "#create_view" do
+      before :each do
+        @doc = DesignSampleModel.design_doc
+        @doc['views'] = @doc['views'].clone
+      end
+
+      it "should forward view creation to View model" do
+        CouchRest::Model::Designs::View.should_receive(:define_and_create).with(@doc, 'by_other_name', {})
+        @doc.create_view('by_other_name')
+      end
+
+      it "should forward view creation to View model with opts" do
+        CouchRest::Model::Designs::View.should_receive(:define_and_create).with(@doc, 'by_other_name', {:by => 'name'})
+        @doc.create_view('by_other_name', :by => 'name')
+      end
+    end
+
+
+    describe "#create_filter" do
+      before :each do
+        @doc = DesignSampleModel.design_doc
+      end
+
+      it "should add simple filter" do
+        @doc.create_filter('test', 'foobar')
+        @doc['filters']['test'].should eql('foobar')
+        @doc['filters'] = nil # cleanup
       end
     end
 

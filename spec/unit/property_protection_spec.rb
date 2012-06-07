@@ -150,7 +150,9 @@ describe "Model Attributes" do
       use_database TEST_SERVER.default_database
       property :name
       property :admin, :default => false, :protected => true
-      view_by :name
+      design do
+        view :by_name
+      end
     end
 
     before(:each) do

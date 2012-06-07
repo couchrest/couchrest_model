@@ -148,19 +148,51 @@ describe CouchRest::Model::Proxyable do
       @klass = CouchRest::Model::Proxyable::ModelProxy
     end
 
-    it "should initialize and set variables" do
-      @obj = @klass.new(Cat, 'owner', 'owner_name', 'database')
-      @obj.model.should eql(Cat)
-      @obj.owner.should eql('owner')
-      @obj.owner_name.should eql('owner_name')
-      @obj.database.should eql('database')
+    before :each do
+      @design_doc = mock('Design')
+      @design_doc.stub!(:view_names).and_return(['all', 'by_name'])
+      @model = mock('Cat')
+      @model.stub!(:design_docs).and_return([@design_doc])
+      @obj = @klass.new(@model, 'owner', 'owner_name', 'database')
+    end
+
+    describe "initialization" do
+
+      it "should set base attributes" do
+        @obj.model.should eql(@model)
+        @obj.owner.should eql('owner')
+        @obj.owner_name.should eql('owner_name')
+        @obj.database.should eql('database')
+      end
+
+      it "should create view methods" do
+        @obj.should respond_to('all')
+        @obj.should respond_to('by_name')
+        @obj.should respond_to('find_all')
+        @obj.should respond_to('find_by_name')
+      end
+
+      it "should create 'all' view method that forward to model's view with proxy" do
+        @model.should_receive(:all).with(:proxy => @obj).and_return(nil)
+        @obj.all
+      end
+
+      it "should create 'by_name' view method that forward to model's view with proxy" do
+        @model.should_receive(:by_name).with(:proxy => @obj).and_return(nil)
+        @obj.by_name
+      end
+
+      it "should create 'find_by_name' view that forwards to normal view" do
+        view = mock('view')
+        view.should_receive('key').with('name').and_return(view)
+        view.should_receive('first').and_return(nil)
+        @obj.should_receive(:by_name).and_return(view)
+        @obj.find_by_name('name')
+      end
+
     end
 
     describe "instance" do
-
-      before :each do
-        @obj = @klass.new(Cat, 'owner', 'owner_name', 'database')
-      end
 
       it "should proxy new call" do
         @obj.should_receive(:proxy_block_update).with(:new, 'attrs', 'opts')
@@ -172,117 +204,45 @@ describe CouchRest::Model::Proxyable do
         @obj.build_from_database('attrs', 'opts')
       end
 
-      describe "#method_missing" do
-        it "should return design view object" do
-          m = "by_some_property"
-          inst = mock('DesignView')
-          inst.stub!(:proxy).and_return(inst)
-          @obj.should_receive(:has_view?).with(m).and_return(true)
-          Cat.should_receive(:respond_to?).with(m).and_return(true)
-          Cat.should_receive(:send).with(m).and_return(inst)
-          @obj.method_missing(m).should eql(inst)
-        end
-
-        it "should call view if necessary" do
-          m = "by_some_property"
-          @obj.should_receive(:has_view?).with(m).and_return(true)
-          Cat.should_receive(:respond_to?).with(m).and_return(false)
-          @obj.should_receive(:view).with(m, {}).and_return('view')
-          @obj.method_missing(m).should eql('view')
-        end
-
-        it "should provide wrapper for #first_from_view" do
-          m = "find_by_some_property"
-          view = "by_some_property"
-          @obj.should_receive(:has_view?).with(m).and_return(false)
-          @obj.should_receive(:has_view?).with(view).and_return(true)
-          @obj.should_receive(:first_from_view).with(view).and_return('view')
-          @obj.method_missing(m).should eql('view')    
-        end
-
-      end
-
-      it "should proxy #all" do
-        Cat.should_receive(:all).with({:database => 'database'})
-        @obj.should_receive(:proxy_update_all)
-        @obj.all
-      end
-  
       it "should proxy #count" do
-        Cat.should_receive(:all).with({:database => 'database', :raw => true, :limit => 0}).and_return({'total_rows' => 3})
-        @obj.count.should eql(3)
+        view = mock('View')
+        view.should_receive(:count).and_return(nil)
+        @model.should_receive(:all).and_return(view)
+        @obj.count
       end
 
       it "should proxy #first" do
-        Cat.should_receive(:first).with({:database => 'database'})
-        @obj.should_receive(:proxy_update)
+        view = mock('View')
+        view.should_receive(:first).and_return(nil)
+        @model.should_receive(:all).and_return(view)
         @obj.first
       end
 
       it "should proxy #last" do
-        Cat.should_receive(:last).with({:database => 'database'})
-        @obj.should_receive(:proxy_update)
+        view = mock('View')
+        view.should_receive(:last).and_return(nil)
+        @model.should_receive(:all).and_return(view)
         @obj.last
       end
 
       it "should proxy #get" do
-        Cat.should_receive(:get).with(32, 'database')
+        @model.should_receive(:get).with(32, 'database')
         @obj.should_receive(:proxy_update)
         @obj.get(32)
       end
       it "should proxy #find" do
-        Cat.should_receive(:get).with(32, 'database')
+        @model.should_receive(:get).with(32, 'database')
         @obj.should_receive(:proxy_update)
         @obj.find(32)
       end
 
-      it "should proxy #has_view?" do
-        Cat.should_receive(:has_view?).with('view').and_return(false)
-        @obj.has_view?('view')
-      end
-
-      it "should proxy #view_by" do
-        Cat.should_receive(:view_by).with('name').and_return(false)
-        @obj.view_by('name')
-      end
-
-      it "should proxy #view" do
-        Cat.should_receive(:view).with('view', {:database => 'database'})
-        @obj.should_receive(:proxy_update_all)
-        @obj.view('view')
-      end
-
-      it "should proxy #first_from_view" do
-        Cat.should_receive(:first_from_view).with('view', {:database => 'database'})
-        @obj.should_receive(:proxy_update)
-        @obj.first_from_view('view')
-      end
-
-      it "should proxy design_doc" do
-        Cat.should_receive(:design_doc)
-        @obj.design_doc
-      end
-
-      describe "#save_design_doc" do
-        it "should be proxied without args" do
-          Cat.should_receive(:save_design_doc).with('database')
-          @obj.save_design_doc
-        end
-
-        it "should be proxied with database arg" do
-          Cat.should_receive(:save_design_doc).with('db')
-          @obj.save_design_doc('db')
-        end
-      end
-
-      
 
       ### Updating methods
 
       describe "#proxy_update" do
         it "should set returned doc fields" do
           doc = mock(:Document)
-          doc.should_receive(:is_a?).with(Cat).and_return(true)
+          doc.should_receive(:is_a?).with(@model).and_return(true)
           doc.should_receive(:database=).with('database')
           doc.should_receive(:model_proxy=).with(@obj)
           doc.should_receive(:send).with('owner_name=', 'owner')
@@ -291,7 +251,7 @@ describe CouchRest::Model::Proxyable do
 
         it "should not set anything if matching document not provided" do
           doc = mock(:DocumentFoo)
-          doc.should_receive(:is_a?).with(Cat).and_return(false)
+          doc.should_receive(:is_a?).with(@model).and_return(false)
           doc.should_not_receive(:database=)
           doc.should_not_receive(:model_proxy=)
           doc.should_not_receive(:owner_name=)
@@ -343,13 +303,12 @@ describe CouchRest::Model::Proxyable do
           view :by_total
         end
       end
-
-
       @company = ProxyableCompany.create(:slug => 'samco')
     end
 
     it "should create the new database" do
-      @company.proxyable_invoices.all.should be_empty
+      view = @company.proxyable_invoices.all
+      view.should be_empty
       TEST_SERVER.databases.find{|db| db =~ /#{TESTDB}-samco/}.should_not be_nil
     end
 

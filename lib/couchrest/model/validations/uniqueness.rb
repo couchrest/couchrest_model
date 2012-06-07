@@ -15,9 +15,10 @@ module CouchRest
             attributes.each do |attribute|
               opts = merge_view_options(attribute)
 
-              if model.respond_to?(:has_view?) && !model.has_view?(opts[:view_name])
-                opts[:keys] << {:allow_nil => true}
-                model.view_by(*opts[:keys])
+              unless model.respond_to?(opts[:view_name])
+                model.design do
+                  view opts[:view_name], :allow_nil => true
+                end
               end
             end
           end
@@ -33,15 +34,15 @@ module CouchRest
           # Determine the base of the search
           base = opts[:proxy].nil? ? model : document.instance_eval(opts[:proxy])
 
-          if base.respond_to?(:has_view?) && !base.has_view?(opts[:view_name])
+          unless base.respond_to?(opts[:view_name])
             raise "View #{document.class.name}.#{opts[:view_name]} does not exist for validation!"
           end
 
-          rows = base.view(opts[:view_name], :key => values, :limit => 2, :include_docs => false)['rows']
+          rows = base.send(opts[:view_name], :key => values, :limit => 2, :include_docs => false).rows
           return if rows.empty?
 
           unless document.new?
-            return if rows.find{|row| row['id'] == document.id}
+            return if rows.find{|row| row.id == document.id}
           end
 
           if rows.length > 0

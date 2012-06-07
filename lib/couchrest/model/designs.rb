@@ -27,8 +27,9 @@ module CouchRest
         def design(prefix = nil, &block)
           mapper = DesignMapper.new(self, prefix)
           mapper.instance_eval(&block) if block_given?
-          # Create an 'all' view, using the previous settings.
-          mapper.view :all if prefix.nil?
+
+          # Create an 'all' view if no prefix and one has not been defined already
+          mapper.view(:all) if prefix.nil? and !mapper.design_doc.has_view?(:all)
         end
 
         # Override the default page pagination value:
@@ -54,7 +55,8 @@ module CouchRest
 
       end
 
-
+      # Map method calls defined in a design block to actions
+      # in the Design Document.
       class DesignMapper
 
         # Basic mapper attributes
@@ -66,17 +68,10 @@ module CouchRest
         def initialize(model, prefix = nil)
           self.model  = model
           self.prefix = prefix
-          self.method = (prefix ? "#{prefix}_" : '') + 'design_doc'
+          self.method = Design.method_name(prefix)
 
-          # Create design doc method in model, then call it so we have a copy
-          create_design_doc_method
-          self.design_doc = model.send(method)
-
-          # Ensure model has up to date list of design docs
-          model.design_docs << design_doc unless model.design_docs.include?(design_doc)
-
-          # Some defaults
-          design_doc.auto_update = model.auto_update_design_doc
+          self.design_doc = (model.respond_to?(method) ?
+            model.send(method) : create_model_design_doc_reader)
         end
 
         def disable_auto_update
@@ -90,8 +85,7 @@ module CouchRest
         # Add the specified view to the design doc the definition was made in
         # and create quick access methods in the model.
         def view(name, opts = {})
-          View.define(model, design_doc, name, opts)
-          create_view_method(name)
+          design_doc.create_view(name, opts)
         end
 
         # Really simple design function that allows a filter
@@ -101,8 +95,7 @@ module CouchRest
         # No methods are created here, the design is simply updated.
         # See the CouchDB API for more information on how to use this.
         def filter(name, function)
-          filters = (design_doc['filters'] ||= {})
-          filters[name.to_s] = function
+          design_doc.create_filter(name, function)
         end
 
         # Convenience wrapper to access model's type key option.
@@ -112,24 +105,18 @@ module CouchRest
 
         protected
 
-        def create_design_doc_method
-          model.class_eval <<-EOS, __FILE__, __LINE__ + 1
-            def self.#{method}
-              @_#{method} ||= ::CouchRest::Model::Designs::Design.new(self, #{prefix ? '"'+prefix.to_s+'"' : 'nil'})
-            end
-          EOS
-        end
+        # Create accessor in model and assign a new design doc.
+        # New design doc is returned ready to use.
+        def create_model_design_doc_reader
+          doc = Design.new(model, prefix)
+          model.instance_eval "def #{method}; @#{method}; end"
+          model.instance_variable_set("@#{method}", doc)
+          model.design_docs << doc
 
-        def create_view_method(name, prefix = nil)
-          prefix = prefix ? "#{prefix}_" : ''
-          model.class_eval <<-EOS, __FILE__, __LINE__ + 1
-            def self.#{name}(opts = {})
-              #{method}.view('#{name}', opts)
-            end
-            def self.find_#{name}(*key)
-              #{name}.key(*key).first()
-            end
-          EOS
+          # Set defaults
+          doc.auto_update = model.auto_update_design_doc
+
+          doc
         end
 
       end

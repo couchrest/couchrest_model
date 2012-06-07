@@ -59,6 +59,43 @@ describe "Design View" do
 
       end
 
+      describe "with proxy in query for first initialization" do
+        it "should set model to proxy object and remove from query" do
+          proxy = mock("Proxy")
+          @obj = @klass.new(@mod.design_doc, @mod, {:proxy => proxy}, 'test_view')
+          @obj.model.should eql(proxy)
+        end
+      end
+
+      describe "with proxy in query for chained instance" do
+        it "should set the model to proxy object instead of parents model" do
+          proxy = mock("Proxy")
+          @obj = @klass.new(@mod.design_doc, @mod, {}, 'test_view')
+          @obj.model.should eql(@mod)
+          @obj = @obj.proxy(proxy)
+          @obj.model.should eql(proxy)
+        end
+      end
+
+    end
+
+    describe ".define_and_create" do
+      before :each do
+        @design_doc = { }
+      end
+
+      it "should call define and create_model_methods method" do
+        @klass.should_receive(:define).with(@design_doc, 'test', {}).and_return(nil)
+        @klass.should_receive(:create_model_methods).with(@design_doc, 'test', {}).and_return(nil)
+        @klass.define_and_create(@design_doc, 'test')
+      end
+
+      it "should call define and create_model_methods method with opts" do
+        @klass.should_receive(:define).with(@design_doc, 'test', {:foo => :bar}).and_return(nil)
+        @klass.should_receive(:create_model_methods).with(@design_doc, 'test', {:foo => :bar}).and_return(nil)
+        @klass.define_and_create(@design_doc, 'test', {:foo => :bar})
+      end
+
     end
 
     describe ".define" do
@@ -66,17 +103,18 @@ describe "Design View" do
       describe "with no auto update" do
         before :each do
           @design_doc = { }
+          @design_doc.stub!(:model).and_return(DesignViewModel)
           @design_doc.stub!(:auto_update).and_return(false)
         end
 
         it "should set map view to true" do
-          @klass.define(DesignViewModel, @design_doc, 'test_view')
+          @klass.define(@design_doc, 'test_view')
           @design_doc['views']['test_view']['map'].should eql(true)
           @design_doc['views']['test_view']['reduce'].should be_false
         end
 
         it "should set reduce to true if set" do
-          @klass.define(DesignViewModel, @design_doc, 'test_view', :reduce => true)
+          @klass.define(@design_doc, 'test_view', :reduce => true)
           @design_doc['views']['test_view']['map'].should eql(true)
           @design_doc['views']['test_view']['reduce'].should eql(true)
         end
@@ -86,16 +124,17 @@ describe "Design View" do
 
         before :each do
           @design_doc = { }
+          @design_doc.stub!(:model).and_return(DesignViewModel)
           @design_doc.stub!(:auto_update).and_return(true)
         end
 
         it "should add a basic view" do
-          @klass.define(DesignViewModel, @design_doc, 'test_view', :map => 'foo')
+          @klass.define(@design_doc, 'test_view', :map => 'foo')
           @design_doc['views']['test_view'].should_not be_nil
         end
 
         it "should auto generate mapping from name" do
-          lambda { @klass.define(DesignViewModel, @design_doc, 'by_title') }.should_not raise_error
+          lambda { @klass.define(@design_doc, 'by_title') }.should_not raise_error
           str = @design_doc['views']['by_title']['map']
           str.should include("((doc['#{DesignViewModel.model_type_key}'] == 'DesignViewModel') && (doc['title'] != null))")
           str.should include("emit(doc['title'], 1);")
@@ -104,7 +143,7 @@ describe "Design View" do
         end
 
         it "should auto generate mapping from name with and" do
-          @klass.define(DesignViewModel, @design_doc, 'by_title_and_name')
+          @klass.define(@design_doc, 'by_title_and_name')
           str = @design_doc['views']['by_title_and_name']['map']
           str.should include("(doc['title'] != null) && (doc['name'] != null)")
           str.should include("emit([doc['title'], doc['name']], 1);")
@@ -112,7 +151,33 @@ describe "Design View" do
           str.should include("return sum(values);")
         end
       end
+
+      describe ".create_model_methods" do
+        before :each do
+          @model = DesignViewModel
+          @design_doc = { }
+          @design_doc.stub!(:model).and_return(@model)
+          @design_doc.stub!(:method_name).and_return("design_doc")
+          @model.stub!('design_doc').and_return(@design_doc)
+        end
+        it "should create standard view method" do
+          @klass.create_model_methods(@design_doc, 'by_name')
+          @model.should respond_to('by_name')
+          @design_doc.should_receive('view').with('by_name', {})
+          @model.by_name
+        end
+        it "should create find_ view method" do
+          @klass.create_model_methods(@design_doc, 'by_name')
+          @model.should respond_to('find_by_name')
+          view = mock("View")
+          view.should_receive('key').with('fred').and_return(view)
+          view.should_receive('first').and_return(nil)
+          @design_doc.should_receive('view').and_return(view)
+          @model.find_by_name('fred')
+        end
+      end
     end
+
 
     describe "instance methods" do
 

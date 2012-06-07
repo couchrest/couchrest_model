@@ -10,7 +10,7 @@ describe CouchRest::Model::Validations do
       end
 
       it "should create a new view if none defined before performing" do
-        WithUniqueValidation.has_view?(:by_title).should be_true
+        WithUniqueValidation.design_doc.has_view?(:by_title).should be_true
       end
 
       it "should validate a new unique document" do
@@ -49,16 +49,14 @@ describe CouchRest::Model::Validations do
 
       it "should not try to create a defined view" do
         WithUniqueValidationView.validates_uniqueness_of :title, :view => 'fooobar'
-        WithUniqueValidationView.has_view?('fooobar').should be_false
-        WithUniqueValidationView.has_view?('by_title').should be_false
+        WithUniqueValidationView.design_doc.has_view?('fooobar').should be_false
+        WithUniqueValidationView.design_doc.has_view?('by_title').should be_false
       end
 
 
       it "should not try to create new view when already defined" do
         @obj = @objs[1]
-        @obj.class.should_not_receive('view_by')
-        @obj.class.should_receive('has_view?').and_return(true)
-        @obj.class.should_receive('view').and_return({'rows' => [ ]})
+        @obj.class.design_doc.should_not_receive('create_view')
         @obj.valid?
       end
     end
@@ -66,7 +64,7 @@ describe CouchRest::Model::Validations do
     context "with a proxy parameter" do
 
       it "should create a new view despite proxy" do
-        WithUniqueValidationProxy.has_view?(:by_title).should be_true
+        WithUniqueValidationProxy.design_doc.has_view?(:by_title).should be_true
       end
 
       it "should be used" do
@@ -77,19 +75,23 @@ describe CouchRest::Model::Validations do
 
       it "should allow specific view" do
         @obj = WithUniqueValidationProxy.new(:title => 'test 7')
-        @obj.class.should_not_receive('view_by')
+        @obj.class.should_not_receive('by_title')
+        view = mock('View')
+        view.stub!(:rows).and_return([])
         proxy = mock('Proxy')
+        proxy.should_receive('by_title').and_return(view)
+        proxy.should_receive('respond_to?').with('by_title').and_return(true)
         @obj.should_receive('proxy').and_return(proxy)
-        proxy.should_receive('has_view?').and_return(true)
-        proxy.should_receive('view').and_return({'rows' => [ ]})
         @obj.valid?
       end
     end
 
     context "when proxied" do
       it "should lookup the model_proxy" do
+        view = mock('View')
+        view.stub!(:rows).and_return([])
         mp = mock(:ModelProxy)
-        mp.should_receive(:view).and_return({'rows' => []})
+        mp.should_receive(:by_title).and_return(view)
         @obj = WithUniqueValidation.new(:title => 'test 8')
         @obj.stub!(:model_proxy).twice.and_return(mp)
         @obj.valid?
@@ -103,7 +105,7 @@ describe CouchRest::Model::Validations do
       end
 
       it "should create the view" do
-        @objs.first.class.has_view?('by_parent_id_and_title')
+        @objs.first.class.design_doc.has_view?('by_parent_id_and_title')
       end
 
       it "should validate unique document" do

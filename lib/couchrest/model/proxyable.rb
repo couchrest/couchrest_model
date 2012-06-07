@@ -108,10 +108,10 @@ module CouchRest
           model.design_docs.each do |doc|
             doc.view_names.each do |name|
               class_eval <<-EOS, __FILE__, __LINE__ + 1
-                def self.#{name}(opts = {})
-                  #{name}({:proxy => self}.merge(opts))
+                def #{name}(opts = {})
+                  model.#{name}({:proxy => self}.merge(opts))
                 end
-                def self.find_#{name}(*key)
+                def find_#{name}(*key)
                   #{name}.key(*key).first()
                 end
               EOS

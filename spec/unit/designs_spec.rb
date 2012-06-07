@@ -146,7 +146,7 @@ describe CouchRest::Model::Designs do
       end
 
       it "should call create method on view" do
-        CouchRest::Model::Designs::View.should_receive(:define).with(DesignModel, @object.design_doc, 'test', {})
+        CouchRest::Model::Designs::View.should_receive(:define).with(@object.design_doc, 'test', {})
         @object.view('test')
       end
 
@@ -157,8 +157,7 @@ describe CouchRest::Model::Designs do
       end
 
       it "should create a method for view instance" do
-        CouchRest::Model::Designs::View.stub!(:define)
-        @object.should_receive(:create_view_method).with('test')
+        @object.design_doc.should_receive(:create_view).with('test', {})
         @object.view('test')
       end
     end
@@ -174,29 +173,6 @@ describe CouchRest::Model::Designs do
         DesignModel.design_doc['filters'].should_not be_empty
         DesignModel.design_doc['filters']['important'].should_not be_blank
       end
-
-    end
-
-    describe "#create_view_method" do
-      before :each do
-        @object = @klass.new(DesignModel)
-      end
-
-      it "should create a method that returns view instance" do
-        @object.design_doc.should_receive(:view).with('test_view', {}).and_return(nil)
-        @object.send(:create_view_method, 'test_view')
-        DesignModel.test_view
-      end
-
-      it "should create a method that returns quick access find_by method" do
-        view = mock("View")
-        view.stub(:key).and_return(view)
-        view.stub(:first).and_return(true)
-        @object.design_doc.should_receive(:view).with('by_test_view', {}).and_return(view)
-        @object.send(:create_view_method, 'by_test_view')
-        lambda { DesignModel.find_by_test_view('test').should be_true }.should_not raise_error
-      end
-
     end
 
   end

@@ -9,7 +9,6 @@ module CouchRest
       include CouchRest::Model::Persistence
       include CouchRest::Model::DocumentQueries
       include CouchRest::Model::ExtendedAttachments
-      include CouchRest::Model::ClassProxy
       include CouchRest::Model::Proxyable
       include CouchRest::Model::PropertyProtection
       include CouchRest::Model::Associations

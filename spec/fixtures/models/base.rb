@@ -150,6 +150,7 @@ class WithUniqueValidationView < CouchRest::Model::Base
   end
   property :title
 
+  design
   validates_uniqueness_of :code, :view => 'all'
 end
 

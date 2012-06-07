@@ -5,8 +5,8 @@ module CouchRest
 
       class Design < ::CouchRest::Design
 
-        # The model Class that this design belongs to
-        attr_accessor :model
+        # The model Class that this design belongs to and method name
+        attr_accessor :model, :method_name
 
         # Can this design save itself to the database?
         # If false, the design will be loaded automatically before a view is executed.
@@ -15,16 +15,11 @@ module CouchRest
 
         # Instantiate a new design document for this model
         def initialize(model, prefix = nil)
-          self.model  = model
+          self.model       = model
+          self.method_name = self.class.method_name(prefix)
           suffix = prefix ? "_#{prefix}" : ''
           self["_id"] = "_design/#{model.to_s}#{suffix}"
           apply_defaults
-        end
-
-        # Create a new view object.
-        # This overrides the normal CouchRest Design view method
-        def view(name, opts = {})
-          CouchRest::Model::Designs::View.new(self, model, opts, name)
         end
 
         def sync(db = nil)
@@ -77,9 +72,35 @@ module CouchRest
           "#{db.root}/#{self['_id']}"
         end
 
+
+        ######## VIEW HANDLING ########
+
+        # Create a new view object.
+        # This overrides the normal CouchRest Design view method
+        def view(name, opts = {})
+          CouchRest::Model::Designs::View.new(self, model, opts, name)
+        end
+
         # Helper method to provide a list of all the views
         def view_names
           self['views'].keys
+        end
+
+        def has_view?(name)
+          view_names.include?(name.to_s)
+        end
+
+        # Add the specified view to the design doc the definition was made in
+        # and create quick access methods in the model.
+        def create_view(name, opts = {})
+          View.define_and_create(self, name, opts)
+        end
+
+        ######## FILTER HANDLING ########
+
+        def create_filter(name, function)
+          filters = (self['filters'] ||= {})
+          filters[name.to_s] = function
         end
 
         protected
@@ -136,6 +157,15 @@ module CouchRest
             "language" => "javascript",
             "views"    => { }
           )
+        end
+
+
+        class << self
+
+          def method_name(prefix = nil)
+            (prefix ? "#{prefix}_" : '') + 'design_doc'
+          end
+
         end
 
       end
