@@ -402,25 +402,24 @@ describe "Model Base" do
   
   describe "counting all instances of a model" do
     before(:each) do
-      @db = reset_test_db!
+      reset_test_db!
     end
-    
+
     it ".count should return 0 if there are no docuemtns" do
       WithTemplateAndUniqueID.count.should == 0
     end
-    
+
     it ".count should return the number of documents" do
       WithTemplateAndUniqueID.new('slug' => '1').save
       WithTemplateAndUniqueID.new('slug' => '2').save
       WithTemplateAndUniqueID.new('slug' => '3').save
-      
       WithTemplateAndUniqueID.count.should == 3
     end
   end
   
   describe "finding the first instance of a model" do
     before(:each) do      
-      @db = reset_test_db!
+      reset_test_db!
       WithTemplateAndUniqueID.new('slug' => '1').save
       WithTemplateAndUniqueID.new('slug' => '2').save
       WithTemplateAndUniqueID.new('slug' => '3').save

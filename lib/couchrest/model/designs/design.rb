@@ -40,8 +40,9 @@ module CouchRest
                 # Different! Update.
                 doc.merge!(to_hash)
               else
-                # No previous doc, use our version.
-                doc = self
+                # No previous doc, use a *copy* of our version.
+                # Using a copy prevents reverse updates
+                doc = to_hash.dup
               end
               db.save_doc(doc)
             end
@@ -49,6 +50,11 @@ module CouchRest
             set_cache_checksum(db, checksum)
           end
           self
+        rescue
+          puts "DESIGN DOC SYNC FAILED:"
+          puts docdb.inspect
+          puts doc.inspect
+          raise
         end
 
 

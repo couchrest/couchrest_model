@@ -145,6 +145,7 @@ describe CouchRest::Model::Designs::Design do
           @doc.send(:set_cache_checksum, @doc.database, nil)
           @doc.sync
           @doc['views'].should_not have_key('test')
+          @doc['_rev'].should be_nil
         end
 
         it "should be re-created if database destroyed" do

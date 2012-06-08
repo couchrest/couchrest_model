@@ -1,5 +1,5 @@
 class WithDefaultValues < CouchRest::Model::Base
-  use_database TEST_SERVER.default_database
+  use_database DB
   property :preset, Object, :default => {:right => 10, :top_align => false}
   property :set_by_proc, Time, :default => Proc.new{Time.now}
   property :tags, [String], :default => []
@@ -10,7 +10,7 @@ class WithDefaultValues < CouchRest::Model::Base
 end
 
 class WithSimplePropertyType < CouchRest::Model::Base
-  use_database TEST_SERVER.default_database
+  use_database DB
   property :name, String
   property :preset, String, :default => 'none'
   property :tags, [String]
@@ -18,7 +18,7 @@ class WithSimplePropertyType < CouchRest::Model::Base
 end
 
 class WithCallBacks < CouchRest::Model::Base
-  use_database TEST_SERVER.default_database
+  use_database DB
   property :name
   property :run_before_validation
   property :run_after_validation
@@ -85,19 +85,19 @@ end
 
 # Following two fixture classes have __intentionally__ diffent syntax for setting the validation context
 class WithContextualValidationOnCreate < CouchRest::Model::Base
-  use_database TEST_SERVER.default_database
+  use_database DB
   property(:name, String)
   validates(:name, :presence => {:on => :create})
 end
 
 class WithContextualValidationOnUpdate < CouchRest::Model::Base
-  use_database TEST_SERVER.default_database
+  use_database DB
   property(:name, String)
   validates(:name, :presence => true, :on => :update)
 end
 
 class WithTemplateAndUniqueID < CouchRest::Model::Base
-  use_database TEST_SERVER.default_database
+  use_database DB
   unique_id do |model|
     model.slug
   end
@@ -108,7 +108,7 @@ class WithTemplateAndUniqueID < CouchRest::Model::Base
 end
 
 class WithGetterAndSetterMethods < CouchRest::Model::Base
-  use_database TEST_SERVER.default_database
+  use_database DB
 
   property :other_arg
   def arg
@@ -121,7 +121,7 @@ class WithGetterAndSetterMethods < CouchRest::Model::Base
 end
 
 class WithAfterInitializeMethod < CouchRest::Model::Base
-  use_database TEST_SERVER.default_database
+  use_database DB
 
   property :some_value
 
@@ -164,7 +164,7 @@ class WithScopedUniqueValidation < CouchRest::Model::Base
 end
 
 class WithDateAndTime < CouchRest::Model::Base
-  use_database TEST_SERVER.default_database
+  use_database DB
   property :exec_date, Date
   property :exec_time, Time
 end
