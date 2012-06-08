@@ -25,11 +25,26 @@ module CouchRest
         # Add views and other design document features
         # to the current model.
         def design(prefix = nil, &block)
+
+          # Store ourselves a copy of this design spec incase any other model inherits.
+          (@_design_blocks ||= [ ]) << {:args => [prefix], :block => block}
+
           mapper = DesignMapper.new(self, prefix)
           mapper.instance_eval(&block) if block_given?
 
           # Create an 'all' view if no prefix and one has not been defined already
           mapper.view(:all) if prefix.nil? and !mapper.design_doc.has_view?(:all)
+        end
+
+        def inherited(model)
+          super
+
+          # Go through our design blocks and re-implement them in the child.
+          unless @_design_blocks.nil?
+            @_design_blocks.each do |row|
+              model.design(*row[:args], &row[:block])
+            end
+          end
         end
 
         # Override the default page pagination value:
@@ -70,8 +85,8 @@ module CouchRest
           self.prefix = prefix
           self.method = Design.method_name(prefix)
 
-          self.design_doc = (model.respond_to?(method) ?
-            model.send(method) : create_model_design_doc_reader)
+          create_model_design_doc_reader
+          self.design_doc = model.send(method) || assign_model_design_doc
         end
 
         def disable_auto_update
@@ -108,8 +123,11 @@ module CouchRest
         # Create accessor in model and assign a new design doc.
         # New design doc is returned ready to use.
         def create_model_design_doc_reader
-          doc = Design.new(model, prefix)
           model.instance_eval "def #{method}; @#{method}; end"
+        end
+
+        def assign_model_design_doc
+          doc = Design.new(model, prefix)
           model.instance_variable_set("@#{method}", doc)
           model.design_docs << doc
 

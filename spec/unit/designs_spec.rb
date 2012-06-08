@@ -2,6 +2,7 @@ require "spec_helper"
 
 class DesignModel < CouchRest::Model::Base
   use_database DB
+  property :name
 end
 
 describe CouchRest::Model::Designs do
@@ -30,15 +31,72 @@ describe CouchRest::Model::Designs do
           @klass.should respond_to(:stats_design_doc)
           @klass.should_not respond_to(:all)
         end
+
+        it "should have added itself to a design_blocks array" do
+          @klass.design
+          blocks = @klass.instance_variable_get(:@_design_blocks)
+          blocks.length.should eql(1)
+          blocks.first.should eql({:args => [nil], :block => nil})
+        end
+
+        it "should have added itself to a design_blocks array" do
+          @klass.design
+          blocks = @klass.instance_variable_get(:@_design_blocks)
+          blocks.length.should eql(1)
+          blocks.first.should eql({:args => [nil], :block => nil})
+        end
+
+        it "should have added itself to a design_blocks array with prefix" do
+          @klass.design :stats
+          blocks = @klass.instance_variable_get(:@_design_blocks)
+          blocks.length.should eql(1)
+          blocks.first.should eql({:args => [:stats], :block => nil})
+        end
       end
 
       describe "with block" do
-        it "should pass calls to mapper" do
-          @klass.design do
+        before :each do
+          @block = Proc.new do
             disable_auto_update
           end
+          @klass.design &@block
+        end
+
+        it "should pass calls to mapper" do
           @klass.design_doc.auto_update.should be_false
         end
+
+        it "should have added itself to a design_blocks array" do
+          blocks = @klass.instance_variable_get(:@_design_blocks)
+          blocks.length.should eql(1)
+          blocks.first.should eql({:args => [nil], :block => @block})
+        end
+
+        it "should handle multiple designs" do
+          @block2 = Proc.new do
+            view :by_name
+          end
+          @klass.design :stats, &@block2
+          blocks = @klass.instance_variable_get(:@_design_blocks)
+          blocks.length.should eql(2)
+          blocks.first.should eql({:args => [nil], :block => @block})
+          blocks.last.should eql({:args => [:stats], :block => @block2})
+        end
+      end
+
+    end
+
+    describe "inheritance" do
+      before :each do
+        klass = DesignModel.dup
+        klass.design do
+          view :by_name
+        end
+        @klass = Class.new(klass)
+      end
+
+      it "should add designs to sub module" do
+        @klass.should respond_to(:design_doc)
       end
 
     end
