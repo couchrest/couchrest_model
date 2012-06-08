@@ -21,7 +21,11 @@ it is not possible to load ActiveModel into programs that do not use ActiveSuppo
 
 CouchRest Model is only properly tested on CouchDB version 1.0 or newer.
 
-*WARNING:* As of April 2011 and the release of version 1.1.0, the default model type key is 'type' instead of 'couchrest-type'. Simply updating your project will not work unless you migrate your data or set the configuration option in your initializers:
+### Upgrading from an earlier version?
+
+*Pre 1.2:* As of June 2012, couchrest model no longer supports the `view_by` and `view` calls from the model. Views are no only accessed via a design document. If you have older code and wish to upgrade, please ensure you move to the new syntax for using views.
+
+*Pre 1.1:* As of April 2011 and the release of version 1.1.0, the default model type key is 'type' instead of 'couchrest-type'. Simply updating your project will not work unless you migrate your data or set the configuration option in your initializers:
 
     CouchRest::Model::Base.configure do |config|
       config.model_type_key = 'couchrest-type'
@@ -91,7 +95,9 @@ The example config above for example would use a database called "project_test".
 
       timestamps!
 
-      view_by :name
+      design do
+        view :by_name
+      end
 
     end
 

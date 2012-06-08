@@ -1,7 +1,9 @@
 # CouchRest Model Change History
 
-## 1.1.3
+## 1.2.0.beta - 2012-06-08
 
+  * Completely refactored Design Document handling.
+  * Removed old `view` and `view_by` methods.
   * CouchRest::Model::Base.respond_to_missing? and respond_to? (Kim Burgestrand)
   * Time#as_json now insists on using xmlschema with 3 fraction digits by default.
   * Added time_fraction_digits configuration object
