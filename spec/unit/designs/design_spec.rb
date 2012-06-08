@@ -79,11 +79,11 @@ describe CouchRest::Model::Designs::Design do
 
 
 
-    describe "sync method" do
+    describe "#sync and #sync!" do
 
       it "should skip if auto update disabled" do
         @obj.auto_update = false
-        @obj.should_not_receive(:database)
+        @obj.should_not_receive(:sync!)
         @obj.sync
       end
 
@@ -100,17 +100,14 @@ describe CouchRest::Model::Designs::Design do
           lambda { @mod.database.get(@doc['_id']) }.should raise_error(RestClient::ResourceNotFound)
         end
 
-        it "should save a non existant design" do
-          begin
-            doc = @db.get(@doc['_id'])
-          rescue
-            doc = nil
-          end
-          @db.delete_doc(doc) if doc
+
+        it "should save a design that is in cache and has changed" do
+          @doc.sync # put in cache
+          @doc['views']['all']['map'] += '// comment'
+          # This would fail if changes were not detected!
           @doc.sync
           doc = @db.get(@doc['_id'])
-          doc.should_not be_nil
-          doc['views']['all'].should eql(@doc['views']['all'])
+          doc['views']['all']['map'].should eql(@doc['views']['all']['map'])
         end
 
         it "should not save a design that is not in cache and has not changed" do
@@ -128,17 +125,15 @@ describe CouchRest::Model::Designs::Design do
           @doc.sync
         end
 
-        it "should save a design that is in cache and has changed" do
-          @doc.sync # put in cache
-          @doc['views']['all']['map'] += '// comment'
-          # This would fail if changes were not detected!
+        it "should be re-created if database destroyed" do
+          @doc.sync  # saved
+          reset_test_db!
+          @db.should_receive(:save_doc).with(@doc)
           @doc.sync
-          doc = @db.get(@doc['_id'])
-          doc['views']['all']['map'].should eql(@doc['views']['all']['map'])
         end
 
         it "should not update the local design definition" do
-          @doc.sync
+          @doc.sync!
           doc = @db.get(@doc['_id'])
           doc['views']['test'] = {'map' => "function(d) { if (d) { emit(d._id, null); } }"}
           @db.save_doc(doc)
@@ -148,16 +143,22 @@ describe CouchRest::Model::Designs::Design do
           @doc['_rev'].should be_nil
         end
 
-        it "should be re-created if database destroyed" do
-          @doc.sync  # saved
-          reset_test_db!
-          @db.should_receive(:save_doc).with(@doc)
-          @doc.sync
+        it "should save a non existant design" do
+          begin
+            doc = @db.get(@doc['_id'])
+          rescue
+            doc = nil
+          end
+          @db.delete_doc(doc) if doc
+          @doc.sync!
+          doc = @db.get(@doc['_id'])
+          doc.should_not be_nil
+          doc['views']['all'].should eql(@doc['views']['all'])
         end
 
       end
-
     end
+
 
     describe "checksum" do
 

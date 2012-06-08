@@ -25,36 +25,36 @@ module CouchRest
         def sync(db = nil)
           if auto_update
             db ||= database
-
-            # do we need to continue?
-            return self if cache_checksum(db) == checksum
-
-            # Load up the last copy. We never overwrite the remote copy
-            # as it may contain views that are not used or known about by
-            # our model.
-            doc = load_from_database(db)
-
-            if !doc || doc['couchrest-hash'] != checksum
-              # We need to save something
-              if doc
-                # Different! Update.
-                doc.merge!(to_hash)
-              else
-                # No previous doc, use a *copy* of our version.
-                # Using a copy prevents reverse updates
-                doc = to_hash.dup
-              end
-              db.save_doc(doc)
+            if cache_checksum(db) != checksum
+              sync!(db)
+              set_cache_checksum(db, checksum)
             end
-
-            set_cache_checksum(db, checksum)
           end
           self
-        rescue
-          puts "DESIGN DOC SYNC FAILED:"
-          puts docdb.inspect
-          puts doc.inspect
-          raise
+        end
+
+        def sync!(db = nil)
+          db ||= database
+
+          # Load up the last copy. We never blindly overwrite the remote copy
+          # as it may contain views that are not used or known about by
+          # our model.
+          doc = load_from_database(db)
+
+          if !doc || doc['couchrest-hash'] != checksum
+            # We need to save something
+            if doc
+              # Different! Update.
+              doc.merge!(to_hash)
+            else
+              # No previous doc, use a *copy* of our version.
+              # Using a copy prevents reverse updates.
+              doc = to_hash.dup
+            end
+            db.save_doc(doc)
+          end
+
+          self
         end
 
 

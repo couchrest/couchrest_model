@@ -43,6 +43,11 @@ describe "Time Parsing core extension" do
         CouchRest::Model::Base.time_fraction_digits = 3 # Back to normal
       end
 
+      it "should cope with a nil options parameter" do
+        time = Time.utc(2011, 04, 01, 19, 05, 30.123456)
+        lambda { time.as_json(nil) }.should_not raise_error
+      end
+
     end
 
     describe ".parse_iso8601" do

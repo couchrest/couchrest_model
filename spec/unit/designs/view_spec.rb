@@ -556,6 +556,20 @@ describe "Design View" do
         end
       end
 
+      describe "#stale" do
+        it "should update query with ok" do
+          @obj.should_receive(:update_query).with(:stale => 'ok')
+          @obj.stale('ok')
+        end
+        it "should update query with update_after" do
+          @obj.should_receive(:update_query).with(:stale => 'update_after')
+          @obj.stale('update_after')
+        end
+        it "should fail if anything else is provided" do
+          lambda { @obj.stale('yes') }.should raise_error(/can only be set with/)
+        end
+      end
+
       describe "#include_docs" do
         it "should call include_docs! on new view" do
           @obj.should_receive(:update_query).and_return(@obj)

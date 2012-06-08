@@ -273,7 +273,7 @@ module CouchRest
         end
 
         # Use the reduce function on the view. If none is available this method
-        # will fail. 
+        # will fail.
         def reduce
           raise "Cannot reduce a view without a reduce method" unless can_reduce?
           update_query(:reduce => true, :include_docs => nil)
@@ -302,6 +302,17 @@ module CouchRest
         end
 
         ### Special View Filter Methods
+
+        # Allow the results of a query to be provided "stale". Setting to 'ok'
+        # will disable all view updates for the query.
+        # When 'update_after' is provided the index will be update after the 
+        # result has been returned.
+        def stale(value)
+          unless (['ok', 'update_after'].include?(value.to_s))
+            raise "View#stale can only be set with 'ok' or 'update_after'."
+          end
+          update_query(:stale => value.to_s)
+        end
 
         # Specify the database the view should use. If not defined,
         # an attempt will be made to load its value from the model.
