@@ -57,6 +57,54 @@ module CouchRest
           self
         end
 
+        # Migrate the design document preventing downtime on a production
+        # system. Typically this will be used when auto updates are disabled.
+        #
+        # Steps taken are:
+        #
+        #  1. Compare the checksum with the current version
+        #  2. If different, create a new design doc with timestamp
+        #  3. Wait until the view returns a result
+        #  4. Copy over the original design doc
+        #
+        # A status will be returned according to which method was used in
+        # the migration, if at all. The symbols are:
+        #
+        #  * :no_change - Nothing performed as there are no changes.
+        #  * :created   - Add a new design doc as non existed
+        #  * :migrated  - Migrated the existing design doc.
+        #
+        #
+        def migrate!(db = nil)
+          doc = load_from_database(db)
+
+          if !doc
+            # no need to migrate, just save it
+            db.save_doc(to_hash)
+            :created
+          else doc['couchrest-hash'] != checksum
+            # Migration required
+            doc.merge!(to_hash)
+            doc['_id'] = self['_id']+"_#{Time.now.to_i}"
+            db.save_doc(doc)
+
+            # Create a view query and send
+            name = doc['views'].keys.first
+            view = doc['views'][name]
+            params = {:limit => 1}
+            params[:reduce => false] if view['reduce']
+            db.view(name, params)
+
+            # When that finishes, copy the design doc back
+            db.copy_doc(doc['_id'], self['_id'])
+
+            :migrated
+          else
+            # Already up to date
+            :no_change
+          end
+        end
+
 
         def checksum
           sum = self['couchrest-hash']

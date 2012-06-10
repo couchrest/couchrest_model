@@ -4,7 +4,7 @@
 
   * Completely refactored Design Document handling.
   * Removed old `view` and `view_by` methods.
-  * CouchRest::Model::Base.respond_to_missing? and respond_to? (Kim Burgestrand)
+  * CouchRest::Model::Base.respond_to_missing? and respond_to? (Kim Burgestrand) (later removed)
   * Time#as_json now insists on using xmlschema with 3 fraction digits by default.
   * Added time_fraction_digits configuration object
 

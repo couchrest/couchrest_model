@@ -173,7 +173,7 @@ describe CouchRest::Model::Designs::Design do
 
       it "should provide same checksum without refresh on re-request" do
         chk = @doc.checksum
-        @doc.should_not_receive(:chaecksum!)
+        @doc.should_not_receive(:checksum!)
         @doc.checksum.should eql(chk)
       end
 
