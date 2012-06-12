@@ -1,14 +1,23 @@
-
+#
+# CouchRest Migration Rake Tasks
+#
+# Use at own risk! These are not tested yet!
+#
 namespace :couchrest do
 
   desc "Migrate all the design docs found in each model"
   task :migrate => :environment do
 
+    # Make a reasonable effort to load all models
+    Dir[Rails.root + 'app/models/**/*.rb'].each do |path|
+      require path
+    end
+
     callbacks = [ ]
     puts "Finding all CouchRest Models to migrate (excludes proxied models)"
     CouchRest::Model::Base.subclasses.each do |model|
       next unless model.respond_to?(:design_docs)
-      next if model.respond_to?(:model_proxy)
+      next unless model.proxy_owner_method.blank?
       model.design_docs.each do |design|
         print "Migrating #{model.to_s}##{design.method_name}... "
         callback = design.migrate do |result|
