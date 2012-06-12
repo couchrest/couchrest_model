@@ -100,37 +100,22 @@ describe "Design View" do
 
     describe ".define" do
 
-      describe "with no auto update" do
-        before :each do
-          @design_doc = { }
-          @design_doc.stub!(:model).and_return(DesignViewModel)
-          @design_doc.stub!(:auto_update).and_return(false)
-        end
-
-        it "should set map view to true" do
-          @klass.define(@design_doc, 'test_view')
-          @design_doc['views']['test_view']['map'].should eql(true)
-          @design_doc['views']['test_view']['reduce'].should be_false
-        end
-
-        it "should set reduce to true if set" do
-          @klass.define(@design_doc, 'test_view', :reduce => true)
-          @design_doc['views']['test_view']['map'].should eql(true)
-          @design_doc['views']['test_view']['reduce'].should eql(true)
-        end
-      end
-
-      describe "with auto update" do
+      describe "under normal circumstances" do
 
         before :each do
           @design_doc = { }
           @design_doc.stub!(:model).and_return(DesignViewModel)
-          @design_doc.stub!(:auto_update).and_return(true)
         end
 
         it "should add a basic view" do
           @klass.define(@design_doc, 'test_view', :map => 'foo')
           @design_doc['views']['test_view'].should_not be_nil
+        end
+
+        it "should not overwrite reduce if set" do
+          @klass.define(@design_doc, 'by_title', :reduce => true)
+          @design_doc['views']['by_title']['map'].should_not be_blank
+          @design_doc['views']['by_title']['reduce'].should eql(true)
         end
 
         it "should auto generate mapping from name" do

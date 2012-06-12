@@ -453,49 +453,45 @@ module CouchRest
           # is true, empty strings are permited in the indexes.
           #
           def define(design_doc, name, opts = {})
-            # Don't create the map or reduce method if auto updates are disabled
-            if design_doc.auto_update
-              model = design_doc.model
-              # Is this an all view?
-              if name.to_s == 'all'
-                opts[:map] = <<-EOF
-                  function(doc) {
-                    if (doc['#{model.model_type_key}'] == '#{model.to_s}') {
-                      emit(doc._id, null);
-                    }
+            model = design_doc.model
+
+            # Is this an all view?
+            if name.to_s == 'all'
+              opts[:map] = <<-EOF
+                function(doc) {
+                  if (doc['#{model.model_type_key}'] == '#{model.to_s}') {
+                    emit(doc._id, null);
                   }
-                EOF
-              elsif !opts[:map]
-                if opts[:by].nil? && name.to_s =~ /^by_(.+)/
-                  opts[:by] = $1.split(/_and_/)
-                end
+                }
+              EOF
+            elsif !opts[:map]
+              if opts[:by].nil? && name.to_s =~ /^by_(.+)/
+                opts[:by] = $1.split(/_and_/)
+              end
+              raise "View cannot be created without recognised name, :map or :by options" if opts[:by].nil?
 
-                raise "View cannot be created without recognised name, :map or :by options" if opts[:by].nil?
+              opts[:allow_blank] = opts[:allow_blank].nil? ? true : opts[:allow_blank]
+              opts[:guards] ||= []
+              opts[:guards].push "(doc['#{model.model_type_key}'] == '#{model.to_s}')"
 
-                opts[:allow_blank] = opts[:allow_blank].nil? ? true : opts[:allow_blank]
-                opts[:guards] ||= []
-                opts[:guards].push "(doc['#{model.model_type_key}'] == '#{model.to_s}')"
-
-                keys = opts[:by].map{|o| "doc['#{o}']"}
-                emit = keys.length == 1 ? keys.first : "[#{keys.join(', ')}]"
-                opts[:guards] += keys.map{|k| "(#{k} != null)"} unless opts[:allow_nil]
-                opts[:guards] += keys.map{|k| "(#{k} != '')"} unless opts[:allow_blank]
-                opts[:map] = <<-EOF
-                  function(doc) {
-                    if (#{opts[:guards].join(' && ')}) {
-                      emit(#{emit}, 1);
-                    }
+              keys = opts[:by].map{|o| "doc['#{o}']"}
+              emit = keys.length == 1 ? keys.first : "[#{keys.join(', ')}]"
+              opts[:guards] += keys.map{|k| "(#{k} != null)"} unless opts[:allow_nil]
+              opts[:guards] += keys.map{|k| "(#{k} != '')"} unless opts[:allow_blank]
+              opts[:map] = <<-EOF
+                function(doc) {
+                  if (#{opts[:guards].join(' && ')}) {
+                    emit(#{emit}, 1);
                   }
-                EOF
+                }
+              EOF
+              if opts[:reduce].nil?
                 opts[:reduce] = <<-EOF
                   function(key, values, rereduce) {
                     return sum(values);
                   }
                 EOF
               end
-            else
-              # Assume there is always a map method
-              opts[:map] ||= true
             end
 
             design_doc['views'] ||= {}

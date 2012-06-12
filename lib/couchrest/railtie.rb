@@ -18,6 +18,14 @@ module CouchRest
           Rails.application.class.to_s.underscore.gsub(/\/.*/, '')
       end
     end
+
+    config.before_configuration do
+      config.couchrest_model = CouchRest::Model::Base
+    end
+
+    rake_tasks do
+      Dir[File.join(File.dirname(__FILE__),'../tasks/*.rake')].each { |f| load f }
+    end
   end
 
 end

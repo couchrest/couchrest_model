@@ -89,6 +89,7 @@ module CouchRest
         #     end
         #
         def migrate(db = nil, &block)
+          db    ||= database
           doc     = load_from_database(db)
           cleanup = nil
 
@@ -98,11 +99,11 @@ module CouchRest
             db.save_doc(new_doc)
 
             result = :created
-          else doc['couchrest-hash'] != checksum
+          elsif doc['couchrest-hash'] != checksum
             id = self['_id'] + "_migration"
 
             # Delete current migration if there is one
-            old_migration = db.get(id)
+            old_migration = load_from_database(db, id)
             db.delete_doc(old_migration) if old_migration
 
             # Save new design doc
@@ -130,7 +131,7 @@ module CouchRest
             view = new_doc['views'][name]
             params = {:limit => 1}
             params[:reduce] = false if view['reduce']
-            db.view(name, params)
+            db.view("#{id}/_view/#{name}", params)
           end
 
           # Provide the result in block
@@ -208,8 +209,9 @@ module CouchRest
 
         protected
 
-        def load_from_database(db = database)
-          db.get(self['_id'])
+        def load_from_database(db = database, id = nil)
+          id ||= self['_id']
+          db.get(id)
         rescue RestClient::ResourceNotFound
           nil
         end
