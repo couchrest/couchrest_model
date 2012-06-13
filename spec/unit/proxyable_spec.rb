@@ -35,7 +35,6 @@ describe CouchRest::Model::Proxyable do
     it "should raise an error if called and no proxy_database_method set" do
       lambda { @obj.proxy_database }.should raise_error(StandardError, /Please set/)
     end
-
   end
 
   describe "class methods" do
@@ -72,6 +71,11 @@ describe CouchRest::Model::Proxyable do
 
       it "should be provided" do
         @class.should respond_to(:proxy_for)
+      end
+
+      it "should add model name to proxied model name array" do
+        @class.proxy_for(:cats)
+        @class.proxied_model_names.should eql(['Cat'])
       end
 
       it "should create a new method" do
@@ -140,6 +144,26 @@ describe CouchRest::Model::Proxyable do
         lambda { @class.database }.should raise_error(StandardError, /database must be accessed via/)
       end
     end
+
+    describe ".proxied_model_names" do
+      before do
+        @class = Class.new(CouchRest::Model::Base)
+      end
+
+      it "should respond to proxied_model_names" do
+        @class.should respond_to(:proxied_model_names)
+      end
+
+      it "should provide an empty array" do
+        @class.proxied_model_names.should be_empty
+      end
+
+      it "should accept new entries" do
+        @class.proxied_model_names << 'Cat'
+        @class.proxied_model_names.first.should eql('Cat')
+      end
+    end
+
   end
 
   describe "ModelProxy" do

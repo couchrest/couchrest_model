@@ -17,6 +17,7 @@ module CouchRest
         def proxy_for(assoc_name, options = {})
           db_method = options[:database_method] || "proxy_database"
           options[:class_name] ||= assoc_name.to_s.singularize.camelize
+          proxied_model_names << options[:class_name]
           class_eval <<-EOS, __FILE__, __LINE__ + 1
             def #{assoc_name}
               @#{assoc_name} ||= CouchRest::Model::Proxyable::ModelProxy.new(::#{options[:class_name]}, self, self.class.to_s.underscore, #{db_method})
@@ -24,7 +25,7 @@ module CouchRest
           EOS
         end
 
-        # Tell this model which other model to use a base for the database
+        # Tell this model which other model to use as a base for the database
         # connection to use.
         def proxied_by(model_name, options = {})
           raise "Model can only be proxied once or ##{model_name} already defined" if method_defined?(model_name) || !proxy_owner_method.nil?
@@ -45,6 +46,10 @@ module CouchRest
         def proxy_database_method(name = nil)
           @proxy_database_method = name if name
           @proxy_database_method
+        end
+
+        def proxied_model_names
+          @proxied_model_names ||= []
         end
 
         private
