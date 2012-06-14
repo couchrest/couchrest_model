@@ -1,5 +1,12 @@
 # CouchRest Model Change History
 
+## 2.0.0.beta - 2012-06-14
+
+  * Added design doc migration support, including for proxied models
+  * Rake tasks available for migrations
+  * Rails config option now available: `config.couchrest_model.auto_update_design_docs = false`
+  * Skipping 1.2 version due to design doc API changes
+
 ## 1.2.0.beta - 2012-06-08
 
   * Completely refactored Design Document handling.
