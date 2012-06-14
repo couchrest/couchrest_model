@@ -52,7 +52,7 @@ module CouchRest
         callbacks = [ ]
         models.each do |model|
           model.design_docs.each do |design|
-            callbacks << migrate_design(model, design, db = nil)
+            callbacks << migrate_design(model, design, db)
           end
         end
         callbacks
@@ -63,7 +63,7 @@ module CouchRest
         models.each do |model|
           submodels = model.proxied_model_names.map{|n| n.constantize}
           model.all.each do |base|
-            puts "Migrating proxied models for #{model}:\"#{base.send(model.proxy_database_method)}\""
+            puts "Finding proxied models for #{model}: \"#{base.send(model.proxy_database_method)}\""
             callbacks += migrate_each_model(submodels, base.proxy_database)
           end
         end
@@ -80,8 +80,8 @@ module CouchRest
       end
 
       def self.cleanup(methods)
-        callbacks.compact.each do |cb|
-          name = "/#{cb[:db].name}/#{db[:design]['_id']}"
+        methods.compact.each do |cb|
+          name = "/#{cb[:db].name}/#{cb[:design]['_id']}"
           puts "Activating new design: #{name}"
           cb[:proc].call
         end

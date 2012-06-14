@@ -92,6 +92,7 @@ module CouchRest
           db    ||= database
           doc     = load_from_database(db)
           cleanup = nil
+          id      = self['_id']
 
           if !doc
             # no need to migrate, just save it
@@ -100,7 +101,7 @@ module CouchRest
 
             result = :created
           elsif doc['couchrest-hash'] != checksum
-            id = self['_id'] + "_migration"
+            id += "_migration"
 
             # Delete current migration if there is one
             old_migration = load_from_database(db, id)
@@ -131,7 +132,9 @@ module CouchRest
             view = new_doc['views'][name]
             params = {:limit => 1}
             params[:reduce] = false if view['reduce']
-            db.view("#{id}/_view/#{name}", params)
+            db.view("#{id}/_view/#{name}", params) do |res|
+              # Block to use streamer!
+            end
           end
 
           # Provide the result in block

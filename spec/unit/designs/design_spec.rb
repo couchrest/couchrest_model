@@ -179,7 +179,7 @@ describe CouchRest::Model::Designs::Design do
         end
 
         it "should create new design if non exists" do
-          @db.should_receive(:view)
+          @db.should_receive(:view).with("#{@doc['_id']}/_view/#{@doc['views'].keys.first}", {:limit => 1, :reduce => false})
           callback = @doc.migrate do |res|
             res.should eql(:created)
           end

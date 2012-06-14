@@ -17,7 +17,7 @@ module CouchRest
         def proxy_for(assoc_name, options = {})
           db_method = options[:database_method] || "proxy_database"
           options[:class_name] ||= assoc_name.to_s.singularize.camelize
-          proxied_model_names << options[:class_name]
+          proxied_model_names << options[:class_name] unless proxied_model_names.include?(options[:class_name])
           class_eval <<-EOS, __FILE__, __LINE__ + 1
             def #{assoc_name}
               @#{assoc_name} ||= CouchRest::Model::Proxyable::ModelProxy.new(::#{options[:class_name]}, self, self.class.to_s.underscore, #{db_method})

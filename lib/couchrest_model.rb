@@ -56,6 +56,9 @@ require "couchrest/model/core_extensions/time_parsing"
 require "couchrest/model/embeddable"
 require "couchrest/model/base"
 
+# Design Migration support
+require "couchrest/model/migrate.rb"
+
 # Add rails support *after* everything has loaded
 if defined?(Rails)
   require "couchrest/railtie"
