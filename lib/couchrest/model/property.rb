@@ -45,7 +45,7 @@ module CouchRest::Model
 
     # Cast an individual value
     def cast_value(parent, value)
-      value = typecast_value(value, self)
+      value = typecast_value(parent, self, value)
       associate_casted_value_to_parent(parent, value)
     end
 
@@ -64,6 +64,7 @@ module CouchRest::Model
     # a normal call to the class.
     def build(*args)
       raise StandardError, "Cannot build property without a class" if @type_class.nil?
+
       if @init_method.is_a?(Proc)
         @init_method.call(*args)
       else
@@ -106,7 +107,7 @@ module CouchRest::Model
         @read_only          = options.delete(:read_only)  if options[:read_only]
         @alias              = options.delete(:alias)      if options[:alias]
         @default            = options.delete(:default)    unless options[:default].nil?
-        @init_method        = options[:init_method] ? options.delete(:init_method) : 'new'
+        @init_method        = options.delete(:init_method) || 'new'
         @options            = options
       end
 

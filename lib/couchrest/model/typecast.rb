@@ -2,7 +2,7 @@ module CouchRest
   module Model
     module Typecast
 
-      def typecast_value(value, property) # klass, init_method)
+      def typecast_value(parent, property, value)
         return nil if value.nil?
         klass = property.type_class
         if value.instance_of?(klass) || klass == Object
@@ -11,6 +11,8 @@ module CouchRest
           else
             value
           end
+        elsif klass.respond_to?(:couchrest_typecast)
+          klass.couchrest_typecast(parent, property, value)
         elsif [String, TrueClass, Integer, Float, BigDecimal, DateTime, Time, Date, Class].include?(klass)
           send('typecast_to_'+klass.to_s.downcase, value)
         else

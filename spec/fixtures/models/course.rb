@@ -1,5 +1,6 @@
 require 'question'
 require 'person'
+require 'money'
 
 class Course < CouchRest::Model::Base
   use_database TEST_SERVER.default_database
@@ -17,6 +18,8 @@ class Course < CouchRest::Model::Base
   property :active, :type => TrueClass
   property :very_active, :type => TrueClass
   property :klass, :type => Class
+  property :currency, String, :default => 'EUR'
+  property :price, Money
 
   design do
     view :by_title

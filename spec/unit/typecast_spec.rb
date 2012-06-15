@@ -26,6 +26,14 @@ describe "Type Casting" do
     end
   end
 
+  describe "when class responds to .couchrest_typecast" do
+    it "should accept call" do
+      @course.price = "1299"
+      @course.price.cents.should eql(1299)
+      @course.price.currency.should eql('EUR')
+    end
+  end
+
   describe "when type primitive is a String" do
     it "keeps string value unchanged" do
       value = "1.0"
