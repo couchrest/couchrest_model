@@ -393,6 +393,12 @@ describe "Property Class" do
     property.to_s.should eql('test')
   end
 
+  it "should provide name as a symbol" do 
+    property = CouchRest::Model::Property.new(:test, String)
+    property.name.to_sym.should eql(:test)
+    property.to_sym.should eql(:test)
+  end
+
   it "should provide class from type" do
     property = CouchRest::Model::Property.new(:test, String)
     property.type_class.should eql(String)
