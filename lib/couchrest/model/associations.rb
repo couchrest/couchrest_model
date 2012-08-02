@@ -38,7 +38,7 @@ module CouchRest
         def belongs_to(attrib, *options)
           opts = merge_belongs_to_association_options(attrib, options.first)
 
-          property(opts[:foreign_key], opts)
+          property(opts[:foreign_key], String, opts)
 
           create_belongs_to_getter(attrib, opts)
           create_belongs_to_setter(attrib, opts)
@@ -88,7 +88,7 @@ module CouchRest
           opts[:foreign_key] = opts[:foreign_key].pluralize
           opts[:readonly] = true
 
-          property(opts[:foreign_key], [], opts)
+          property(opts[:foreign_key], [String], opts)
 
           create_collection_of_property_setter(attrib, opts)
           create_collection_of_getter(attrib, opts)
@@ -223,6 +223,15 @@ module CouchRest
 
       def check_obj(obj)
         raise "Object cannot be added to #{casted_by.class.to_s}##{casted_by_property.to_s} collection unless saved" if obj.new?
+      end
+
+      # Override CastedArray instantiation_and_cast method for a simpler
+      # version that will not try to cast the model.
+      def instantiate_and_cast(obj, change = true)
+        couchrest_parent_will_change! if change && use_dirty?
+        obj.casted_by = casted_by if obj.respond_to?(:casted_by)
+        obj.casted_by_property = casted_by_property if obj.respond_to?(:casted_by_property)
+        obj
       end
 
     end

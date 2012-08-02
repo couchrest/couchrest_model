@@ -31,6 +31,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency(%q<json>, ["~> 1.5.1"])
   s.add_development_dependency(%q<rack-test>, ">= 0.5.7")
   s.add_development_dependency("rake", ">= 0.8.0")
+  s.add_development_dependency("debugger", "~> 1.2.0")
   # s.add_development_dependency("jruby-openssl", ">= 0.7.3")
 end
 

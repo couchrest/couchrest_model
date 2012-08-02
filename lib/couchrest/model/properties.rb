@@ -40,7 +40,7 @@ module CouchRest
       # with a property and update dirty status
       def write_attribute(property, value)
         prop = find_property!(property)
-        value = prop.is_a?(String) ? value : prop.cast(self, value)
+        value = prop.cast(self, value)
         couchrest_attribute_will_change!(prop.name) if use_dirty? && self[prop.name] != value
         self[prop.name] = value
       end

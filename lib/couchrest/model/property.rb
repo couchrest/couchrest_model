@@ -33,6 +33,7 @@ module CouchRest::Model
           raise "Expecting an array or keyed hash for property #{parent.class.name}##{self.name}"
         end
         arr = value.collect { |data| cast_value(parent, data) }
+        arr.reject!{ |data| data.nil? } unless allow_blank
         # allow casted_by calls to be passed up chain by wrapping in CastedArray
         CastedArray.new(arr, self, parent)
       elsif (type == Object || type == Hash) && (value.is_a?(Hash))
@@ -45,8 +46,12 @@ module CouchRest::Model
 
     # Cast an individual value
     def cast_value(parent, value)
-      value = typecast_value(parent, self, value)
-      associate_casted_value_to_parent(parent, value)
+      if !allow_blank && value.to_s.empty?
+        nil
+      else
+        value = typecast_value(parent, self, value)
+        associate_casted_value_to_parent(parent, value)
+      end
     end
 
     def default_value

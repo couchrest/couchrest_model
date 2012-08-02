@@ -3,7 +3,7 @@ module CouchRest
     module Typecast
 
       def typecast_value(parent, property, value)
-        return nil if value.nil? || (!property.allow_blank && value.to_s.empty?)
+        return nil if value.nil?
         klass = property.type_class
         if value.instance_of?(klass) || klass == Object
           if klass == Time && !value.utc?

@@ -70,6 +70,11 @@ describe "Assocations" do
       @invoice.client
     end
 
+    it "should ignore blank ids" do
+      @invoice.client_id = ""
+      @invoice.client_id.should be_nil
+    end
+
     it "should allow override of foreign key" do
       @invoice.respond_to?(:alternate_client).should be_true
       @invoice.respond_to?("alternate_client=").should be_true
@@ -114,6 +119,11 @@ describe "Assocations" do
       @invoice.entry_ids = @entries.collect{|i| i.id}
       @invoice.entries.length.should eql(3)
       @invoice.entries.first.should eql(@entries.first)
+    end
+
+    it "should ignore blank ids when set directly" do
+      @invoice.entry_ids = ["", @entries.first.id]
+      @invoice.entry_ids.length.should be(1)
     end
 
     it "should replace collection if ids replaced" do
