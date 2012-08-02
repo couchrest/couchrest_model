@@ -6,6 +6,7 @@ class Course < CouchRest::Model::Base
   use_database TEST_SERVER.default_database
   
   property :title, String
+  property :subtitle, String, :allow_blank => false
   property :questions, [Question]
   property :professor, Person
   property :participants, [Object]

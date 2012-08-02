@@ -101,8 +101,9 @@ module CouchRest
         def merge_belongs_to_association_options(attrib, options = nil)
           opts = {
             :foreign_key => attrib.to_s.singularize + '_id',
-            :class_name => attrib.to_s.singularize.camelcase,
-            :proxy_name => attrib.to_s.pluralize
+            :class_name  => attrib.to_s.singularize.camelcase,
+            :proxy_name  => attrib.to_s.pluralize,
+            :allow_blank => false
           }
           opts.merge!(options) if options.is_a?(Hash)
 

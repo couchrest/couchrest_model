@@ -14,6 +14,28 @@ describe "Type Casting" do
     end
   end
 
+  describe "when value is empty string" do
+    it "leaves the value unchanged" do
+      @course.title = ""
+      @course['title'].should == ""
+    end
+  end
+
+  describe "when blank is not allow on property" do
+    it "leaves nil as nil" do
+      @course.subtitle = nil
+      @course['subtitle'].should == nil
+    end
+    it "converts blank to nil" do
+      @course.subtitle = ""
+      @course['subtitle'].should == nil
+    end
+    it "leaves text as text" do
+      @course.subtitle = "Test"
+      @course['subtitle'].should == "Test"
+    end
+  end
+
   describe "when type primitive is an Object" do
     it "it should not cast given value" do
       @course.participants = [{}, 'q', 1]

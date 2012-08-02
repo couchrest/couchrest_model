@@ -428,6 +428,16 @@ describe "Property Class" do
     property.init_method.should eql('parse')
   end
 
+  it "should set the allow_blank option to true by default" do
+    property = CouchRest::Model::Property.new(:test, String)
+    property.allow_blank.should be_true
+  end
+
+  it "should allow setting of  the allow_blank option to false" do
+    property = CouchRest::Model::Property.new(:test, String, :allow_blank => false)
+    property.allow_blank.should be_false
+  end
+
   describe "#build" do
     it "should allow instantiation of new object" do
       property = CouchRest::Model::Property.new(:test, Date)

@@ -4,7 +4,7 @@ module CouchRest::Model
 
     include ::CouchRest::Model::Typecast
 
-    attr_reader :name, :type, :type_class, :read_only, :alias, :default, :casted, :init_method, :options
+    attr_reader :name, :type, :type_class, :read_only, :alias, :default, :casted, :init_method, :options, :allow_blank
 
     # Attribute to define.
     # All Properties are assumed casted unless the type is nil.
@@ -103,13 +103,13 @@ module CouchRest::Model
       end
 
       def parse_options(options)
-        @validation_format  = options.delete(:format)     if options[:format]
-        @read_only          = options.delete(:read_only)  if options[:read_only]
-        @alias              = options.delete(:alias)      if options[:alias]
-        @default            = options.delete(:default)    unless options[:default].nil?
+        @validation_format  = options.delete(:format)      if options[:format]
+        @read_only          = options.delete(:read_only)   if options[:read_only]
+        @alias              = options.delete(:alias)       if options[:alias]
+        @default            = options.delete(:default)     unless options[:default].nil?
         @init_method        = options.delete(:init_method) || 'new'
+        @allow_blank        = options[:allow_blank].nil? ? true : options.delete(:allow_blank)
         @options            = options
       end
-
   end
 end
