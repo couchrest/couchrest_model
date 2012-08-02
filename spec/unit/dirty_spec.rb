@@ -33,11 +33,22 @@ describe "Dirty" do
 
   describe "changes" do
 
-    it "should return changes on an attribute" do
-      @card = Card.new(:first_name => "matt")
-      @card.first_name = "andrew"
-      @card.first_name_changed?.should be_true
-      @card.changes.should == { "first_name" => ["matt", "andrew"] }
+    context "when new record" do
+      it "should return changes on an attribute" do
+        @card = Card.new(:first_name => "matt")
+        @card.first_name = "andrew"
+        @card.first_name_changed?.should be_true
+        @card.changes.should == { "first_name" => [nil, "andrew"] }
+      end
+    end
+
+    context "when persisted" do
+      it "should return changes on an attribute" do
+        @card = Card.create!(:first_name => "matt")
+        @card.first_name = "andrew"
+        @card.first_name_changed?.should be_true
+        @card.changes.should == { "first_name" => ["matt", "andrew"] }
+      end
     end
 
   end

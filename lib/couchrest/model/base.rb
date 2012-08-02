@@ -2,7 +2,7 @@ module CouchRest
   module Model
     class Base < CouchRest::Document
 
-      extend ActiveModel::Naming
+      extend  ActiveModel::Naming
       include ActiveModel::Conversion
 
       include CouchRest::Model::Configuration
