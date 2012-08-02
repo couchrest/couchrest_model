@@ -38,7 +38,11 @@ describe "Dirty" do
         @card = Card.new(:first_name => "matt")
         @card.first_name = "andrew"
         @card.first_name_changed?.should be_true
-        @card.changes.should == { "first_name" => [nil, "andrew"] }
+        if ActiveModel::VERSION::STRING > "3.2.0"
+          @card.changes.should == { "first_name" => [nil, "andrew"] }
+        else
+          @card.changes.should == { "first_name" => ["matt", "andrew"] }
+        end
       end
     end
 
