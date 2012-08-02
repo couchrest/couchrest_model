@@ -3,6 +3,7 @@ module CouchRest
     class Base < CouchRest::Document
 
       extend ActiveModel::Naming
+      include ActiveModel::Conversion
 
       include CouchRest::Model::Configuration
       include CouchRest::Model::Connection
@@ -62,11 +63,6 @@ module CouchRest
         run_callbacks(:initialize) { self }
       end
 
-      def to_key
-        new? ? nil : [id]
-      end
-
-      alias :to_param :id
       alias :new_record? :new?
       alias :new_document? :new?
 
