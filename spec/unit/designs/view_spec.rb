@@ -719,6 +719,15 @@ describe "Design View" do
           end
         end
 
+        describe "#total_pages" do
+          it "should use total_count and limit_value" do
+            @obj.should_receive(:total_count).and_return(200)
+            @obj.should_receive(:limit_value).and_return(25)
+            @obj.total_pages.should eql(8)
+          end
+        end
+
+        # `num_pages` aliases to `total_pages` for compatibility for Kaminari '< 0.14'
         describe "#num_pages" do
           it "should use total_count and limit_value" do
             @obj.should_receive(:total_count).and_return(200)
@@ -887,7 +896,7 @@ describe "Design View" do
       end
 
       it "should calculate number of pages" do
-        @view.num_pages.should eql(2)
+        @view.total_pages.should eql(2)
       end
       it "should return results from first page" do
         @view.all.first.name.should eql('Judith')
@@ -900,7 +909,7 @@ describe "Design View" do
 
       it "should allow overriding per page count" do
         @view = @view.per(10)
-        @view.num_pages.should eql(1)
+        @view.total_pages.should eql(1)
         @view.all.last.name.should eql('Vilma')
       end
     end
