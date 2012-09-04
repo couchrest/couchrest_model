@@ -19,6 +19,10 @@ module CouchRest::Model
     def to_s
       name
     end
+    
+    def to_sym
+      @_sym_name ||= name.to_sym
+    end
 
     # Cast the provided value using the properties details.
     def cast(parent, value)
