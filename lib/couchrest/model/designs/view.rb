@@ -371,9 +371,10 @@ module CouchRest
           query[:limit]
         end
 
-        def num_pages
+        def total_pages
           (total_count.to_f / limit_value).ceil
         end
+        alias num_pages total_pages
 
         def current_page
           (offset_value / limit_value) + 1
