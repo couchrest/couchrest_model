@@ -5,6 +5,7 @@ require "bundler/setup"
 require "rubygems"
 require "rspec"
 
+require 'oj'
 require 'couchrest_model'
 
 unless defined?(FIXTURE_PATH)

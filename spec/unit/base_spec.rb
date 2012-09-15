@@ -469,6 +469,7 @@ describe "Model Base" do
     
     it "should define the updated_at and created_at getters and set the values" do
       @obj.save
+      json = @obj.to_json
       obj = WithDefaultValues.get(@obj.id)
       obj.should be_an_instance_of(WithDefaultValues)
       obj.created_at.should be_an_instance_of(Time)
@@ -487,7 +488,8 @@ describe "Model Base" do
     it "should set the time on create" do
       (Time.now - @art.created_at).should < 2
       foundart = Article.get @art.id
-      foundart.created_at.should == foundart.updated_at
+      # Use string for comparison to cope with microsecond differences
+      foundart.created_at.to_s.should == foundart.updated_at.to_s
     end
     it "should set the time on update" do
       @art.title = "new title"  # only saved if @art.changed? == true

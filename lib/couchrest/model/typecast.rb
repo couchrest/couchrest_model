@@ -106,7 +106,10 @@ module CouchRest
         # Typecasts an arbitrary value to a Time
         # Handles both Hashes and Time instances.
         def typecast_to_time(value)
-          if value.is_a?(Hash)
+          case value
+          when Float # JSON oj already parses Time, FTW.
+            Time.at(value).utc
+          when Hash
             typecast_hash_to_time(value)
           else
             Time.parse_iso8601(value.to_s)

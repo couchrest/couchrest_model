@@ -11,6 +11,7 @@
   * Modified associations to use allow_blank property
   * Incorported Rails 3.2 support changes (Thanks @jodosha)
   * Kaminari support upgraded to use 0.14.0 API (Thanks @amatsuda)
+  * JSON Oj support, fixed some Time handling issues
 
 ## 1.2.0.beta - 2012-06-08
 
