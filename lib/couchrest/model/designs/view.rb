@@ -487,11 +487,11 @@ module CouchRest
                 }
               EOF
               if opts[:reduce].nil?
-                opts[:reduce] = <<-EOF
-                  function(key, values, rereduce) {
-                    return sum(values);
-                  }
-                EOF
+                # Use built-in sum function by default
+                opts[:reduce] = "_sum"
+              elsif opts[:reduce].is_a?(Symbol)
+                # Assume calling a built in method, convert to a string
+                opts[:reduce] = "_#{opts[:reduce]}"
               end
             end
 

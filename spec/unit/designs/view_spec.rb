@@ -124,7 +124,7 @@ describe "Design View" do
           str.should include("((doc['#{DesignViewModel.model_type_key}'] == 'DesignViewModel') && (doc['title'] != null))")
           str.should include("emit(doc['title'], 1);")
           str = @design_doc['views']['by_title']['reduce']
-          str.should include("return sum(values);")
+          str.should include("_sum")
         end
 
         it "should auto generate mapping from name with and" do
@@ -133,7 +133,12 @@ describe "Design View" do
           str.should include("(doc['title'] != null) && (doc['name'] != null)")
           str.should include("emit([doc['title'], doc['name']], 1);")
           str = @design_doc['views']['by_title_and_name']['reduce']
-          str.should include("return sum(values);")
+          str.should include("_sum")
+        end
+
+        it "should allow reduce methods as symbols" do
+          @klass.define(@design_doc, 'by_title', :reduce => :stats)
+          @design_doc['views']['by_title']['reduce'].should eql('_stats')
         end
       end
 

@@ -1,9 +1,5 @@
 require "spec_helper"
 
-class DesignModel < CouchRest::Model::Base
-  use_database DB
-  property :name
-end
 
 describe CouchRest::Model::Designs do
 
@@ -16,7 +12,7 @@ describe CouchRest::Model::Designs do
     describe ".design" do
 
       before :each do
-        @klass = DesignModel.dup
+        @klass = DesignsModel.dup
       end
 
       describe "without block" do
@@ -36,14 +32,14 @@ describe CouchRest::Model::Designs do
           @klass.design
           blocks = @klass.instance_variable_get(:@_design_blocks)
           blocks.length.should eql(1)
-          blocks.first.should eql({:args => [nil], :block => nil})
+          blocks.first.should eql({:args => [], :block => nil})
         end
 
         it "should have added itself to a design_blocks array" do
           @klass.design
           blocks = @klass.instance_variable_get(:@_design_blocks)
           blocks.length.should eql(1)
-          blocks.first.should eql({:args => [nil], :block => nil})
+          blocks.first.should eql({:args => [], :block => nil})
         end
 
         it "should have added itself to a design_blocks array with prefix" do
@@ -69,7 +65,7 @@ describe CouchRest::Model::Designs do
         it "should have added itself to a design_blocks array" do
           blocks = @klass.instance_variable_get(:@_design_blocks)
           blocks.length.should eql(1)
-          blocks.first.should eql({:args => [nil], :block => @block})
+          blocks.first.should eql({:args => [], :block => @block})
         end
 
         it "should handle multiple designs" do
@@ -79,7 +75,7 @@ describe CouchRest::Model::Designs do
           @klass.design :stats, &@block2
           blocks = @klass.instance_variable_get(:@_design_blocks)
           blocks.length.should eql(2)
-          blocks.first.should eql({:args => [nil], :block => @block})
+          blocks.first.should eql({:args => [], :block => @block})
           blocks.last.should eql({:args => [:stats], :block => @block2})
         end
       end
@@ -112,137 +108,6 @@ describe CouchRest::Model::Designs do
         DesignModel.paginates_per(21)
         DesignModel.default_per_page.should eql(21)
       end
-    end
-  end
-
-  describe "DesignMapper" do
-
-    before :all do
-      @klass = CouchRest::Model::Designs::DesignMapper
-    end
-
-    describe 'initialize without prefix' do
-
-      before :all do
-        @object = @klass.new(DesignModel)
-      end
-
-      it "should set basic variables" do
-        @object.send(:model).should eql(DesignModel)
-        @object.send(:prefix).should be_nil
-        @object.send(:method).should eql('design_doc')
-      end
-
-      it "should add design doc to list" do
-        @object.model.design_docs.should include(@object.model.design_doc)
-      end
-
-      it "should create a design doc method" do
-        @object.model.should respond_to('design_doc')
-        @object.design_doc.should eql(@object.model.design_doc)
-      end
-
-      it "should use default for autoupdate" do
-        @object.design_doc.auto_update.should be_true
-      end
-
-    end
-
-    describe 'initialize with prefix' do
-      before :all do
-        @object = @klass.new(DesignModel, 'stats')
-      end
-
-      it "should set basics" do
-        @object.send(:model).should eql(DesignModel)
-        @object.send(:prefix).should eql('stats')
-        @object.send(:method).should eql('stats_design_doc')
-      end
-
-      it "should add design doc to list" do
-        @object.model.design_docs.should include(@object.model.stats_design_doc)
-      end
-
-      it "should not create an all method" do
-        @object.model.should_not respond_to('all')
-      end
-
-      it "should create a design doc method" do
-        @object.model.should respond_to('stats_design_doc')
-        @object.design_doc.should eql(@object.model.stats_design_doc)
-      end
-
-    end
-
-    describe "#disable_auto_update" do
-      it "should disable auto updates" do
-        @object = @klass.new(DesignModel)
-        @object.disable_auto_update
-        @object.design_doc.auto_update.should be_false
-      end
-    end
-
-    describe "#enable_auto_update" do
-      it "should enable auto updates" do
-        @object = @klass.new(DesignModel)
-        @object.enable_auto_update
-        @object.design_doc.auto_update.should be_true
-      end
-    end
-
-    describe "#model_type_key" do
-      it "should return models type key" do
-        @object = @klass.new(DesignModel)
-        @object.model_type_key.should eql(@object.model.model_type_key)
-      end
-    end
-
-    describe "#view" do
-
-      before :each do
-        @object = @klass.new(DesignModel)
-      end
-
-      it "should call create method on view" do
-        CouchRest::Model::Designs::View.should_receive(:define).with(@object.design_doc, 'test', {})
-        @object.view('test')
-      end
-
-      it "should create a method on parent model" do
-        CouchRest::Model::Designs::View.stub!(:define)
-        @object.view('test_view')
-        DesignModel.should respond_to(:test_view)
-      end
-
-      it "should create a method for view instance" do
-        @object.design_doc.should_receive(:create_view).with('test', {})
-        @object.view('test')
-      end
-    end
-
-    describe "#filter" do
-
-      before :each do
-        @object = @klass.new(DesignModel)
-      end
-
-      it "should add the provided function to the design doc" do
-        @object.filter(:important, "function(doc, req) { return doc.priority == 'high'; }")
-        DesignModel.design_doc['filters'].should_not be_empty
-        DesignModel.design_doc['filters']['important'].should_not be_blank
-      end
-    end
-
-  end
-
-
-  class DesignsNoAutoUpdate < CouchRest::Model::Base
-    use_database DB
-    property :title, String
-    design do
-      disable_auto_update
-      view :by_title_fail, :by => ['title']
-      view :by_title, :reduce => true
     end
   end
 

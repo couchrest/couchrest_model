@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe CouchRest::Model::Designs::Design do
+describe CouchRest::Model::Design do
 
   before :all do
     reset_test_db!
@@ -26,7 +26,7 @@ describe CouchRest::Model::Designs::Design do
   describe "class methods" do
 
     before :all do
-      @klass = CouchRest::Model::Designs::Design
+      @klass = CouchRest::Model::Design
     end
 
     describe ".method_name" do
@@ -46,7 +46,7 @@ describe CouchRest::Model::Designs::Design do
     before :each do
       @model = mock("ModelExample")
       @model.stub(:to_s).and_return("ModelExample")
-      @obj = CouchRest::Model::Designs::Design.new(@model)
+      @obj = CouchRest::Model::Design.new(@model)
     end
 
 
@@ -68,13 +68,13 @@ describe CouchRest::Model::Designs::Design do
     describe "initialisation with prefix" do
 
       it "should associate model and set method name" do
-        @obj = CouchRest::Model::Designs::Design.new(@model, 'stats')
+        @obj = CouchRest::Model::Design.new(@model, 'stats')
         @obj.model.should eql(@model)
         @obj.method_name.should eql("stats_design_doc")
       end
 
       it "should generate correct id with prefix" do
-        @obj = CouchRest::Model::Designs::Design.new(@model, 'stats')
+        @obj = CouchRest::Model::Design.new(@model, 'stats')
         @obj['_id'].should eql("_design/ModelExample_stats")
       end
 
@@ -358,7 +358,7 @@ describe CouchRest::Model::Designs::Design do
 
     it "should calculate checksum for complex model" do
       #Article.design_doc.checksum.should eql('70dff8caea143bf40fad09adf0701104')
-      Article.design_doc.checksum.should eql('0f25a2d9f86e31ebd61b29863a41d5ed')
+      Article.design_doc.checksum.should eql('81f6553c44ecc3fe12a39331b0cdee46')
     end
 
     it "should cache the generated checksum value" do

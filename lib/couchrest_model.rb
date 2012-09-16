@@ -41,8 +41,9 @@ require "couchrest/model/proxyable"
 require "couchrest/model/associations"
 require "couchrest/model/configuration"
 require "couchrest/model/connection"
+require "couchrest/model/design"
 require "couchrest/model/designs"
-require "couchrest/model/designs/design"
+require "couchrest/model/designs/design_mapper"
 require "couchrest/model/designs/view"
 
 # Monkey patches applied to couchrest
