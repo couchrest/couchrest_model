@@ -12,6 +12,7 @@
   * Incorported Rails 3.2 support changes (Thanks @jodosha)
   * Kaminari support upgraded to use 0.14.0 API (Thanks @amatsuda)
   * JSON Oj support, fixed some Time handling issues
+  * Simplifying number typecasting to always provide a number, or nil.
 
 ## 1.2.0.beta - 2012-06-08
 

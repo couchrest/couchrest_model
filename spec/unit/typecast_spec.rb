@@ -166,10 +166,22 @@ describe "Type Casting" do
       @course.estimate.should eql(24.35)
     end
 
-    [ Object.new, true, '00.0', '0.', '-.0', 'string' ].each do |value|
-      it "does not typecast non-numeric value #{value.inspect}" do
+    it "should handle numbers with unit strings" do
+      @course.estimate = "23.21 points"
+      @course['estimate'].should eql(23.21)
+    end
+
+    [ '00.0', '0.', '-.0', 'string' ].each do |value|
+      it "should typecast non-numeric value that responds to #to_f (#{value.inspect})" do
         @course.estimate = value
-        @course['estimate'].should equal(value)
+        @course['estimate'].should eql(0.0)
+      end
+    end
+
+    [ Object.new, true ].each do |value|
+      it "should not typecast non-numeric value that won't respond to #to_f (#{value.inspect})" do
+        @course.estimate = value
+        @course['estimate'].should equal(nil)
       end
     end
 
@@ -257,12 +269,25 @@ describe "Type Casting" do
       @course['hours'].should eql(24)
     end
 
-    [ Object.new, true, '00.0', '0.', '-.0', 'string' ].each do |value|
-      it "does not typecast non-numeric value #{value.inspect}" do
+    it "should handle numbers with string units" do
+      @course.hours = "23 hours"
+      @course['hours'].should eql(23)
+    end
+
+    [ '00.0', '0.', '-.0', 'string' ].each do |value|
+      it "should typecast non-numeric value that respond to #to_i #{value.inspect}" do
         @course.hours = value
-        @course['hours'].should equal(value)
+        @course['hours'].should eql(0)
       end
     end
+
+    [ Object.new, true ].each do |value|
+      it "should not typecast non-numeric value that won't respond to #to_i (#{value.inspect})" do
+        @course.hours = value
+        @course['hours'].should equal(nil)
+      end
+    end
+
   end
 
   describe 'when type primitive is a BigDecimal' do
@@ -347,12 +372,25 @@ describe "Type Casting" do
       @course['profit'].should eql(BigDecimal('24.35'))
     end
 
-    [ Object.new, true, '00.0', '0.', '-.0', 'string' ].each do |value|
-      it "does not typecast non-numeric value #{value.inspect}" do
+    it "should handle numbers with strings" do
+      @course.profit = "22.23 euros"
+      @course['profit'].should eql(BigDecimal('22.23'))
+    end
+
+    [ '00.0', '0.', '-.0', 'string' ].each do |value|
+      it "should typecast non-numeric value that responds to to_d #{value.inspect} to 0" do
         @course.profit = value
-        @course['profit'].should equal(value)
+        @course['profit'].should eql(BigDecimal('0.0'))
       end
     end
+
+    [ Object.new, true ].each do |value|
+      it "should typecast non-numeric value that won't respond to to_d (#{value.inspect}) as nil" do
+        @course.profit = value
+        @course['profit'].should equal(nil)
+      end
+    end
+
   end
 
   describe 'when type primitive is a DateTime' do

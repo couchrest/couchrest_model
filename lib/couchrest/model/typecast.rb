@@ -27,6 +27,38 @@ module CouchRest
           typecast_to_numeric(value, :to_i)
         end
 
+        # Typecast a value to a BigDecimal
+        def typecast_to_bigdecimal(value)
+          typecast_to_numeric(value, :to_d)
+        end
+
+        # Typecast a value to a Float
+        def typecast_to_float(value)
+          typecast_to_numeric(value, :to_f)
+        end
+
+        # Convert some kind of object to a number that of the type
+        # provided.
+        #
+        # When a string is provided, It'll attempt to filter out
+        # region specific details such as commas instead of points
+        # for decimal places, text units, and anything else that is
+        # not a number and a human could make out.
+        #
+        # Esentially, the aim is to provide some kind of sanitary
+        # conversion from values in incoming http forms.
+        #
+        # If what we get makes no sense at all, nil it.
+        def typecast_to_numeric(value, method)
+          if value.is_a?(String)
+            value.strip.gsub(/,/, '.').gsub(/[^\d\-\.]/, '').gsub(/\.(?!\d*\Z)/, '').send(method)
+          elsif value.respond_to?(method)
+            value.send(method)
+          else
+            nil
+          end
+        end
+
         # Typecast a value to a String
         def typecast_to_string(value)
           value.to_s
@@ -42,35 +74,6 @@ module CouchRest
             return false if %w[ false 0 f ].include?(value.to_s.downcase)
           end
           value
-        end
-
-        # Typecast a value to a BigDecimal
-        def typecast_to_bigdecimal(value)
-          if value.kind_of?(Integer)
-            value.to_s.to_d
-          else
-            typecast_to_numeric(value, :to_d)
-          end
-        end
-
-        # Typecast a value to a Float
-        def typecast_to_float(value)
-          typecast_to_numeric(value, :to_f)
-        end
-
-        # Match numeric string
-        def typecast_to_numeric(value, method)
-          if value.respond_to?(:to_str)
-            if value.strip.gsub(/,/, '.').gsub(/\.(?!\d*\Z)/, '').to_str =~ /\A(-?(?:0|[1-9]\d*)(?:\.\d+)?|(?:\.\d+))\z/
-              $1.send(method)
-            else
-              value
-            end
-          elsif value.respond_to?(method)
-            value.send(method)
-          else
-            value
-          end
         end
 
         # Typecasts an arbitrary value to a DateTime.
