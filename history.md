@@ -1,6 +1,6 @@
 # CouchRest Model Change History
 
-## 2.0.0.beta2 - 2012-08-02
+## 2.0.0.beta3 - 
 
   * Added design doc migration support, including for proxied models
   * Rake tasks available for migrations
@@ -13,6 +13,7 @@
   * Kaminari support upgraded to use 0.14.0 API (Thanks @amatsuda)
   * JSON Oj support, fixed some Time handling issues
   * Simplifying number typecasting to always provide a number, or nil.
+  * Reduce option in views now accepts symbols: `:sum` to `'_sum'`
 
 ## 1.2.0.beta - 2012-06-08
 

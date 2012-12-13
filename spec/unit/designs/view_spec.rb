@@ -118,6 +118,18 @@ describe "Design View" do
           @design_doc['views']['by_title']['reduce'].should eql(true)
         end
 
+        it "should replace reduce symbol with string name" do
+          @klass.define(@design_doc, 'by_title', :reduce => :sum)
+          @design_doc['views']['by_title']['map'].should_not be_blank
+          @design_doc['views']['by_title']['reduce'].should eql('_sum')
+        end
+
+        it "should replace reduce symbol with string if map function present" do
+          @klass.define(@design_doc, 'by_title', :map => "function(d) { }", :reduce => :sum)
+          @design_doc['views']['by_title']['map'].should_not be_blank
+          @design_doc['views']['by_title']['reduce'].should eql('_sum')
+        end
+
         it "should auto generate mapping from name" do
           lambda { @klass.define(@design_doc, 'by_title') }.should_not raise_error
           str = @design_doc['views']['by_title']['map']

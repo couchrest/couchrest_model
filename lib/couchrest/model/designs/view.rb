@@ -489,10 +489,12 @@ module CouchRest
               if opts[:reduce].nil?
                 # Use built-in sum function by default
                 opts[:reduce] = "_sum"
-              elsif opts[:reduce].is_a?(Symbol)
-                # Assume calling a built in method, convert to a string
-                opts[:reduce] = "_#{opts[:reduce]}"
               end
+            end
+
+            if opts[:reduce].is_a?(Symbol)
+              # Assume calling a built in method, convert to a string
+              opts[:reduce] = "_#{opts[:reduce]}"
             end
 
             design_doc['views'] ||= {}
