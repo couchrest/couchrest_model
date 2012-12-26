@@ -171,8 +171,15 @@ describe "Type Casting" do
       @course['estimate'].should eql(23.21)
     end
 
-    [ '00.0', '0.', '-.0', 'string' ].each do |value|
-      it "should typecast non-numeric value that responds to #to_f (#{value.inspect})" do
+    [ '', 'string', ' foo ' ].each do |value|
+      it "should typecast string without a number to nil (#{value.inspect})" do
+        @course.estimate = value
+        @course['estimate'].should be_nil
+      end
+    end
+
+    [ '00.0', '0.', '-.0' ].each do |value|
+      it "should typecast strings with strange numbers to zero (#{value.inspect})" do
         @course.estimate = value
         @course['estimate'].should eql(0.0)
       end
@@ -274,8 +281,20 @@ describe "Type Casting" do
       @course['hours'].should eql(23)
     end
 
-    [ '00.0', '0.', '-.0', 'string' ].each do |value|
-      it "should typecast non-numeric value that respond to #to_i #{value.inspect}" do
+    it "should typecast an empty string to nil" do
+      @course.hours = ""
+      @course['hours'].should be_nil
+    end
+
+    [ '', 'string', ' foo ' ].each do |value|
+      it "should typecast string without a number to nil (#{value.inspect})" do
+        @course.hours = value
+        @course['hours'].should be_nil
+      end
+    end
+
+    [ '00.0', '0.', '-.0' ].each do |value|
+      it "should typecast strings with strange numbers to zero (#{value.inspect})" do
         @course.hours = value
         @course['hours'].should eql(0)
       end
@@ -377,10 +396,22 @@ describe "Type Casting" do
       @course['profit'].should eql(BigDecimal('22.23'))
     end
 
-    [ '00.0', '0.', '-.0', 'string' ].each do |value|
-      it "should typecast non-numeric value that responds to to_d #{value.inspect} to 0" do
+    it "should typecast an empty string to nil" do
+      @course.profit = ""
+      @course['profit'].should be_nil
+    end
+
+    [ '', 'string', ' foo ' ].each do |value|
+      it "should typecast string without a number to nil (#{value.inspect})" do
         @course.profit = value
-        @course['profit'].should eql(BigDecimal('0.0'))
+        @course['profit'].should be_nil
+      end
+    end
+
+    [ '00.0', '0.', '-.0' ].each do |value|
+      it "should typecast strings with strange numbers to zero (#{value.inspect})" do
+        @course.profit = value
+        @course['profit'].should eql(0.0)
       end
     end
 

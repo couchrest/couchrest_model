@@ -51,7 +51,8 @@ module CouchRest
         # If what we get makes no sense at all, nil it.
         def typecast_to_numeric(value, method)
           if value.is_a?(String)
-            value.strip.gsub(/,/, '.').gsub(/[^\d\-\.]/, '').gsub(/\.(?!\d*\Z)/, '').send(method)
+            value = value.strip.gsub(/,/, '.').gsub(/[^\d\-\.]/, '').gsub(/\.(?!\d*\Z)/, '')
+            value.empty? ? nil : value.send(method)
           elsif value.respond_to?(method)
             value.send(method)
           else
