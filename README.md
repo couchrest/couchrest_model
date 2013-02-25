@@ -1,4 +1,4 @@
-# CouchRest Model: CouchDB, close to shiny metal with rounded edges
+# CouchRest Model: CouchDB, close to shiny metal with rounded edges [![Build Status](https://travis-ci.org/couchrest/couchrest_model.png)](https://travis-ci.org/couchrest/couchrest_model)
 
 CouchRest Models adds additional functionality to the standard CouchRest Document class such as
 setting properties, callbacks, typecasting, and validations.
