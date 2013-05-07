@@ -270,6 +270,20 @@ describe "Dirty" do
       end
     end
 
+    it "should report changes if item is inserted into array" do
+      should_change_array do |array, obj|
+        array.insert(0, 'keyword')
+        obj.keywords[0].should eql('keyword')
+      end
+    end
+
+    it "should report changes if items are inserted into array" do
+      should_change_array do |array, obj|
+        array.insert(1, 'keyword', 'keyword2')
+        obj.keywords[2].should eql('keyword2')
+      end
+    end
+
     it "should report changes if an array is popped" do
       should_change_array do |array, obj|
         array.pop

@@ -35,6 +35,12 @@ module CouchRest::Model
       super(index, value)
     end
 
+    def insert index, *args
+      values = *args.map{|obj| instantiate_and_cast(obj, false)}
+      couchrest_parent_will_change! if use_dirty?
+      super(index, *values)
+    end
+
     def pop
       couchrest_parent_will_change! if use_dirty? && self.length > 0
       super

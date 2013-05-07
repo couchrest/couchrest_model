@@ -14,6 +14,7 @@
   * JSON Oj support, fixed some Time handling issues
   * Simplifying number typecasting to always provide a number, or nil.
   * Reduce option in views now accepts symbols: `:sum` to `'_sum'`
+  * Dirty tracking now supports CastedArray#insert method.
 
 ## 1.2.0.beta - 2012-06-08
 
