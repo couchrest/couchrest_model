@@ -24,20 +24,12 @@ module CouchRest
       #
       #    $ rake couchrest:migrate_with_proxies
       #
-      class Migrate
+      module Migrate
+        extend self
 
-        def self.all_models
-          callbacks = migrate_each_model(find_models)
-          cleanup(callbacks)
-        end
-
-        def self.all_models_and_proxies
-          callbacks = migrate_each_model(find_models)
-          callbacks += migrate_each_proxying_model(find_proxying_models)
-          cleanup(callbacks)
-        end
-
-        def self.load_all_models
+        # Make an attempt at loading all the files in this Rails application's
+        # models directory.
+        def load_all_models
           # Make a reasonable effort to load all models
           return unless defined?(Rails)
           Dir[Rails.root + 'app/models/**/*.rb'].each do |path|
@@ -45,15 +37,30 @@ module CouchRest
           end
         end
 
-        def self.find_models
+        # Go through each class that inherits from CouchRest::Model::Base and
+        # attempt to migrate the design documents.
+        def all_models
+          callbacks = migrate_each_model(find_models)
+          cleanup(callbacks)
+        end
+
+        def all_models_and_proxies
+          callbacks = migrate_each_model(find_models)
+          callbacks += migrate_each_proxying_model(find_proxying_models)
+          cleanup(callbacks)
+        end
+
+        protected
+
+        def find_models
           CouchRest::Model::Base.subclasses.reject{|m| m.proxy_owner_method.present?}
         end
 
-        def self.find_proxying_models
+        def find_proxying_models
           CouchRest::Model::Base.subclasses.reject{|m| m.proxy_database_method.blank?}
         end
 
-        def self.migrate_each_model(models, db = nil)
+        def migrate_each_model(models, db = nil)
           callbacks = [ ]
           models.each do |model|
             model.design_docs.each do |design|
@@ -63,7 +70,7 @@ module CouchRest
           callbacks
         end
 
-        def self.migrate_each_proxying_model(models)
+        def migrate_each_proxying_model(models)
           callbacks = [ ]
           models.each do |model|
             submodels = model.proxied_model_names.map{|n| n.constantize}
@@ -75,7 +82,7 @@ module CouchRest
           callbacks
         end
 
-        def self.migrate_design(model, design, db = nil)
+        def migrate_design(model, design, db = nil)
           print "Migrating #{model.to_s}##{design.method_name}... "
           callback = design.migrate(db) do |result|
             puts "#{result.to_s.gsub(/_/, ' ')}"
@@ -84,7 +91,7 @@ module CouchRest
           callback ? {:design => design, :proc => callback, :db => db || model.database} : nil
         end
 
-        def self.cleanup(methods)
+        def cleanup(methods)
           methods.compact.each do |cb|
             name = "/#{cb[:db].name}/#{cb[:design]['_id']}"
             puts "Activating new design: #{name}"
