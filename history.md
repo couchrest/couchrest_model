@@ -16,6 +16,7 @@
   * Reduce option in views now accepts symbols: `:sum` to `'_sum'`
   * Dirty tracking now supports CastedArray#insert method.
   * Support for Rails 4.0.
+  * Removing support for <= Ruby 1.9.2.
 
 ## 1.2.0.beta - 2012-06-08
 
