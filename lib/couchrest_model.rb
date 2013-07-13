@@ -24,6 +24,7 @@ require 'couchrest'
 
 require 'couchrest/model'
 require 'couchrest/model/errors'
+require 'couchrest/model/translation'
 require "couchrest/model/persistence"
 require "couchrest/model/typecast"
 require "couchrest/model/casted_by"

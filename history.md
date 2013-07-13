@@ -17,6 +17,7 @@
   * Dirty tracking now supports CastedArray#insert method.
   * Support for Rails 4.0.
   * Removing support for <= Ruby 1.9.2.
+  * Fixing model translation support.
 
 ## 1.2.0.beta - 2012-06-08
 

@@ -2,22 +2,24 @@ module CouchRest
   module Model
     class Base < CouchRest::Document
 
-      extend  ActiveModel::Naming
       include ActiveModel::Conversion
 
-      include CouchRest::Model::Configuration
-      include CouchRest::Model::Connection
-      include CouchRest::Model::Persistence
-      include CouchRest::Model::DocumentQueries
-      include CouchRest::Model::ExtendedAttachments
-      include CouchRest::Model::Proxyable
-      include CouchRest::Model::PropertyProtection
-      include CouchRest::Model::Associations
-      include CouchRest::Model::Validations
-      include CouchRest::Model::Callbacks
-      include CouchRest::Model::Designs
-      include CouchRest::Model::CastedBy
-      include CouchRest::Model::Dirty
+      extend Translation
+
+      include Configuration
+      include Connection
+      include Persistence
+      include DocumentQueries
+      include ExtendedAttachments
+      include Proxyable
+      include PropertyProtection
+      include Associations
+      include Validations
+      include Callbacks
+      include Designs
+      include CastedBy
+      include Dirty
+      
 
       def self.subclasses
         @subclasses ||= []
@@ -25,7 +27,7 @@ module CouchRest
 
       def self.inherited(subklass)
         super
-        subklass.send(:include, CouchRest::Model::Properties)
+        subklass.send(:include, Properties)
 
         subklass.class_eval <<-EOS, __FILE__, __LINE__ + 1
           def self.inherited(subklass)
