@@ -60,9 +60,9 @@ The library will try to detect a configuration file at `config/couchdb.yml` from
       username: test
       password: user
 
-Note that the name of the database is either just the prefix and suffix combined or the prefix plus any text you specifify using `use_database` method in your models with the suffix on the end.
+Note that the name of the database is either just the prefix and suffix combined or the prefix plus any text you specify using `use_database` method in your models with the suffix on the end.
 
-The example config above for example would use a database called "project_test". Heres an example using the `use_database` call:
+The example config above for example would use a database called "project_test". Here's an example using the `use_database` call:
 
     class Project < CouchRest::Model::Base
       use_database 'sample'
