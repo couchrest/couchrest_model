@@ -18,6 +18,7 @@
   * Support for Rails 4.0.
   * Removing support for <= Ruby 1.9.2.
   * Fixing model translation support.
+  * Fixing `belongs_to` setting foreign key cache issue.
 
 ## 1.2.0.beta - 2012-06-08
 

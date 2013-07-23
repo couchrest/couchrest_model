@@ -75,6 +75,13 @@ describe "Assocations" do
       @invoice.client_id.should be_nil
     end
 
+    it "should allow replacement of object after updating key" do
+      @invoice.client = @client
+      @invoice.client.should eql(@client)
+      @invoice.client_id = nil
+      @invoice.client.should be_nil
+    end
+
     it "should allow override of foreign key" do
       @invoice.respond_to?(:alternate_client).should be_true
       @invoice.respond_to?("alternate_client=").should be_true

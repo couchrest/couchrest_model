@@ -40,6 +40,7 @@ module CouchRest
 
           property(opts[:foreign_key], String, opts)
 
+          create_association_property_setter(attrib, opts)
           create_belongs_to_getter(attrib, opts)
           create_belongs_to_setter(attrib, opts)
         end
@@ -90,7 +91,7 @@ module CouchRest
 
           property(opts[:foreign_key], [String], opts)
 
-          create_collection_of_property_setter(attrib, opts)
+          create_association_property_setter(attrib, opts)
           create_collection_of_getter(attrib, opts)
           create_collection_of_setter(attrib, opts)
         end
@@ -120,6 +121,20 @@ module CouchRest
           opts
         end
 
+        ### Generic support methods
+
+        def create_association_property_setter(attrib, options)
+          # ensure CollectionOfProxy is nil, ready to be reloaded on request
+          class_eval <<-EOS, __FILE__, __LINE__ + 1
+            def #{options[:foreign_key]}=(value)
+              @#{attrib} = nil
+              write_attribute("#{options[:foreign_key]}", value)
+            end
+          EOS
+        end
+
+        ### belongs_to support methods
+
         def create_belongs_to_getter(attrib, options)
           class_eval <<-EOS, __FILE__, __LINE__ + 1
             def #{attrib}
@@ -138,16 +153,6 @@ module CouchRest
         end
 
         ### collection_of support methods
-
-        def create_collection_of_property_setter(attrib, options)
-          # ensure CollectionOfProxy is nil, ready to be reloaded on request
-          class_eval <<-EOS, __FILE__, __LINE__ + 1
-            def #{options[:foreign_key]}=(value)
-              @#{attrib} = nil
-              write_attribute("#{options[:foreign_key]}", value)
-            end
-          EOS
-        end
 
         def create_collection_of_getter(attrib, options)
           class_eval <<-EOS, __FILE__, __LINE__ + 1
