@@ -205,26 +205,15 @@ module CouchRest
 
           # This is not a thread safe operation, if you have to set new properties at runtime
           # make sure a mutex is used.
-          def define_property(name, options={}, &block)
-            # check if this property is going to casted
-            type = options.delete(:type) || options.delete(:cast_as)
-            if block_given?
-              type = Class.new do
-                include Embeddable
-              end
-              if block.arity == 1 # Traditional, with options
-                type.class_eval { yield type }
-              else
-                type.instance_exec(&block)
-              end
-              type = [type] # inject as an array
-            end
-            property = Property.new(name, type, options)
+          def define_property(name, options = {}, &block)
+            property = Property.new(name, options, &block)
             create_property_getter(property)
             create_property_setter(property) unless property.read_only == true
-            if property.type_class.respond_to?(:validates_casted_model)
+
+            if property.type.respond_to?(:validates_casted_model)
               validates_casted_model property.name
             end
+
             properties << property
             properties_by_name[property.to_s] = property
             property

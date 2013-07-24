@@ -14,7 +14,7 @@ class DirtyModel < CouchRest::Model::Base
   property :title, :default => 'Sample Title'
   property :details,     Object,   :default => { 'color' => 'blue' }
   property :keywords,    [String], :default => ['default-keyword']
-  property :sub_models do
+  property :sub_models, :array => true do
     property :title
   end
 end

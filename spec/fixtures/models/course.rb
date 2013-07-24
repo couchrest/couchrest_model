@@ -21,6 +21,7 @@ class Course < CouchRest::Model::Base
   property :klass, :type => Class
   property :currency, String, :default => 'EUR'
   property :price, Money
+  property :symbol, Symbol
 
   design do
     view :by_title

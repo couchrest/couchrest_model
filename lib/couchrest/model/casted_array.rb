@@ -77,7 +77,7 @@ module CouchRest::Model
     def instantiate_and_cast(obj, change = true)
       property = casted_by_property
       couchrest_parent_will_change! if change && use_dirty?
-      if casted_by && property && obj.class != property.type_class
+      if casted_by && property && obj.class != property.type
         property.cast_value(casted_by, obj)
       else
         obj.casted_by = casted_by if obj.respond_to?(:casted_by)

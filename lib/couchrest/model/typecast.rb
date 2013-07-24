@@ -4,17 +4,17 @@ module CouchRest
 
       def typecast_value(parent, property, value)
         return nil if value.nil?
-        klass = property.type_class
-        if value.instance_of?(klass) || klass == Object
-          if klass == Time && !value.utc?
+        type = property.type
+        if value.instance_of?(type) || type == Object
+          if type == Time && !value.utc?
             value.utc # Ensure Time is always in UTC
           else
             value
           end
-        elsif klass.respond_to?(:couchrest_typecast)
-          klass.couchrest_typecast(parent, property, value)
-        elsif [String, TrueClass, Integer, Float, BigDecimal, DateTime, Time, Date, Class].include?(klass)
-          send('typecast_to_'+klass.to_s.downcase, value)
+        elsif type.respond_to?(:couchrest_typecast)
+          type.couchrest_typecast(parent, property, value)
+        elsif [String, Symbol, TrueClass, Integer, Float, BigDecimal, DateTime, Time, Date, Class].include?(type)
+          send('typecast_to_'+type.to_s.downcase, value)
         else
           property.build(value)
         end
@@ -63,6 +63,10 @@ module CouchRest
         # Typecast a value to a String
         def typecast_to_string(value)
           value.to_s
+        end
+
+        def typecast_to_symbol(value)
+          value.to_sym
         end
 
         # Typecast a value to a true or false

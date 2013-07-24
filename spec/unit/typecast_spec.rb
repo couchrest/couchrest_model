@@ -69,6 +69,20 @@ describe "Type Casting" do
     end
   end
 
+  describe "when type primitive is a Symbol" do
+    it "keeps symbol value unchanged" do
+      value = :a_symbol
+      @course.symbol = value
+      @course['symbol'].should equal(:a_symbol)
+    end
+
+    it "it casts to symbol representation of the value" do
+      @course.symbol = "a_symbol"
+      @course['symbol'].should equal(:a_symbol)
+    end
+  end
+
+
   describe 'when type primitive is a Float' do
     it 'returns same value if a float' do
       value = 24.0

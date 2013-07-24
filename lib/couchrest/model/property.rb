@@ -4,15 +4,14 @@ module CouchRest::Model
 
     include ::CouchRest::Model::Typecast
 
-    attr_reader :name, :type, :type_class, :read_only, :alias, :default, :casted, :init_method, :options, :allow_blank
+    attr_reader :name, :type, :array, :read_only, :alias, :default, :casted, :init_method, :options, :allow_blank
 
     # Attribute to define.
     # All Properties are assumed casted unless the type is nil.
-    def initialize(name, type = nil, options = {})
+    def initialize(name, options = {}, &block)
       @name = name.to_s
-      @casted = true
-      parse_type(type)
       parse_options(options)
+      parse_type(options, &block)
       self
     end
 
@@ -27,7 +26,7 @@ module CouchRest::Model
     # Cast the provided value using the properties details.
     def cast(parent, value)
       return value unless casted
-      if type.is_a?(Array)
+      if array
         if value.nil?
           value = []
         elsif [Hash, HashWithIndifferentAccess].include?(value.class)
@@ -72,12 +71,12 @@ module CouchRest::Model
     # used. If a proc is defined for the init method, it will be used instead of 
     # a normal call to the class.
     def build(*args)
-      raise StandardError, "Cannot build property without a class" if @type_class.nil?
+      raise StandardError, "Cannot build property without a class" if @type.nil?
 
       if @init_method.is_a?(Proc)
         @init_method.call(*args)
       else
-        @type_class.send(@init_method, *args)
+        @type.send(@init_method, *args)
       end
     end
 
@@ -97,21 +96,23 @@ module CouchRest::Model
         value
       end
 
-      def parse_type(type)
-        if type.nil?
+      def parse_type(options, &block)
+        set_type_from_block(&block) if block_given?
+        if @type.nil?
           @casted = false
-          @type = nil
-          @type_class = nil
         else
-          base = type.is_a?(Array) ? type.first : type
-          base = Object if base.nil?
-          raise "Defining a property type as a #{type.class.name.humanize} is not supported in CouchRest Model!" if base.class != Class
-          @type_class = base
-          @type = type
+          @casted = true
+          if @type.is_a?(Array)
+            @type  = @type.first || Object
+            @array = true
+          end
+          raise "Defining a property type as a #{@type.class.name.humanize} is not supported in CouchRest Model!" if @type.class != Class
         end
       end
 
       def parse_options(options)
+        @type               = options.delete(:type) || options.delete(:cast_as)
+        @array              = !!options.delete(:array)
         @validation_format  = options.delete(:format)      if options[:format]
         @read_only          = options.delete(:read_only)   if options[:read_only]
         @alias              = options.delete(:alias)       if options[:alias]
@@ -120,5 +121,18 @@ module CouchRest::Model
         @allow_blank        = options[:allow_blank].nil? ? true : options.delete(:allow_blank)
         @options            = options
       end
+
+
+      def set_type_from_block(&block)
+        @type = Class.new do
+          include Embeddable
+        end
+        if block.arity == 1 # Traditional, with options
+          @type.class_eval(&block)
+        else
+          @type.instance_eval(&block)
+        end
+      end
+
   end
 end

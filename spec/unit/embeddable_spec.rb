@@ -20,10 +20,10 @@ class DummyModel < CouchRest::Model::Base
   property :casted_attribute, WithCastedModelMixin
   property :keywords,         [String]
   property :old_casted_attribute, OldFashionedMixin
-  property :sub_models do |child|
+  property :sub_models, :array => true do |child|
     child.property :title
   end
-  property :param_free_sub_models do
+  property :param_free_sub_models, :array => true do
     property :title
   end
 end
