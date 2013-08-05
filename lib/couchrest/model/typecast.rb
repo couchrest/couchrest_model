@@ -78,7 +78,7 @@ module CouchRest
             return true  if %w[ true  1 t ].include?(value.to_s.downcase)
             return false if %w[ false 0 f ].include?(value.to_s.downcase)
           end
-          value
+          nil
         end
 
         # Typecasts an arbitrary value to a DateTime.
@@ -91,7 +91,7 @@ module CouchRest
             DateTime.parse(value.to_s)
           end
         rescue ArgumentError
-          value
+          nil
         end
 
         # Typecasts an arbitrary value to a Date
@@ -108,7 +108,7 @@ module CouchRest
             Date.parse(value)
           end
         rescue ArgumentError
-          value
+          nil
         end
 
         # Typecasts an arbitrary value to a Time
@@ -123,9 +123,9 @@ module CouchRest
             Time.parse_iso8601(value.to_s)
           end
         rescue ArgumentError
-          value
+          nil
         rescue TypeError
-          value
+          nil
         end
 
         # Creates a DateTime instance from a Hash with keys :year, :month, :day,
@@ -158,7 +158,7 @@ module CouchRest
         def typecast_to_class(value)
           value.to_s.constantize
         rescue NameError
-          value
+          nil
         end
 
     end

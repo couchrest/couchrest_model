@@ -470,7 +470,7 @@ describe "Type Casting" do
 
     it 'does not typecast non-datetime values' do
       @course.updated_at = 'not-datetime'
-      @course['updated_at'].should eql('not-datetime')
+      @course['updated_at'].should be_nil
     end
   end
 
@@ -502,7 +502,7 @@ describe "Type Casting" do
 
     it 'does not typecast non-date values' do
       @course.started_on = 'not-date'
-      @course['started_on'].should eql('not-date')
+      @course['started_on'].should be_nil
     end
   end
 
@@ -562,7 +562,7 @@ describe "Type Casting" do
 
     it 'does not typecast non-time values' do
       @course.ends_at = 'not-time'
-      @course['ends_at'].should eql('not-time')
+      @course['ends_at'].should be_nil
     end
   end
 
@@ -580,7 +580,7 @@ describe "Type Casting" do
 
     it 'does not typecast non-class values' do
       @course.klass = 'NoClass'
-      @course['klass'].should eql('NoClass')
+      @course['klass'].should be_nil
     end
   end
 
@@ -603,7 +603,7 @@ describe "Type Casting" do
     [ 'string', 2, 1.0, BigDecimal('1.0'), DateTime.now, Time.now, Date.today, Class, Object.new, ].each do |value|
       it "does not typecast value #{value.inspect}" do
         @course.active = value
-        @course['active'].should equal(value)
+        @course['active'].should be_nil
       end
     end
 
