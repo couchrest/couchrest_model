@@ -24,6 +24,8 @@ module CouchRest
       #
       #    $ rake couchrest:migrate_with_proxies
       #
+      # NOTE: This is an experimental feature that is not yet properly tested.
+      #
       module Migrate
         extend self
 

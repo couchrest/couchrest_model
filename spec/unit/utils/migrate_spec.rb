@@ -22,9 +22,4 @@ describe CouchRest::Model::Utils::Migrate do
     end
   end
 
-  describe "#all_models" do
-    
-  end
-
-
 end

@@ -1,6 +1,6 @@
 # CouchRest Model Change History
 
-## 2.0.0.beta3 - 
+## 2.0.0 - 2013-10-04
 
   * Added design doc migration support, including for proxied models
   * Rake tasks available for migrations
