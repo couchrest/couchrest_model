@@ -57,6 +57,11 @@ describe "Design View" do
           @obj.query.should eql({:foo => :bar})
         end
 
+        it "should delete query keys if :delete defined" do
+          @obj2 = @klass.new(@mod.design_doc, @obj, {:delete => [:foo]})
+          @obj2.query.should_not include(:foo)
+        end
+
       end
 
       describe "with proxy in query for first initialization" do
@@ -517,7 +522,7 @@ describe "Design View" do
       describe "#reduce" do
         it "should update query" do
           @obj.should_receive(:can_reduce?).and_return(true)
-          @obj.should_receive(:update_query).with({:reduce => true, :include_docs => nil})
+          @obj.should_receive(:update_query).with({:reduce => true, :delete => [:include_docs]})
           @obj.reduce
         end
         it "should raise error if query cannot be reduced" do
@@ -690,11 +695,11 @@ describe "Design View" do
           @obj.result.should eql('foos')
         end
 
-        it "should remove nil values from query" do
+        it "should not remove nil values from query" do
           @obj.should_receive(:can_reduce?).and_return(true)
           @obj.stub!(:use_database).and_return(@mod.database)
           @obj.query = {:reduce => true, :limit => nil, :skip => nil}
-          @design_doc.should_receive(:view_on).with(@mod.database, 'test_view', {:reduce => true})
+          @design_doc.should_receive(:view_on).with(@mod.database, 'test_view', {:reduce => true, :limit => nil, :skip => nil})
           @obj.send(:execute)
         end
 
@@ -870,6 +875,10 @@ describe "Design View" do
         view.total_rows.should eql(5)
         view.last.name.should eql("Peter")
         view.all.length.should eql(3)
+      end
+
+      it "should not return document if nil key provided" do
+        DesignViewModel.by_name.key(nil).first.should be_nil
       end
     end
 

@@ -1,5 +1,9 @@
 # CouchRest Model Change History
 
+## 2.0.1 - pending
+
+  * nil keys in view requests are now sent to server, avoiding returning first document issue. (Thanks to @svoboda-jan for pointer.)
+
 ## 2.0.0 - 2013-10-04
 
   * Added design doc migration support, including for proxied models

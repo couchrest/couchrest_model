@@ -20,7 +20,11 @@ module CouchRest
         # outside CouchRest Model.
         def initialize(design_doc, parent, new_query = {}, name = nil)
           self.design_doc = design_doc
-          proxy = new_query.delete(:proxy)
+
+          # Extrace important non-regular query values
+          proxy  = new_query.delete(:proxy)
+          delete = new_query.delete(:delete)
+
           if parent.is_a?(Class) && parent < CouchRest::Model::Base
             raise "Name must be provided for view to be initialized" if name.nil?
             self.model    = (proxy || parent)
@@ -36,7 +40,11 @@ module CouchRest
           else
             raise "View cannot be initialized without a parent Model or View"
           end
+
+          # Update the local query hash
           query.update(new_query)
+          delete.each{|k| query.delete(k)} if delete
+
           super()
         end
 
@@ -276,7 +284,7 @@ module CouchRest
         # will fail.
         def reduce
           raise "Cannot reduce a view without a reduce method" unless can_reduce?
-          update_query(:reduce => true, :include_docs => nil)
+          update_query(:reduce => true, :delete => [:include_docs])
         end
 
         # Control whether the reduce function reduces to a set of distinct keys
@@ -414,7 +422,7 @@ module CouchRest
 
           design_doc.sync(use_database)
 
-          self.result = design_doc.view_on(use_database, name, query.reject{|k,v| v.nil?})
+          self.result = design_doc.view_on(use_database, name, query)
         end
 
         # Class Methods
