@@ -53,6 +53,17 @@ describe CouchRest::Model::Connection do
       it "should respond to" do
         @class.should respond_to(:use_database)
       end
+      it "should set the database if object provided" do
+        db = @class.server.database('test')
+        @class.use_database(db)
+        @class.database.should eql(db)
+      end
+      it "should never prepare the database before it is needed" do
+        db = @class.server.database('test')
+        @class.should_not_receive(:prepare_database)
+        @class.use_database('test')
+        @class.use_database(db)
+      end
     end
 
     describe ".database" do
@@ -63,9 +74,8 @@ describe CouchRest::Model::Connection do
         @class.database.should be_a(CouchRest::Database)
       end
       it "should provide a database with default name" do
-
+        @class.database.name.should eql('couchrest')
       end
-
     end
 
     describe ".server" do
@@ -94,7 +104,6 @@ describe CouchRest::Model::Connection do
     end
 
     describe ".prepare_database" do
-
       it "should respond to" do
         @class.should respond_to(:prepare_database)
       end
@@ -109,6 +118,12 @@ describe CouchRest::Model::Connection do
         @class.connection[:suffix] = nil
         db = @class.prepare_database('test')
         db.name.should eql('couchrest_test')
+      end
+
+      it "should use the .use_database value" do
+        @class.use_database('testing')
+        db = @class.prepare_database
+        db.name.should eql('couchrest_testing')
       end
     end
 

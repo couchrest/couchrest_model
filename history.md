@@ -3,6 +3,7 @@
 ## 2.0.1 - pending
 
   * nil keys in view requests are now sent to server, avoiding returning first document issue. (Thanks to @svoboda-jan for pointer.)
+  * lazy create database if using `use_database`
 
 ## 2.0.0 - 2013-10-04
 

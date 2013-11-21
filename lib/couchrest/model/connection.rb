@@ -11,8 +11,13 @@ module CouchRest
 
         # Overwrite the normal use_database method so that a database
         # name can be provided instead of a full connection.
+        # The actual database will be validated when it is requested for use.
         def use_database(db)
-          @database = prepare_database(db)
+          if db.is_a?(CouchRest::Database)
+            @database = db
+          else
+            @_use_database = db
+          end
         end
 
         # Overwrite the default database method so that it always
@@ -26,8 +31,9 @@ module CouchRest
         end
 
         def prepare_database(db = nil)
-          unless db.is_a?(CouchRest::Database)
+          if db.nil? || !db.is_a?(CouchRest::Database)
             conf = connection_configuration
+            db ||= @_use_database
             db = [conf[:prefix], db.to_s, conf[:suffix]].reject{|s| s.to_s.empty?}.join(conf[:join])
             self.server.database!(db)
           else
