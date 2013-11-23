@@ -62,6 +62,4 @@ require "couchrest/model/base"
 require "couchrest/model/utils/migrate.rb"
 
 # Add rails support *after* everything has loaded
-if defined?(Rails)
-  require "couchrest/railtie"
-end
+require "couchrest/railtie" if defined?(Rails)
