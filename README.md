@@ -5,7 +5,7 @@ setting properties, callbacks, typecasting, and validations.
 
 ## Documentation
 
-Please visit the documentation project at [http://www.couchrest.info](http://www.couchrest.info). You're [contributions](https://github.com/couchrest/couchrest.github.com) to the documentation would be greatly appreciated!
+Please visit the documentation project at [http://www.couchrest.info](http://www.couchrest.info). Your [contributions](https://github.com/couchrest/couchrest.github.com) to the documentation would be greatly appreciated!
 
 General API: [http://rdoc.info/projects/couchrest/couchrest_model](http://rdoc.info/projects/couchrest/couchrest_model)
 
