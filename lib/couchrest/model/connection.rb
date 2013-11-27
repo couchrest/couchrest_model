@@ -15,10 +15,6 @@ module CouchRest
         # Note that this should not be used with proxied models!
         def use_database(db)
           @_use_database = db
-          #if db.is_a?(CouchRest::Database)
-          #  @database = db
-          #else
-          #end
         end
 
         # Overwrite the default database method so that it always
