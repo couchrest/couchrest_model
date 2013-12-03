@@ -478,4 +478,10 @@ describe CouchRest::Model::Persistence do
     end
   end
 
+  describe ".model_type_value" do
+    it "should always return string value of class" do
+      Article.model_type_value.should eql('Article')
+    end
+  end
+
 end

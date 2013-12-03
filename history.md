@@ -4,6 +4,7 @@
 
   * nil keys in view requests are now sent to server, avoiding returning first document issue. (Thanks to @svoboda-jan for pointer.)
   * lazy create database if using `use_database`
+  * added .model_type_value to persistence layer, so that model name can be overwrriten if required (issue #163)
 
 ## 2.0.0 - 2013-10-04
 

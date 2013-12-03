@@ -166,6 +166,13 @@ module CouchRest
           end
         end
 
+        # The value to use for this model's model_type_key.
+        # By default, this shouls always be the string representation of the class,
+        # but if you need anything special, overwrite this method.
+        def model_type_value
+          to_s
+        end
+
         # Raise an error if validation failed.
         def fail_validate!(document)
           raise Errors::Validations.new(document)

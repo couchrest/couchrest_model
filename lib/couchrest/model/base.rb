@@ -56,7 +56,7 @@ module CouchRest
         # set the instance's database, if provided
         self.database = options[:database] unless options[:database].nil?
         unless self['_id'] && self['_rev']
-          self[self.model_type_key] = self.class.to_s
+          self[self.model_type_key] = self.class.model_type_value
         end
 
         yield self if block_given?
