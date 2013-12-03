@@ -64,6 +64,10 @@ describe CouchRest::Model::Connection do
         @class.use_database('test')
         @class.use_database(db)
       end
+      it "should use the database specified" do
+        @class.use_database(:test)
+        @class.database.name.should eql('couchrest_test')
+      end
     end
 
     describe ".database" do
