@@ -11,7 +11,7 @@ CouchRest Model uses ActiveModel for a lot of the magic, so if you're using Rail
 
 ## Documentation
 
-Please visit the documentation project at [http://www.couchrest.info](http://www.couchrest.info). You're [contributions](https://github.com/couchrest/couchrest.github.com) would be greatly appreciated!
+Please visit the documentation project at [http://www.couchrest.info](http://www.couchrest.info). Your [contributions](https://github.com/couchrest/couchrest.github.com) would be greatly appreciated!
 
 General API: [http://rdoc.info/projects/couchrest/couchrest_model](http://rdoc.info/projects/couchrest/couchrest_model)
 
@@ -23,21 +23,27 @@ See the [update history](https://github.com/couchrest/couchrest_model/blob/maste
 
 *Pre 1.1:* As of April 2011 and the release of version 1.1.0, the default model type key is 'type' instead of 'couchrest-type'. Simply updating your project will not work unless you migrate your data or set the configuration option in your initializers:
 
-    CouchRest::Model::Base.configure do |config|
-      config.model_type_key = 'couchrest-type'
-    end
+```ruby
+CouchRest::Model::Base.configure do |config|
+  config.model_type_key = 'couchrest-type'
+end
+```
 
 ## Install
 
 ### Gem
 
-    $ sudo gem install couchrest_model
+```bash
+$ sudo gem install couchrest_model
+```
 
 ### Bundler
 
 If you're using bundler, define a line similar to the following in your project's Gemfile:
 
-    gem 'couchrest_model'
+```ruby
+gem 'couchrest_model'
+```
 
 ### Configuration
 
@@ -58,12 +64,14 @@ Note that the name of the database is either just the prefix and suffix combined
 
 The example config above for example would use a database called "project_test". Heres an example using the `use_database` call:
 
-    class Project < CouchRest::Model::Base
-      use_database 'sample'
-    end
+```ruby
+class Project < CouchRest::Model::Base
+  use_database 'sample'
+end
 
-    # The database object would be provided as:
-    Project.database     #=> "https://test:user@sample.cloudant.com:443/project_sample_test"
+# The database object would be provided as:
+Project.database     #=> "https://test:user@sample.cloudant.com:443/project_sample_test"
+```
 
 ### Using instead of ActiveRecord in Rails
 
@@ -83,44 +91,50 @@ You'll then need to make sure any references to `config.active_record` are remov
 
 ### Configuration
 
-    $ rails generate couchrest_model:config
+```bash
+$ rails generate couchrest_model:config
+```
 
 ### Model
 
-    $ rails generate model person --orm=couchrest_model
+```bash
+$ rails generate model person --orm=couchrest_model
+```
 
 ## General Usage 
 
-    require 'couchrest_model'
+```ruby
+require 'couchrest_model'
 
-    class Cat < CouchRest::Model::Base
+class Cat < CouchRest::Model::Base
 
-      property :name,      String
-      property :lives,     Integer, :default => 9
+  property :name,      String
+  property :lives,     Integer, :default => 9
 
-      property :nicknames, [String]
+  property :nicknames, [String]
 
-      timestamps!
+  timestamps!
 
-      design do
-        view :by_name
-      end
+  design do
+    view :by_name
+  end
 
-    end
+end
 
-    @cat = Cat.new(:name => 'Felix', :nicknames => ['so cute', 'sweet kitty'])
+@cat = Cat.new(:name => 'Felix', :nicknames => ['so cute', 'sweet kitty'])
 
-    @cat.new?   # true
-    @cat.save
+@cat.new?   # true
+@cat.save
 
-    @cat['name']   # "Felix"
+@cat['name']   # "Felix"
 
-    @cat.nicknames << 'getoffdamntable'
+@cat.nicknames << 'getoffdamntable'
 
-    @cat = Cat.new
-    @cat.update_attributes(:name => 'Felix', :random_text => 'feline')
-    @cat.new? # false
-    @cat.random_text  # Raises error!
+@cat = Cat.new
+@cat.update_attributes(:name => 'Felix', :random_text => 'feline')
+@cat.new? # false
+@cat.random_text  # Raises error!
+```
 
 ## Development
 
@@ -128,7 +142,9 @@ You'll then need to make sure any references to `config.active_record` are remov
 
 CouchRest Model now comes with a Gemfile to help with development. If you want to make changes to the code, download a copy then run:
 
-    bundle install
+```bash
+bundle install
+```
 
 That should set everything up for `rake spec` to be run correctly. Update the couchrest_model.gemspec if your alterations
 use different gems.
