@@ -19,12 +19,13 @@ describe CouchRest::Model::Persistence do
       doc.class.should eql(Article)
     end
 
-    it "should instantialize document of different type" do
+    it "should instantiate document of different type" do
       doc = Article.build_from_database({'_id' => 'testitem2', '_rev' => 123, Article.model_type_key => 'WithTemplateAndUniqueID', 'name' => 'my test'})
       doc.class.should eql(WithTemplateAndUniqueID)
     end
 
   end
+
 
   describe "basic saving and retrieving" do
     it "should work fine" do
@@ -481,6 +482,32 @@ describe CouchRest::Model::Persistence do
   describe ".model_type_value" do
     it "should always return string value of class" do
       Article.model_type_value.should eql('Article')
+    end
+
+    describe "usage" do
+      let :klass do
+        Class.new(CouchRest::Model::Base) do
+          property :name, String
+          def self.model_type_value
+            'something_else'
+          end
+        end
+      end
+      it "should use the model type value if overridden" do
+        obj = klass.build_from_database(
+          '_id' => '1234', 'type' => 'something_else', 'name' => 'Test'
+        )
+        obj['type'].should eql('something_else')
+        obj.name.should eql('Test')
+      end
+      it "should fail if different model type value provided" do
+        expect {
+          obj = klass.build_from_database(
+            '_id' => '1234', 'type' => 'something', 'name' => 'Test'
+          )
+        }.to raise_error(NameError)
+      end
+
     end
   end
 

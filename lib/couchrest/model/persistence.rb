@@ -120,7 +120,7 @@ module CouchRest
         #
         def build_from_database(doc = {}, options = {}, &block)
           src = doc[model_type_key]
-          base = (src.blank? || src == self.to_s) ? self : src.constantize
+          base = (src.blank? || src == model_type_value) ? self : src.constantize
           base.new(doc, options.merge(:directly_set_attributes => true), &block)
         end
 
