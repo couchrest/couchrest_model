@@ -1,6 +1,6 @@
 # CouchRest Model Change History
 
-## 2.0.1 - pending
+## 2.0.1 - 2013-12-03
 
   * nil keys in view requests are now sent to server, avoiding returning first document issue. (Thanks to @svoboda-jan for pointer.)
   * lazy create database if using `use_database`
