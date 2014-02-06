@@ -3,6 +3,7 @@
 ## 2.0.2 - pending
 
   * Fix for model_type_value, not being used correctly from database.
+  * CastedArray now supports `as_couch_json` method.
 
 ## 2.0.1 - 2013-12-03
 

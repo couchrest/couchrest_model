@@ -72,6 +72,10 @@ module CouchRest::Model
       obj
     end
 
+    def as_couch_json
+      map{ |v| (v.respond_to?(:as_couch_json) ? v.as_couch_json : v)}
+    end
+
     protected
 
     def instantiate_and_cast(obj, change = true)
