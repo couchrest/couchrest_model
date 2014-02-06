@@ -1,6 +1,6 @@
 # CouchRest Model Change History
 
-## 2.0.2 - pending
+## 2.0.2 - 2014-02-06
 
   * Fix for model_type_value, not being used correctly from database.
   * CastedArray now supports `as_couch_json` method.
