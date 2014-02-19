@@ -522,6 +522,9 @@ module CouchRest
               def find_#{name}(*key)
                 #{name}.key(*key).first()
               end
+              def find_#{name}!(*key)
+                find_#{name}(*key) || raise(CouchRest::Model::DocumentNotFound)
+              end
             EOS
           end
 

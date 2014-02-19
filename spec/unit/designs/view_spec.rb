@@ -182,6 +182,25 @@ describe "Design View" do
           @design_doc.should_receive('view').and_return(view)
           @model.find_by_name('fred')
         end
+        it "should create find_! view method" do
+          @klass.create_model_methods(@design_doc, 'by_name')
+          @model.should respond_to('find_by_name!')
+          obj = mock("SomeKlass")
+          view = mock("View")
+          view.should_receive('key').with('fred').and_return(view)
+          view.should_receive('first').and_return(obj)
+          @design_doc.should_receive('view').and_return(view)
+          @model.find_by_name!('fred').should eql(obj)
+        end
+        it "should create find_! view method and raise error when nil" do
+          @klass.create_model_methods(@design_doc, 'by_name')
+          view = mock("View")
+          view.should_receive('key').with('fred').and_return(view)
+          view.should_receive('first').and_return(nil)
+          @design_doc.should_receive('view').and_return(view)
+          lambda { @model.find_by_name!('fred') }.should raise_error(CouchRest::Model::DocumentNotFound)
+        end
+
       end
     end
 

@@ -1,5 +1,9 @@
 # CouchRest Model Change History
 
+## 2.0.3 - pending
+
+  * Added find_by_view! method support for raising DocumentNotFound error when searching.
+
 ## 2.0.2 - 2014-02-06
 
   * Fix for model_type_value, not being used correctly from database.
