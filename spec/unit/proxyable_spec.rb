@@ -194,6 +194,7 @@ describe CouchRest::Model::Proxyable do
         @obj.should respond_to('by_name')
         @obj.should respond_to('find_all')
         @obj.should respond_to('find_by_name')
+        @obj.should respond_to('find_by_name!')
       end
 
       it "should create 'all' view method that forward to model's view with proxy" do
@@ -212,6 +213,14 @@ describe CouchRest::Model::Proxyable do
         view.should_receive('first').and_return(nil)
         @obj.should_receive(:by_name).and_return(view)
         @obj.find_by_name('name')
+      end
+
+      it "should create 'find_by_name!' that raises error when there are no results" do
+        view = mock('view')
+        view.should_receive('key').with('name').and_return(view)
+        view.should_receive('first').and_return(nil)
+        @obj.should_receive(:by_name).and_return(view)
+        lambda { @obj.find_by_name!('name') }.should raise_error(CouchRest::Model::DocumentNotFound)
       end
 
     end
