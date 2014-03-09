@@ -91,7 +91,7 @@ or alternatively below command do the same work
 ```ruby
 rails new <application-name> --skip-active-record
 ```
-Now in the gem file just add [couchrest_model]
+Now in the gem file just add [couchrest_model] and you are good to go.
 
 ## Generators
 
