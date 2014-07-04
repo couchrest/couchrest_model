@@ -1,4 +1,4 @@
-require 'active_model'
+require "active_model"
 require "active_model/callbacks"
 require "active_model/conversion"
 require "active_model/errors"
@@ -9,22 +9,22 @@ require "active_model/validator"
 require "active_model/validations"
 require "active_model/dirty"
 
-require 'active_support/core_ext'
-require 'active_support/json'
+require "active_support/core_ext"
+require "active_support/json"
 
-require 'mime/types'
+require "mime/types"
 require "enumerator"
 require "time"
-require 'digest/md5'
+require "digest/md5"
 
-require 'bigdecimal' # used in typecast
-require 'bigdecimal/util' # used in typecast
+require "bigdecimal" # used in typecast
+require "bigdecimal/util" # used in typecast
 
-require 'couchrest'
+require "couchrest"
 
-require 'couchrest/model'
-require 'couchrest/model/errors'
-require 'couchrest/model/translation'
+require "couchrest/model"
+require "couchrest/model/errors"
+require "couchrest/model/translation"
 require "couchrest/model/persistence"
 require "couchrest/model/typecast"
 require "couchrest/model/casted_by"
@@ -62,6 +62,4 @@ require "couchrest/model/base"
 require "couchrest/model/utils/migrate.rb"
 
 # Add rails support *after* everything has loaded
-if defined?(Rails)
-  require "couchrest/railtie"
-end
+require "couchrest/railtie" if defined?(Rails)

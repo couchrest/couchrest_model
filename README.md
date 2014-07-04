@@ -87,6 +87,12 @@ require 'rails/test_unit/railtie'
 
 You'll then need to make sure any references to `config.active_record` are removed from your environment files.
 
+or alternatively below command do the same work
+```ruby
+rails new <application-name> --skip-active-record
+```
+Now in the gem file just add [couchrest_model] and you are good to go.
+
 ## Generators
 
 ### Configuration
