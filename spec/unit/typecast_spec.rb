@@ -80,6 +80,11 @@ describe "Type Casting" do
       @course.symbol = "a_symbol"
       @course['symbol'].should equal(:a_symbol)
     end
+
+    it "turns blank value into nil" do
+      @course.symbol = ""
+      @course['symbol'].should be_nil
+    end
   end
 
 

@@ -66,7 +66,7 @@ module CouchRest
         end
 
         def typecast_to_symbol(value)
-          value.to_sym
+          value.kind_of?(Symbol) || !value.to_s.empty? ? value.to_sym : nil
         end
 
         # Typecast a value to a true or false

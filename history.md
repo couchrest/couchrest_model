@@ -1,8 +1,9 @@
 # CouchRest Model Change History
 
-## 2.0.3 - pending
+## 2.0.3 - 2014-07-04 
 
   * Added find_by_view! method support for raising DocumentNotFound error when searching.
+  * Upgraded CouchRest to ~> 1.2.0
 
 ## 2.0.2 - 2014-02-06
 
