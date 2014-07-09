@@ -29,7 +29,7 @@ module CouchRest::Model
       if array
         if value.nil?
           value = []
-        elsif [Hash, HashWithIndifferentAccess].include?(value.class)
+        elsif value.is_a?(Hash)
           # Assume provided as a params hash where key is index
           value = parameter_hash_to_array(value)
         elsif !value.is_a?(Array)

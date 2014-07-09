@@ -328,6 +328,15 @@ describe "properties of array of casted models" do
     @course.questions.last.class.should eql(Question)
   end
 
+  it "should allow attribute to be set from Hash subclass with ordered keys" do
+    ourhash = Class.new(HashWithIndifferentAccess)
+    hash = ourhash.new({ '0' => {:q => "Test1"}, '1' => {:q => 'Test2'} })
+    @course.questions = hash
+    @course.questions.length.should eql(2)
+    @course.questions.last.q.should eql('Test2')
+    @course.questions.last.class.should eql(Question)
+  end
+
   it "should raise an error if attempting to set single value for array type" do
     lambda {
       @course.questions = Question.new(:q => 'test1')

@@ -1,5 +1,9 @@
 # CouchRest Model Change History
 
+## 2.0.4 - pending
+
+  * Casting Array properties using anything that inherits from Hash.
+
 ## 2.0.3 - 2014-07-04 
 
   * Added find_by_view! method support for raising DocumentNotFound error when searching.
