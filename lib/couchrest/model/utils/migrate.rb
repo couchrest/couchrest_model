@@ -75,10 +75,13 @@ module CouchRest
         def migrate_each_proxying_model(models)
           callbacks = [ ]
           models.each do |model|
-            submodels = model.proxied_model_names.map{|n| n.constantize}
-            model.all.each do |base|
-              puts "Finding proxied models for #{model}: \"#{base.send(model.proxy_database_method)}\""
-              callbacks += migrate_each_model(submodels, base.proxy_database)
+            methods = model.proxy_method_names
+            methods.each do |method|
+              puts "Finding proxied models for #{model}##{method}"
+              model.all.each do |obj|
+                proxy = obj.send(method)
+                callbacks += migrate_each_model([proxy.model], proxy.database)
+              end
             end
           end
           callbacks

@@ -78,6 +78,11 @@ describe CouchRest::Model::Proxyable do
         @class.proxied_model_names.should eql(['Cat'])
       end
 
+      it "should add method names to proxied method name array" do
+        @class.proxy_for(:cats)
+        @class.proxy_method_names.should eql([:cats])
+      end
+
       it "should create a new method" do
         DummyProxyable.stub!(:method_defined?).and_return(true)
         DummyProxyable.proxy_for(:cats)
