@@ -88,7 +88,9 @@ module CouchRest
         end
 
         def migrate_design(model, design, db = nil)
-          print "Migrating #{model.to_s}##{design.method_name}... "
+          print "Migrating #{model.to_s}##{design.method_name}"
+          print " on #{db.name}" if db
+          print "... "
           callback = design.migrate(db) do |result|
             puts "#{result.to_s.gsub(/_/, ' ')}"
           end
