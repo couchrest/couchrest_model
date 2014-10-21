@@ -59,7 +59,7 @@ module CouchRest
         end
 
         def find_proxying_models
-          CouchRest::Model::Base.subclasses.reject{|m| m.proxy_database_method.blank?}
+          CouchRest::Model::Base.subclasses.reject{|m| m.proxy_method_names.empty?}
         end
 
         def migrate_each_model(models, db = nil)
