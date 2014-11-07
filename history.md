@@ -4,6 +4,7 @@
 
   * Casting Array properties using anything that inherits from Hash.
   * Adding `.proxy_method_names` call to help migrations with multiple proxied models.
+  * Fixing `collection_of` dirty tracking when setting with objects.
 
 ## 2.0.3 - 2014-07-04 
 

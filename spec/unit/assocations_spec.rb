@@ -126,6 +126,7 @@ describe "Assocations" do
       @invoice.entry_ids = @entries.collect{|i| i.id}
       @invoice.entries.length.should eql(3)
       @invoice.entries.first.should eql(@entries.first)
+      @invoice.changed?.should be_true
     end
 
     it "should ignore blank ids when set directly" do
@@ -171,6 +172,10 @@ describe "Assocations" do
 
     # Account for dirty tracking
     describe "dirty tracking" do
+      it "should register changes on replacement" do
+        @invoice.entries = @entries
+        @invoice.changed?.should be_true
+      end
       it "should register changes on push" do
         @invoice.changed?.should be_false
         @invoice.entries << @entries[0]

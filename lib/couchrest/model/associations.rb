@@ -183,48 +183,56 @@ module CouchRest
       def initialize(array, property, parent)
         (array ||= []).compact!
         super(array, property, parent)
-        casted_by[casted_by_property.to_s] = [] # replace the original array!
+        self.casted_by_attribute = [] # replace the original array!
         array.compact.each do |obj|
           check_obj(obj)
-          casted_by[casted_by_property.to_s] << obj.id
+          casted_by_attribute << obj.id
         end
       end
 
       def << obj
         check_obj(obj)
-        casted_by[casted_by_property.to_s] << obj.id
+        casted_by_attribute << obj.id
         super(obj)
       end
 
       def push(obj)
         check_obj(obj)
-        casted_by[casted_by_property.to_s].push obj.id
+        casted_by_attribute.push obj.id
         super(obj)
       end
 
       def unshift(obj)
         check_obj(obj)
-        casted_by[casted_by_property.to_s].unshift obj.id
+        casted_by_attribute.unshift obj.id
         super(obj)
       end
 
       def []= index, obj
         check_obj(obj)
-        casted_by[casted_by_property.to_s][index] = obj.id
+        casted_by_attribute[index] = obj.id
         super(index, obj)
       end
 
       def pop
-        casted_by[casted_by_property.to_s].pop
+        casted_by_attribute.pop
         super
       end
 
       def shift
-        casted_by[casted_by_property.to_s].shift
+        casted_by_attribute.shift
         super
       end
 
       protected
+
+      def casted_by_attribute=(value)
+        casted_by.write_attribute(casted_by_property, value)
+      end
+
+      def casted_by_attribute
+        casted_by.read_attribute(casted_by_property)
+      end
 
       def check_obj(obj)
         raise "Object cannot be added to #{casted_by.class.to_s}##{casted_by_property.to_s} collection unless saved" if obj.new?
