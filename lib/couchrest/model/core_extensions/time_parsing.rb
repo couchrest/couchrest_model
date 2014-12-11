@@ -10,6 +10,13 @@ module CouchRest
         # Times, unless provided with a time zone, are assumed to be in 
         # UTC.
         #
+        # Uses String#to_r on seconds portion to avoid rounding errors. Eg:
+        #     Time.parse_iso8601("2014-12-11T16:54:54.549Z").as_json
+        #      => "2014-12-11T16:54:54.548Z"
+        #
+        # See: https://bugs.ruby-lang.org/issues/7829
+        #
+
         def parse_iso8601(string)
           if (string =~ /(\d{4})[\-|\/](\d{2})[\-|\/](\d{2})[T|\s](\d{2}):(\d{2}):(\d{2}(\.\d+)?)(Z| ?([\+|\s|\-])?(\d{2}):?(\d{2}))?/)
             # $1 = year
@@ -24,9 +31,9 @@ module CouchRest
             # $11 = tz difference minutes
 
             if $8 == 'Z' || $8.to_s.empty?
-              utc($1.to_i, $2.to_i, $3.to_i, $4.to_i, $5.to_i, $6.to_f)
+              utc($1.to_i, $2.to_i, $3.to_i, $4.to_i, $5.to_i, $6.to_r)
             else
-              new($1.to_i, $2.to_i, $3.to_i, $4.to_i, $5.to_i, $6.to_f, "#{$9 == '-' ? '-' : '+'}#{$10}:#{$11}")
+              new($1.to_i, $2.to_i, $3.to_i, $4.to_i, $5.to_i, $6.to_r, "#{$9 == '-' ? '-' : '+'}#{$10}:#{$11}")
             end
           else
             parse(string)
