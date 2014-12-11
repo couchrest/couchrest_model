@@ -99,6 +99,21 @@ describe "Time Parsing core extension" do
           Time.parse_iso8601(txt).should eql(Time.new(2011, 04, 01, 19, 05, 30, "+02:30"))
         end
 
+        it "should parse JSON time with second fractions" do
+          txt = "2014-12-11T16:53:54.000Z"
+          Time.parse_iso8601(txt).should eql(Time.utc(2014, 12, 11, 16, 53, Rational(54000, 1000)))
+        end
+
+        it "should avoid rounding errors parsing JSON time with second fractions" do
+          txt = "2014-12-11T16:53:54.548Z"
+          Time.parse_iso8601(txt).should eql(Time.utc(2014, 12, 11, 16, 53, Rational(54548,1000)))
+        end
+
+      end
+
+      it "avoids seconds rounding error" do
+        time_string = "2014-12-11T16:54:54.549Z"
+        Time.parse_iso8601(time_string).as_json.should eql(time_string)
       end
 
       describe "resorting back to normal parse" do
