@@ -209,6 +209,13 @@ module CouchRest
         filters[name.to_s] = function
       end
 
+      ######## VIEW LIBS #########
+
+      def create_view_lib(name, function)
+        filters = (self['views']['lib'] ||= {})
+        filters[name.to_s] = function
+      end
+
       protected
 
       def load_from_database(db = database, id = nil)
@@ -221,7 +228,7 @@ module CouchRest
       # Calculate and update the checksum of the Design document.
       # Used for ensuring the latest version has been sent to the database.
       #
-      # This will generate an flatterned, ordered array of all the elements of the
+      # This will generate a flatterned, ordered array of all the elements of the
       # design document, convert to string then generate an MD5 Hash. This should
       # result in a consisitent Hash accross all platforms.
       #
@@ -233,14 +240,13 @@ module CouchRest
         base.delete('_id')
         base.delete('_rev')
         base.delete('couchrest-hash')
-        result = nil
         flatten =
           lambda {|r|
             (recurse = lambda {|v|
               if v.is_a?(Hash) || v.is_a?(CouchRest::Document)
-                v.to_a.map{|v| recurse.call(v)}.flatten
+                v.to_a.map{|p| recurse.call(p)}.flatten
               elsif v.is_a?(Array)
-                v.flatten.map{|v| recurse.call(v)}
+                v.flatten.map{|p| recurse.call(p)}
               else
                 v.to_s
               end

@@ -120,5 +120,19 @@ describe CouchRest::Model::Designs::DesignMapper do
     end
   end
 
+  describe "#view_lib" do
+    before :each do
+      @object = @klass.new(DesignModel)
+    end
+
+    it "should add the #view_lib function to the design doc" do
+      val = "exports.bar = 42;"
+      @object.view_lib(:foo, val)
+      DesignModel.design_doc['views']['lib'].should_not be_empty
+      DesignModel.design_doc['views']['lib'].should_not be_blank
+      DesignModel.design_doc['views']['lib']['foo'].should eql(val)
+    end
+  end
+
 end
 

@@ -5,6 +5,7 @@
   * Casting Array properties using anything that inherits from Hash.
   * Adding `.proxy_method_names` call to help migrations with multiple proxied models.
   * Fixing `collection_of` dirty tracking when setting with objects.
+  * (RC1) Added support for design doc `#view_lib` method for [CommonJS modules in views](http://wiki.apache.org/couchdb/CommonJS_Modules).
 
 ## 2.0.3 - 2014-07-04 
 

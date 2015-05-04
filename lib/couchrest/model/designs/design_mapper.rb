@@ -49,6 +49,11 @@ module CouchRest
           design_doc.create_filter(name, function)
         end
 
+        # Define a new view re-usable lib for shared functions.
+        def view_lib(name, function)
+          design_doc.create_view_lib(name, function)
+        end
+
         # Convenience wrapper to access model's type key option.
         def model_type_key
           model.model_type_key

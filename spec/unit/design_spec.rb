@@ -346,6 +346,17 @@ describe CouchRest::Model::Design do
       end
     end
 
+    describe "#create_view_lib" do
+      before :each do
+        @doc = DesignSampleModel.design_doc
+      end
+
+      it "should add simple view lib" do
+        @doc.create_view_lib('test', 'foobar')
+        @doc['views']['lib']['test'].should eql('foobar')
+        @doc['views']['lib'] = nil # cleanup
+      end
+    end
   end
 
 
