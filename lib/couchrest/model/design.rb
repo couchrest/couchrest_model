@@ -3,6 +3,7 @@ module CouchRest
   module Model
 
     class Design < ::CouchRest::Design
+      include CouchRest::Model::Designs::Migrations
 
       # The model Class that this design belongs to and method name
       attr_accessor :model, :method_name
@@ -54,108 +55,6 @@ module CouchRest
         end
 
         self
-      end
-
-      # Migrate the design document preventing downtime on a production
-      # system. Typically this will be used when auto updates are disabled.
-      #
-      # Steps taken are:
-      #
-      #  1. Compare the checksum with the current version
-      #  2. If different, create a new design doc with timestamp
-      #  3. Wait until the view returns a result
-      #  4. Copy over the original design doc
-      #
-      # If a block is provided, it will be called with the result of the migration:
-      #
-      #  * :no_change - Nothing performed as there are no changes.
-      #  * :created   - Add a new design doc as non existed
-      #  * :migrated  - Migrated the existing design doc.
-      #
-      # This can be used for progressivly printing the results of the migration.
-      #
-      # After completion, either a "cleanup" Proc object will be provided to finalize
-      # the process and copy the document into place, or simply nil if no cleanup is
-      # required. For example:
-      #
-      #     print "Synchronising Cat model designs: "
-      #     callback = Cat.design_doc.migrate do |res|
-      #       puts res.to_s
-      #     end
-      #     if callback
-      #       puts "Cleaning up."
-      #       callback.call
-      #     end
-      #
-      def migrate(db = nil, &block)
-        db    ||= database
-        doc     = load_from_database(db)
-        cleanup = nil
-        id      = self['_id']
-
-        if !doc
-          # no need to migrate, just save it
-          new_doc = to_hash.dup
-          db.save_doc(new_doc)
-
-          result = :created
-        elsif doc['couchrest-hash'] != checksum
-          id += "_migration"
-
-          # Delete current migration if there is one
-          old_migration = load_from_database(db, id)
-          db.delete_doc(old_migration) if old_migration
-
-          # Save new design doc
-          new_doc = doc.merge(to_hash)
-          new_doc['_id'] = id
-          new_doc.delete('_rev')
-          db.save_doc(new_doc)
-
-          # Proc definition to copy the migration doc over the original
-          cleanup = Proc.new do
-            db.copy_doc(new_doc, doc)
-            db.delete_doc(new_doc)
-            self
-          end
-
-          result = :migrated
-        else
-          # Already up to date
-          result = :no_change
-        end
-
-        if new_doc && !new_doc['views'].empty?
-          # Create a view query and send
-          name = new_doc['views'].keys.first
-          view = new_doc['views'][name]
-          params = {:limit => 1}
-          params[:reduce] = false if view['reduce']
-          db.view("#{id}/_view/#{name}", params) do |res|
-            # Block to use streamer!
-          end
-        end
-
-        # Provide the result in block
-        yield result if block_given?
-
-        cleanup
-      end
-
-      # Perform a single migration and inmediatly request a cleanup operation:
-      #
-      #     print "Synchronising Cat model designs: "
-      #     Cat.design_doc.migrate! do |res|
-      #       puts res.to_s
-      #     end
-      #
-      def migrate!(db = nil, &block)
-        callback = migrate(db, &block)
-        if callback.is_a?(Proc)
-          callback.call
-        else
-          callback
-        end
       end
 
       def checksum
