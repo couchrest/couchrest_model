@@ -104,7 +104,7 @@ module CouchRest
 
         def wait_for_view_update_completion(db, attrs)
           if attrs && !attrs['views'].empty?
-            # Pepare a design doc we can use
+            # Prepare a design doc we can use
             doc = CouchRest::Design.new(attrs)
             doc.database = db
 
