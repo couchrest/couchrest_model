@@ -14,7 +14,16 @@ describe CouchRest::Model::Designs::Migrations do
 
       describe "with limited changes" do
 
-        class DesignSampleModelMigrate < DesignSampleModelBase
+        class MigrationModelBase < CouchRest::Model::Base
+          use_database DB
+          property :name
+          property :surname
+          design do
+            view :by_name
+          end
+        end
+
+        class DesignSampleModelMigrate < MigrationModelBase
         end
 
         before :all do
@@ -25,7 +34,7 @@ describe CouchRest::Model::Designs::Migrations do
         end
 
         it "should create new design if non exists" do
-          @db.should_receive(:view).with("#{@doc['_id']}/_view/#{@doc['views'].keys.first}", {:limit => 1, :reduce => false})
+          @db.should_receive(:view).with("#{@doc.name}/#{@doc['views'].keys.first}", {:limit => 1, :stale => 'ok', :reduce => false})
           callback = @doc.migrate do |res|
             res.should eql(:created)
           end
@@ -47,7 +56,7 @@ describe CouchRest::Model::Designs::Migrations do
 
       describe "migrating a document if there are changes" do
 
-        class DesignSampleModelMigrate2 < DesignSampleModelBase
+        class DesignSampleModelMigrate2 < MigrationModelBase
         end
 
         before :all do
@@ -61,7 +70,7 @@ describe CouchRest::Model::Designs::Migrations do
         end
 
         it "should save new migration design doc" do
-          @db.should_receive(:view).with("#{@doc_id}/_view/by_name", {:limit => 1, :reduce => false})
+          @db.should_receive(:view).with("#{@doc.name}_migration/by_name", {:limit => 1, :reduce => false, :stale => 'ok'})
           @callback = @doc.migrate do |res|
             res.should eql(:migrated)
           end

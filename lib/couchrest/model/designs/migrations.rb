@@ -79,7 +79,6 @@ module CouchRest
 
           wait_for_view_update_completion(db, new_doc)
 
-          # Provide the result in block
           yield result if block_given?
 
           cleanup
@@ -103,19 +102,24 @@ module CouchRest
 
         private
 
-        def wait_for_view_update_completion(db, doc)
-          if doc && !doc['views'].empty?
-            # Create a view query and send
-            name = doc['views'].keys.first
-            view = doc['views'][name]
-            params = {:limit => 1, :stale => "ok"}
-            params[:reduce] = false if view['reduce']
-            view_name = "#{id}/_view/#{name}"
+        def wait_for_view_update_completion(db, attrs)
+          if attrs && !attrs['views'].empty?
+            # Pepare a design doc we can use
+            doc = CouchRest::Design.new(attrs)
+            doc.database = db
 
             # Request view, to trigger a *background* view update
-            db.view(view_name, params)
+            doc.view(doc['views'].keys.first, :limit => 1, :stale => "ok")
 
             # Poll the view update process
+            while true
+              info = doc.info
+              if !info || !info['view_index']
+                raise "Migration error, unable to load design doc info: #{db.root}/#{doc.id}"
+              end
+              break if !info['view_index']['updater_running']
+              sleep 1
+            end
           end
         end
 

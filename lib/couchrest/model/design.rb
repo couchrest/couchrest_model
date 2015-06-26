@@ -3,7 +3,7 @@ module CouchRest
   module Model
 
     class Design < ::CouchRest::Design
-      include CouchRest::Model::Designs::Migrations
+      include ::CouchRest::Model::Designs::Migrations
 
       # The model Class that this design belongs to and method name
       attr_accessor :model, :method_name

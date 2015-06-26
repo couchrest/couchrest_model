@@ -1,11 +1,13 @@
 # CouchRest Model Change History
 
-## 2.0.4 - pending
+## 2.0.4 - 2015-06-26
 
-  * Casting Array properties using anything that inherits from Hash.
-  * Adding `.proxy_method_names` call to help migrations with multiple proxied models.
-  * Fixing `collection_of` dirty tracking when setting with objects.
-  * (RC1) Added support for design doc `#view_lib` method for [CommonJS modules in views](http://wiki.apache.org/couchdb/CommonJS_Modules).
+  * Casting Array properties using anything that inherits from Hash. (@samlown)
+  * Adding `.proxy_method_names` call to help migrations with multiple proxied models. (@samlown)
+  * Fixing `collection_of` dirty tracking when setting with objects. (@samlown)
+  * Added support for design doc `#view_lib` method for [CommonJS modules in views](http://wiki.apache.org/couchdb/CommonJS_Modules). (@samlown)
+  * Updating CouchRest dependency to ~> 1.2.1 (@samlown)
+  * Migrations use design doc info requests as opposed to Stream (@samlown)
 
 ## 2.0.3 - 2014-07-04 
 
