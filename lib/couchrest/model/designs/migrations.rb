@@ -109,16 +109,16 @@ module CouchRest
             doc.database = db
 
             # Request view, to trigger a *background* view update
-            doc.view(doc['views'].keys.first, :limit => 1, :stale => "ok")
+            doc.view(doc['views'].keys.first, :limit => 1, :stale => "update_after")
 
             # Poll the view update process
             while true
+              sleep 1
               info = doc.info
               if !info || !info['view_index']
                 raise "Migration error, unable to load design doc info: #{db.root}/#{doc.id}"
               end
               break if !info['view_index']['updater_running']
-              sleep 1
             end
           end
         end

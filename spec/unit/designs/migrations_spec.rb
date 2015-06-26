@@ -34,7 +34,9 @@ describe CouchRest::Model::Designs::Migrations do
         end
 
         it "should create new design if non exists" do
-          @db.should_receive(:view).with("#{@doc.name}/#{@doc['views'].keys.first}", {:limit => 1, :stale => 'ok', :reduce => false})
+          @db.should_receive(:view).with("#{@doc.name}/#{@doc['views'].keys.first}", {
+            :limit => 1, :stale => 'update_after', :reduce => false
+          })
           callback = @doc.migrate do |res|
             res.should eql(:created)
           end
@@ -70,7 +72,9 @@ describe CouchRest::Model::Designs::Migrations do
         end
 
         it "should save new migration design doc" do
-          @db.should_receive(:view).with("#{@doc.name}_migration/by_name", {:limit => 1, :reduce => false, :stale => 'ok'})
+          @db.should_receive(:view).with("#{@doc.name}_migration/by_name", {
+            :limit => 1, :reduce => false, :stale => 'update_after'
+          })
           @callback = @doc.migrate do |res|
             res.should eql(:migrated)
           end
