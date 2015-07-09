@@ -136,7 +136,7 @@ describe CouchRest::Model::Designs do
 
       it "will fail if reduce is not specific in view" do
         @mod.create(:title => 'This is a test')
-        lambda { @mod.by_title_fail.first }.should raise_error(RestClient::ResourceNotFound)
+        lambda { @mod.by_title_fail.first }.should raise_error(CouchRest::NotFound)
       end
 
       it "will perform view request" do

@@ -4,7 +4,7 @@ describe "Model Attributes" do
 
   describe "no declarations" do
     class NoProtection < CouchRest::Model::Base
-      use_database TEST_SERVER.default_database
+      use_database DB 
       property :name
       property :phone
     end
@@ -44,7 +44,7 @@ describe "Model Attributes" do
 
   describe "Model Base", "accessible flag" do
     class WithAccessible < CouchRest::Model::Base
-      use_database TEST_SERVER.default_database
+      use_database DB
       property :name, :accessible => true
       property :admin, :default => false
     end
@@ -81,7 +81,7 @@ describe "Model Attributes" do
 
   describe "Model Base", "protected flag" do
     class WithProtected < CouchRest::Model::Base
-      use_database TEST_SERVER.default_database
+      use_database DB
       property :name
       property :admin, :default => false, :protected => true
     end
@@ -127,7 +127,7 @@ describe "Model Attributes" do
 
   describe "Model Base", "mixing protected and accessible flags" do
     class WithBothAndUnspecified < CouchRest::Model::Base
-      use_database TEST_SERVER.default_database
+      use_database DB
       property :name, :accessible => true
       property :admin, :default => false, :protected => true
       property :phone, :default => 'unset phone number'
@@ -147,7 +147,7 @@ describe "Model Attributes" do
 
   describe "from database" do
     class WithProtected < CouchRest::Model::Base
-      use_database TEST_SERVER.default_database
+      use_database DB
       property :name
       property :admin, :default => false, :protected => true
       design do

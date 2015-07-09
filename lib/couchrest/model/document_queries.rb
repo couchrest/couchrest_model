@@ -57,7 +57,7 @@ module CouchRest
 
           doc = db.get id
           build_from_database(doc)
-        rescue RestClient::ResourceNotFound
+        rescue CouchRest::NotFound
           raise CouchRest::Model::DocumentNotFound
         end
         alias :find! :get!

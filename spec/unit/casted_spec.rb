@@ -1,7 +1,7 @@
 require "spec_helper"
 
 class Driver < CouchRest::Model::Base
-  use_database TEST_SERVER.default_database
+  use_database DB
   # You have to add a casted_by accessor if you want to reach a casted extended doc parent
   attr_accessor :casted_by
   
@@ -9,7 +9,7 @@ class Driver < CouchRest::Model::Base
 end
 
 class Car < CouchRest::Model::Base
-  use_database TEST_SERVER.default_database
+  use_database DB
   
   property :name
   property :driver, Driver

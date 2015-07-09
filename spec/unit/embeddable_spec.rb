@@ -15,8 +15,7 @@ class OldFashionedMixin < Hash
 end
 
 class DummyModel < CouchRest::Model::Base
-  use_database TEST_SERVER.default_database
-  raise "Default DB not set" if TEST_SERVER.default_database.nil?
+  use_database DB 
   property :casted_attribute, WithCastedModelMixin
   property :keywords,         [String]
   property :old_casted_attribute, OldFashionedMixin
@@ -45,8 +44,7 @@ class WithCastedCallBackModel
 end
 
 class CastedCallbackDoc < CouchRest::Model::Base
-  use_database TEST_SERVER.default_database
-  raise "Default DB not set" if TEST_SERVER.default_database.nil?
+  use_database DB 
   property :callback_model, WithCastedCallBackModel
 end
 

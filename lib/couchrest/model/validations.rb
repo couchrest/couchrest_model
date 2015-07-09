@@ -55,7 +55,7 @@ module CouchRest
         # Asside from the standard options, you can specify the name of the view you'd like
         # to use for the search inside the +:view+ option. The following example would search
         # for the code in side the +all+ view, useful for when +unique_id+ is used and you'd
-        # like to check before receiving a RestClient Conflict error:
+        # like to check before receiving a CouchRest::Conflict error:
         #
         #   validates_uniqueness_of :code, :view => 'all'
         #

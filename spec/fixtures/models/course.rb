@@ -3,7 +3,7 @@ require 'person'
 require 'money'
 
 class Course < CouchRest::Model::Base
-  use_database TEST_SERVER.default_database
+  use_database DB 
   
   property :title, String
   property :subtitle, String, :allow_blank => false

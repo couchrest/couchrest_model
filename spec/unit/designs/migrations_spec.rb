@@ -90,7 +90,7 @@ describe CouchRest::Model::Designs::Migrations do
 
           # should be possible to perform cleanup
           @callback.call
-          lambda { new_doc = @db.get(@doc_id) }.should raise_error RestClient::ResourceNotFound
+          lambda { new_doc = @db.get(@doc_id) }.should raise_error CouchRest::NotFound
 
           doc = @db.get(@doc['_id'])
           doc['views'].should have_key('by_name_and_surname')

@@ -18,7 +18,7 @@ unless defined?(FIXTURE_PATH)
   COUCHHOST = "http://127.0.0.1:5984"
   TESTDB    = 'couchrest-model-test'
   TEST_SERVER    = CouchRest.new COUCHHOST
-  TEST_SERVER.default_database = TESTDB
+  # TEST_SERVER.default_database = TESTDB
   DB = TEST_SERVER.database(TESTDB)
 end
 
@@ -38,7 +38,7 @@ end
 Dir[ File.join(MODEL_PATH, "*.rb") ].sort.each { |file| require File.basename(file) }
 
 class Basic < CouchRest::Model::Base
-  use_database TEST_SERVER.default_database
+  use_database DB
 end
 
 def reset_test_db!

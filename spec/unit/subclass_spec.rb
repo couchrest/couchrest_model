@@ -23,7 +23,7 @@ class OnlineCourse < Course
 end
 
 class Animal < CouchRest::Model::Base
-  use_database TEST_SERVER.default_database
+  use_database DB
   property :name
   design do
     view :by_name

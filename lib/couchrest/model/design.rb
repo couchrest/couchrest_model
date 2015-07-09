@@ -120,7 +120,7 @@ module CouchRest
       def load_from_database(db = database, id = nil)
         id ||= self['_id']
         db.get(id)
-      rescue RestClient::ResourceNotFound
+      rescue CouchRest::NotFound
         nil
       end
 
