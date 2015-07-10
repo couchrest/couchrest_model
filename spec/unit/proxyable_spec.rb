@@ -27,9 +27,9 @@ describe CouchRest::Model::Proxyable do
     end
 
     it "should provide proxy database from method" do
-      @class.stub!(:proxy_database_method).twice.and_return(:slug)
-      @obj.proxy_database.should be_a(CouchRest::Database)
-      @obj.proxy_database.name.should eql('couchrest_proxy')
+      expect(@class).to receive(:proxy_database_method).at_least(:twice).and_return(:slug)
+      expect(@obj.proxy_database).to be_a(CouchRest::Database)
+      expect(@obj.proxy_database.name).to eql('couchrest_proxy')
     end
 
     it "should raise an error if called and no proxy_database_method set" do
@@ -84,7 +84,7 @@ describe CouchRest::Model::Proxyable do
       end
 
       it "should create a new method" do
-        DummyProxyable.stub!(:method_defined?).and_return(true)
+        DummyProxyable.stub(:method_defined?).and_return(true)
         DummyProxyable.proxy_for(:cats)
         DummyProxyable.new.should respond_to(:cats)
       end
@@ -178,10 +178,10 @@ describe CouchRest::Model::Proxyable do
     end
 
     before :each do
-      @design_doc = mock('Design')
-      @design_doc.stub!(:view_names).and_return(['all', 'by_name'])
-      @model = mock('Cat')
-      @model.stub!(:design_docs).and_return([@design_doc])
+      @design_doc = double('Design')
+      @design_doc.stub(:view_names).and_return(['all', 'by_name'])
+      @model = double('Cat')
+      @model.stub(:design_docs).and_return([@design_doc])
       @obj = @klass.new(@model, 'owner', 'owner_name', 'database')
     end
 
@@ -213,7 +213,7 @@ describe CouchRest::Model::Proxyable do
       end
 
       it "should create 'find_by_name' view that forwards to normal view" do
-        view = mock('view')
+        view = double('view')
         view.should_receive('key').with('name').and_return(view)
         view.should_receive('first').and_return(nil)
         @obj.should_receive(:by_name).and_return(view)
@@ -221,7 +221,7 @@ describe CouchRest::Model::Proxyable do
       end
 
       it "should create 'find_by_name!' that raises error when there are no results" do
-        view = mock('view')
+        view = double('view')
         view.should_receive('key').with('name').and_return(view)
         view.should_receive('first').and_return(nil)
         @obj.should_receive(:by_name).and_return(view)
@@ -243,21 +243,21 @@ describe CouchRest::Model::Proxyable do
       end
 
       it "should proxy #count" do
-        view = mock('View')
+        view = double('View')
         view.should_receive(:count).and_return(nil)
         @model.should_receive(:all).and_return(view)
         @obj.count
       end
 
       it "should proxy #first" do
-        view = mock('View')
+        view = double('View')
         view.should_receive(:first).and_return(nil)
         @model.should_receive(:all).and_return(view)
         @obj.first
       end
 
       it "should proxy #last" do
-        view = mock('View')
+        view = double('View')
         view.should_receive(:last).and_return(nil)
         @model.should_receive(:all).and_return(view)
         @obj.last
@@ -279,7 +279,7 @@ describe CouchRest::Model::Proxyable do
 
       describe "#proxy_update" do
         it "should set returned doc fields" do
-          doc = mock(:Document)
+          doc = double(:Document)
           doc.should_receive(:is_a?).with(@model).and_return(true)
           doc.should_receive(:database=).with('database')
           doc.should_receive(:model_proxy=).with(@obj)
@@ -288,7 +288,7 @@ describe CouchRest::Model::Proxyable do
         end
 
         it "should not set anything if matching document not provided" do
-          doc = mock(:DocumentFoo)
+          doc = double(:DocumentFoo)
           doc.should_receive(:is_a?).with(@model).and_return(false)
           doc.should_not_receive(:database=)
           doc.should_not_receive(:model_proxy=)

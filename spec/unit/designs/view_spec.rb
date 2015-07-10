@@ -66,7 +66,7 @@ describe "Design View" do
 
       describe "with proxy in query for first initialization" do
         it "should set model to proxy object and remove from query" do
-          proxy = mock("Proxy")
+          proxy = double("Proxy")
           @obj = @klass.new(@mod.design_doc, @mod, {:proxy => proxy}, 'test_view')
           @obj.model.should eql(proxy)
         end
@@ -74,7 +74,7 @@ describe "Design View" do
 
       describe "with proxy in query for chained instance" do
         it "should set the model to proxy object instead of parents model" do
-          proxy = mock("Proxy")
+          proxy = double("Proxy")
           @obj = @klass.new(@mod.design_doc, @mod, {}, 'test_view')
           @obj.model.should eql(@mod)
           @obj = @obj.proxy(proxy)
@@ -109,7 +109,7 @@ describe "Design View" do
 
         before :each do
           @design_doc = { }
-          @design_doc.stub!(:model).and_return(DesignViewModel)
+          @design_doc.stub(:model).and_return(DesignViewModel)
         end
 
         it "should add a basic view" do
@@ -163,9 +163,9 @@ describe "Design View" do
         before :each do
           @model = DesignViewModel
           @design_doc = { }
-          @design_doc.stub!(:model).and_return(@model)
-          @design_doc.stub!(:method_name).and_return("design_doc")
-          @model.stub!('design_doc').and_return(@design_doc)
+          @design_doc.stub(:model).and_return(@model)
+          @design_doc.stub(:method_name).and_return("design_doc")
+          @model.stub('design_doc').and_return(@design_doc)
         end
         it "should create standard view method" do
           @klass.create_model_methods(@design_doc, 'by_name')
@@ -176,7 +176,7 @@ describe "Design View" do
         it "should create find_ view method" do
           @klass.create_model_methods(@design_doc, 'by_name')
           @model.should respond_to('find_by_name')
-          view = mock("View")
+          view = double("View")
           view.should_receive('key').with('fred').and_return(view)
           view.should_receive('first').and_return(nil)
           @design_doc.should_receive('view').and_return(view)
@@ -185,8 +185,8 @@ describe "Design View" do
         it "should create find_! view method" do
           @klass.create_model_methods(@design_doc, 'by_name')
           @model.should respond_to('find_by_name!')
-          obj = mock("SomeKlass")
-          view = mock("View")
+          obj = double("SomeKlass")
+          view = double("View")
           view.should_receive('key').with('fred').and_return(view)
           view.should_receive('first').and_return(obj)
           @design_doc.should_receive('view').and_return(view)
@@ -194,7 +194,7 @@ describe "Design View" do
         end
         it "should create find_! view method and raise error when nil" do
           @klass.create_model_methods(@design_doc, 'by_name')
-          view = mock("View")
+          view = double("View")
           view.should_receive('key').with('fred').and_return(view)
           view.should_receive('first').and_return(nil)
           @design_doc.should_receive('view').and_return(view)
@@ -224,6 +224,28 @@ describe "Design View" do
           CouchRest::Model::Designs::ViewRow.should_receive(:new).with({:foo => :bar}, @obj.model)
           @obj.rows
         end
+
+        describe "streaming" do
+          let :sample_data do
+            [
+              {"id" => "doc1", "key" => "doc1", "value" => {"rev" => "4324BB"}},
+              {"id" => "doc2", "key" => "doc2", "value" => {"rev" => "2441HF"}},
+              {"id" => "doc3", "key" => "doc3", "value" => {"rev" => "74EC24"}}
+            ]
+          end
+
+          it "should support blocks" do
+            expect(@obj).to receive(:execute) do |&block|
+              sample_data.each { |r| block.call(r) }
+            end
+            rows = []
+            @obj.rows {|r| rows << r }
+            expect(rows.length).to eql(3)
+            expect(rows.first).to be_a(CouchRest::Model::Designs::ViewRow)
+            expect(rows.first.id).to eql('doc1')
+            expect(rows.last.value['rev']).to eql('74EC24')
+          end
+        end
       end
 
       describe "#all" do
@@ -231,6 +253,11 @@ describe "Design View" do
           @obj.should_receive(:include_docs!)
           @obj.should_receive(:docs)
           @obj.all
+        end
+        it "should pass on a block" do
+          block = lambda { }
+          expect(@obj).to receive(:docs).with(&block)
+          @obj.all(&block)
         end
       end
 
@@ -244,6 +271,27 @@ describe "Design View" do
           @obj.docs
           @obj.docs
         end
+
+        describe "streaming" do
+          let :sample_data do
+            [
+              {"id" => "doc1", "key" => "doc1", "doc" => {"_id" => "123", "type" => 'DesignViewModel', 'name' => 'Test1'}},
+              {"id" => "doc3", "key" => "doc3", "doc" => {"_id" => "234", "type" => 'DesignViewModel', 'name' => 'Test2'}}
+            ]
+          end
+
+          it "should support blocks" do
+            expect(@obj).to receive(:execute) do |&block|
+              sample_data.each { |r| block.call(r) }
+            end
+            docs = []
+            @obj.docs {|d| docs << d }
+            expect(docs.length).to eql(2)
+            expect(docs.first).to be_a(DesignViewModel)
+            expect(docs.first.name).to eql('Test1')
+            expect(docs.last.id).to eql('234')
+          end
+        end
       end
 
       describe "#first" do
@@ -253,7 +301,7 @@ describe "Design View" do
           @obj.first.should eql(:foo)
         end
         it "should perform a query if no results cached" do
-          view = mock('SubView')
+          view = double('SubView')
           @obj.should_receive(:result).and_return(nil)
           @obj.should_receive(:limit).with(1).and_return(view)
           view.should_receive(:all).and_return([:foo])
@@ -268,7 +316,7 @@ describe "Design View" do
           @obj.first.should eql(:foo)
         end
         it "should perform a query if no results cached" do
-          view = mock('SubView')
+          view = double('SubView')
           @obj.should_receive(:result).and_return(nil)
           @obj.should_receive(:limit).with(1).and_return(view)
           view.should_receive(:descending).and_return(view)
@@ -291,8 +339,8 @@ describe "Design View" do
         end
 
         it "should return first row value if reduce possible" do
-          view = mock("SubView")
-          row = mock("Row")
+          view = double("SubView")
+          row = double("Row")
           @obj.should_receive(:can_reduce?).and_return(true)
           @obj.should_receive(:reduce).and_return(view)
           view.should_receive(:skip).with(0).and_return(view)
@@ -302,7 +350,7 @@ describe "Design View" do
           @obj.count.should eql(2)
         end
         it "should return 0 if no rows and reduce possible" do
-          view = mock("SubView")
+          view = double("SubView")
           @obj.should_receive(:can_reduce?).and_return(true)
           @obj.should_receive(:reduce).and_return(view)
           view.should_receive(:skip).with(0).and_return(view)
@@ -312,7 +360,7 @@ describe "Design View" do
         end
 
         it "should perform limit request for total_rows" do
-          view = mock("SubView")
+          view = double("SubView")
           @obj.should_receive(:limit).with(0).and_return(view)
           view.should_receive(:total_rows).and_return(4)
           @obj.should_receive(:can_reduce?).and_return(false)
@@ -322,7 +370,7 @@ describe "Design View" do
 
       describe "#empty?" do
         it "should check the #all method for any results" do
-          all = mock("All")
+          all = double("All")
           all.should_receive(:empty?).and_return('win')
           @obj.should_receive(:all).and_return(all)
           @obj.empty?.should eql('win')
@@ -361,7 +409,7 @@ describe "Design View" do
 
       describe "#values" do
         it "should request each row and provide value" do
-          row = mock("Row")
+          row = double("Row")
           row.should_receive(:value).twice.and_return('foo')
           @obj.should_receive(:rows).and_return([row, row])
           @obj.values.should eql(['foo', 'foo'])
@@ -433,7 +481,7 @@ describe "Design View" do
           @obj.startkey_doc('foo')
         end
         it "should update query with object id if available" do
-          doc = mock("Document")
+          doc = double("Document")
           doc.should_receive(:id).and_return(44)
           @obj.should_receive(:update_query).with({:startkey_docid => 44})
           @obj.startkey_doc(doc)
@@ -461,7 +509,7 @@ describe "Design View" do
           @obj.endkey_doc('foo')
         end
         it "should update query with object id if available" do
-          doc = mock("Document")
+          doc = double("Document")
           doc.should_receive(:id).and_return(44)
           @obj.should_receive(:update_query).with({:endkey_docid => 44})
           @obj.endkey_doc(doc)
@@ -488,7 +536,7 @@ describe "Design View" do
 
       describe "#keys (without parameters)" do
         it "should request each row and provide key value" do
-          row = mock("Row")
+          row = double("Row")
           row.should_receive(:key).twice.and_return('foo')
           @obj.should_receive(:rows).and_return([row, row])
           @obj.keys.should eql(['foo', 'foo'])
@@ -676,10 +724,10 @@ describe "Design View" do
       describe "#execute" do
         before :each do
           # disable real execution!
-          @design_doc = mock("DesignDoc")
-          @design_doc.stub!(:view_on)
-          @design_doc.stub!(:sync)
-          @obj.stub!(:design_doc).and_return(@design_doc)
+          @design_doc = double("DesignDoc")
+          @design_doc.stub(:view_on)
+          @design_doc.stub(:sync)
+          @obj.stub(:design_doc).and_return(@design_doc)
         end
 
         it "should return previous result if set" do
@@ -689,7 +737,7 @@ describe "Design View" do
 
         it "should raise issue if no database" do
           @obj.should_receive(:query).and_return({:database => nil})
-          model = mock("SomeModel")
+          model = double("SomeModel")
           model.should_receive(:database).and_return(nil)
           @obj.should_receive(:model).and_return(model)
           lambda { @obj.send(:execute) }.should raise_error
@@ -716,12 +764,20 @@ describe "Design View" do
 
         it "should not remove nil values from query" do
           @obj.should_receive(:can_reduce?).and_return(true)
-          @obj.stub!(:use_database).and_return(@mod.database)
+          @obj.stub(:use_database).and_return(@mod.database)
           @obj.query = {:reduce => true, :limit => nil, :skip => nil}
           @design_doc.should_receive(:view_on).with(@mod.database, 'test_view', {:reduce => true, :limit => nil, :skip => nil})
           @obj.send(:execute)
         end
 
+        it "should accept a block and pass to view_on" do
+          row = {'id' => '1234'}
+          expect(@design_doc).to receive(:view_on) { |db,n,q,&block| block.call(row) }
+          expect(@obj).to receive(:can_reduce?).and_return(true)
+          @obj.send(:execute) do |r|
+            expect(r).to eql(row)
+          end
+        end
 
       end
 
@@ -833,7 +889,7 @@ describe "Design View" do
       it "should instantiate a new document" do
         hash = {'doc' => {'_id' => '12345', 'name' => 'sam'}}
         obj = @klass.new(hash, DesignViewModel)
-        doc = mock('DesignViewModel')
+        doc = double('DesignViewModel')
         obj.model.should_receive(:build_from_database).with(hash['doc']).and_return(doc)
         obj.doc.should eql(doc)
       end
@@ -841,7 +897,7 @@ describe "Design View" do
       it "should try to load from id if no document" do
         hash = {'id' => '12345', 'value' => 5}
         obj = @klass.new(hash, DesignViewModel)
-        doc = mock('DesignViewModel')
+        doc = double('DesignViewModel')
         obj.model.should_receive(:get).with('12345').and_return(doc)
         obj.doc.should eql(doc)
       end
@@ -849,7 +905,7 @@ describe "Design View" do
       it "should try to load linked document if available" do
         hash = {'id' => '12345', 'value' => {'_id' => '54321'}}
         obj = @klass.new(hash, DesignViewModel)
-        doc = mock('DesignViewModel')
+        doc = double('DesignViewModel')
         obj.model.should_receive(:get).with('54321').and_return(doc)
         obj.doc.should eql(doc)
       end
@@ -857,7 +913,7 @@ describe "Design View" do
       it "should try to return nil for document if none available" do
         hash = {'value' => 23} # simulate reduce
         obj = @klass.new(hash, DesignViewModel)
-        doc = mock('DesignViewModel')
+        doc = double('DesignViewModel')
         obj.model.should_not_receive(:get)
         obj.doc.should be_nil
       end

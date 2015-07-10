@@ -14,7 +14,7 @@ describe "Model Base" do
     
     it "should override the default db" do
       @obj.database = TEST_SERVER.database!('couchrest-extendedmodel-test')
-      @obj.database.name.should == 'couchrest-extendedmodel-test'
+      expect(@obj.database.name).to eql 'couchrest-extendedmodel-test'
       @obj.database.delete!
     end
   end
@@ -177,7 +177,7 @@ describe "Model Base" do
         it "should not be true if databases do not match" do
           p = Project.create
           p2 = p.dup
-          p2.stub!(:database).and_return('other')
+          p2.stub(:database).and_return('other')
           p.should_not eql(p2)
         end
         it "should always be false if one document not saved" do

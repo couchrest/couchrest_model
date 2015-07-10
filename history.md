@@ -1,5 +1,10 @@
 # CouchRest Model Change History
 
+## 2.1.0.beta1 - 2015-07-10
+
+  * Upgrading to CouchRest 2.0.0.beta1 (@samlown)
+  * Support for streaming in View objects (@samlown)
+
 ## 2.0.4 - 2015-06-26
 
   * Casting Array properties using anything that inherits from Hash. (@samlown)

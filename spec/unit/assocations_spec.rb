@@ -25,7 +25,7 @@ describe "Assocations" do
     end
 
     it "should generate a proxy string if proxied" do
-      SaleInvoice.stub!(:proxy_owner_method).twice.and_return('company')
+      SaleInvoice.stub(:proxy_owner_method).twice.and_return('company')
       o = SaleInvoice.merge_assoc_opts(:cat)
       o[:proxy].should eql('self.company.cats')
     end

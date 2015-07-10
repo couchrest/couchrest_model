@@ -83,7 +83,7 @@ describe "Model attachments" do
 
     it "should use name to detect the content-type automatically if no file" do
       file = File.open(FIXTURE_PATH + '/attachments/couchdb.png')
-      file.stub!(:path).and_return("badfilname")
+      file.stub(:path).and_return("badfilname")
       @obj.create_attachment(:file => File.open(FIXTURE_PATH + '/attachments/couchdb.png'), :name => "couchdb.png")
       @obj.attachments['couchdb.png']['content_type'].should == "image/png" 
     end

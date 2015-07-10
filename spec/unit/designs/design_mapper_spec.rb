@@ -96,7 +96,7 @@ describe CouchRest::Model::Designs::DesignMapper do
     end
 
     it "should create a method on parent model" do
-      CouchRest::Model::Designs::View.stub!(:define)
+      CouchRest::Model::Designs::View.stub(:define)
       @object.view('test_view')
       DesignModel.should respond_to(:test_view)
     end

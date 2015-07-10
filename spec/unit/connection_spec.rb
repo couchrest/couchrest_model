@@ -90,7 +90,7 @@ describe CouchRest::Model::Connection do
         @class.server.should be_a(CouchRest::Server)
       end
       it "should provide a server with default config" do
-        @class.server.uri.should eql("http://localhost:5984")
+        @class.server.uri.to_s.should eql("http://localhost:5984")
       end
       it "should allow the configuration to be overwritten" do
         @class.connection = {
@@ -102,7 +102,7 @@ describe CouchRest::Model::Connection do
             :username => 'foo',
             :password => 'bar'
           }
-        @class.server.uri.should eql("https://foo:bar@127.0.0.1:5985")
+        @class.server.uri.to_s.should eql("https://foo:bar@127.0.0.1:5985")
       end
 
     end
@@ -154,7 +154,7 @@ describe CouchRest::Model::Connection do
           @class.connection_config_file = File.join(FIXTURE_PATH, 'config', 'couchdb.yml')
           hash = @class.send(:load_connection_config_file)
           hash[:development].should_not be_nil
-          @class.server.uri.should eql("https://test:user@sample.cloudant.com:443")
+          @class.server.uri.to_s.should eql("https://test:user@sample.cloudant.com")
         end
 
       end

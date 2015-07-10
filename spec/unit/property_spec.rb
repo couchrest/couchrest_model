@@ -509,26 +509,26 @@ describe "Property Class" do
   describe "casting" do
     it "should cast a value" do
       property = CouchRest::Model::Property.new(:test, :type => Date)
-      parent = mock("FooObject")
+      parent = double("FooObject")
       property.cast(parent, "2010-06-16").should eql(Date.new(2010, 6, 16))
       property.cast_value(parent, "2010-06-16").should eql(Date.new(2010, 6, 16))
     end
 
     it "should cast an array of values" do
       property = CouchRest::Model::Property.new(:test, :type => [Date])
-      parent = mock("FooObject")
+      parent = double("FooObject")
       property.cast(parent, ["2010-06-01", "2010-06-02"]).should eql([Date.new(2010, 6, 1), Date.new(2010, 6, 2)])
     end
 
     it "should cast an array of values with array option" do
       property = CouchRest::Model::Property.new(:test, :type => Date, :array => true)
-      parent = mock("FooObject")
+      parent = double("FooObject")
       property.cast(parent, ["2010-06-01", "2010-06-02"]).should eql([Date.new(2010, 6, 1), Date.new(2010, 6, 2)])
     end
 
     context "when allow_blank is false" do
       let :parent do
-        mock("FooObject")
+        double("FooObject")
       end
 
       it "should convert blank to nil" do
@@ -544,13 +544,13 @@ describe "Property Class" do
 
     it "should set a CastedArray on array of Objects" do
       property = CouchRest::Model::Property.new(:test, :type => [Object])
-      parent = mock("FooObject")
+      parent = double("FooObject")
       property.cast(parent, ["2010-06-01", "2010-06-02"]).class.should eql(CouchRest::Model::CastedArray)
     end
 
     it "should set a CastedArray on array of Strings" do
       property = CouchRest::Model::Property.new(:test, :type => [String])
-      parent = mock("FooObject")
+      parent = double("FooObject")
       property.cast(parent, ["2010-06-01", "2010-06-02"]).class.should eql(CouchRest::Model::CastedArray)
     end
 
@@ -573,20 +573,20 @@ describe "Property Class" do
         def as_json; ary; end
       end
       property = CouchRest::Model::Property.new(:test, :type => prop)
-      parent = mock("FooClass")
+      parent = double("FooClass")
       cast = property.cast(parent, [1, 2])
       cast.ary.should eql([1, 2])
     end
 
     it "should set parent as casted_by object in CastedArray" do
       property = CouchRest::Model::Property.new(:test, :type => [Object])
-      parent = mock("FooObject")
+      parent = double("FooObject")
       property.cast(parent, ["2010-06-01", "2010-06-02"]).casted_by.should eql(parent)
     end
 
     it "should set casted_by on new value" do
       property = CouchRest::Model::Property.new(:test, :type => CatToy)
-      parent = mock("CatObject")
+      parent = double("CatObject")
       cast = property.cast(parent, {:name => 'catnip'})
       cast.casted_by.should eql(parent)
     end

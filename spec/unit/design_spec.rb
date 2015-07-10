@@ -44,7 +44,7 @@ describe CouchRest::Model::Design do
   describe "base methods" do
 
     before :each do
-      @model = mock("ModelExample")
+      @model = double("ModelExample")
       @model.stub(:to_s).and_return("ModelExample")
       @obj = CouchRest::Model::Design.new(@model)
     end

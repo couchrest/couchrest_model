@@ -3,11 +3,17 @@
 # also emptied. Given that this is a rare event, and the consequences are not 
 # very severe, we just completely empty the cache.
 #
-CouchRest::Database.class_eval do
+module CouchRest::Model
+  module Support
+    module Database
 
-  def delete!
-    Thread.current[:couchrest_design_cache] = { }
-    CouchRest.delete @root
+      def delete!
+        Thread.current[:couchrest_design_cache] = { }
+        super
+      end
+
+    end
   end
-
 end
+
+CouchRest::Database.include(CouchRest::Model::Support::Database)

@@ -58,10 +58,16 @@ module CouchRest
         # are no results.
         def rows
           return @rows if @rows
-          if execute && result['rows']
-            @rows ||= result['rows'].map{|v| ViewRow.new(v, model)}
-          else 
-            [ ]
+          if block_given?
+            execute do |row|
+              yield ViewRow.new(row, model)
+            end
+          else
+            if execute && result['rows']
+              @rows ||= result['rows'].map{|v| ViewRow.new(v, model)}
+            else 
+              [ ]
+            end
           end
         end
 
@@ -69,16 +75,22 @@ module CouchRest
         # not already been prepared for including documents in the query,
         # it will be added automatically and reset any previously cached
         # results.
-        def all
+        def all(&block)
           include_docs!
-          docs
+          docs(&block)
         end
 
         # Provide all the documents from the view. If the view has not been
         # prepared with the +include_docs+ option, each document will be 
         # loaded individually.
         def docs
-          @docs ||= rows.map{|r| r.doc}
+          if block_given?
+            rows do |row|
+              yield row.doc
+            end
+          else
+            @docs ||= rows.map{|r| r.doc}
+          end
         end
 
         # If another request has been made on the view, this will return 
@@ -413,7 +425,7 @@ module CouchRest
           query[:database] || model.database
         end
 
-        def execute
+        def execute(&block)
           return self.result if result
           raise "Database must be defined in model or view!" if use_database.nil?
 
@@ -422,7 +434,7 @@ module CouchRest
 
           design_doc.sync(use_database)
 
-          self.result = design_doc.view_on(use_database, name, query)
+          self.result = design_doc.view_on(use_database, name, query, &block)
         end
 
         # Class Methods

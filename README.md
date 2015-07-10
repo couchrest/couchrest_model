@@ -7,7 +7,7 @@ CouchRest Model helps you define models that are stored as documents in your Cou
 It supports useful features such as setting properties with typecasting, callbacks, validations, associations, and helps
 with creating CouchDB views to access your data.
 
-CouchRest Model uses ActiveModel for a lot of the magic, so if you're using Rails, you'll need at least version 3.0. The latest release (since 2.0.0) is Rails 4.0 compatible, and we recommend Ruby 2.0+.
+CouchRest Model uses ActiveModel for a lot of the magic, so if you're using Rails, you'll need at least version 3.0. Releases since 2.0.0 are Rails 4.0 compatible, and we recommend Ruby 2.0+.
 
 ## Documentation
 
@@ -140,6 +140,15 @@ end
 @cat.update_attributes(:name => 'Felix', :random_text => 'feline')
 @cat.new? # false
 @cat.random_text  # Raises error!
+
+# Fetching by views, loading all results into memory
+cats = Cat.by_name.all
+cats.first.name # "Felix"
+
+# Streaming views, for efficient memory usage
+Cat.by_name.all do |cat|
+  puts cat.name
+end
 ```
 
 ## Development

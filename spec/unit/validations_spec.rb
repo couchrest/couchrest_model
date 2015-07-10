@@ -76,9 +76,9 @@ describe CouchRest::Model::Validations do
       it "should allow specific view" do
         @obj = WithUniqueValidationProxy.new(:title => 'test 7')
         @obj.class.should_not_receive('by_title')
-        view = mock('View')
-        view.stub!(:rows).and_return([])
-        proxy = mock('Proxy')
+        view = double('View')
+        view.stub(:rows).and_return([])
+        proxy = double('Proxy')
         proxy.should_receive('by_title').and_return(view)
         proxy.should_receive('respond_to?').with('by_title').and_return(true)
         @obj.should_receive('proxy').and_return(proxy)
@@ -88,12 +88,12 @@ describe CouchRest::Model::Validations do
 
     context "when proxied" do
       it "should lookup the model_proxy" do
-        view = mock('View')
-        view.stub!(:rows).and_return([])
-        mp = mock(:ModelProxy)
+        view = double('View')
+        view.stub(:rows).and_return([])
+        mp = double(:ModelProxy)
         mp.should_receive(:by_title).and_return(view)
         @obj = WithUniqueValidation.new(:title => 'test 8')
-        @obj.stub!(:model_proxy).twice.and_return(mp)
+        @obj.stub(:model_proxy).twice.and_return(mp)
         @obj.valid?
       end
     end
