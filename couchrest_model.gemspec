@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  s.add_dependency(%q<couchrest>, "2.0.0.beta1")
+  s.add_dependency(%q<couchrest>, "2.0.0.beta2")
   s.add_dependency(%q<mime-types>, ">= 1.16")
   s.add_dependency(%q<activemodel>, ">= 4.0", ">= 3.0")
   s.add_dependency(%q<tzinfo>, ">= 0.3.22")
