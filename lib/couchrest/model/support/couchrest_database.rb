@@ -16,4 +16,6 @@ module CouchRest::Model
   end
 end
 
-CouchRest::Database.include(CouchRest::Model::Support::Database)
+class CouchRest::Database
+  include(CouchRest::Model::Support::Database)
+end
