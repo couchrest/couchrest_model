@@ -1,0 +1,7 @@
+
+source 'https://rubygems.org'
+
+#gem 'couchrest_model', '2.0.4'
+gem 'couchrest_model', path: '../'
+gem 'faker'
+
