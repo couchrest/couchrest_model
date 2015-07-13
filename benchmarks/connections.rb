@@ -31,7 +31,7 @@ end
 
 
 Benchmark.bm do |x|
-  x.report("Create:       ") do
+  x.report("Create:        ") do
     100.times do |i|
       m = SampleModel.new(
         name: Faker::Name.name, 
@@ -44,14 +44,20 @@ Benchmark.bm do |x|
   # Make sure the view is fresh
   SampleModel.by_name.limit(1).rows
 
-  x.report("Fetch:        ") do
+  x.report("Fetch inc/docs:") do
+    SampleModel.by_name.all.each do |doc|
+      doc.to_json
+    end
+  end 
+
+  x.report("Fetch:         ") do
     SampleModel.by_name.rows.each do |row|
       row.doc.to_json # Causes each doc to be fetched
     end
   end
 
   if CouchRest::Model::VERSION >= '2.1.0'
-    x.report("Fetch w/block:") do
+    x.report("Fetch w/block: ") do
       SampleModel.by_name.rows do |row|
         row.doc.to_json # Causes each doc to be fetched
       end
