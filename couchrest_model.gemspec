@@ -23,14 +23,11 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_dependency("couchrest",   "2.0.0.rc3")
-  s.add_dependency("mime-types",  ">= 1.16")
   s.add_dependency("activemodel", ">= 4.0.0", "< 4.2.0")
   s.add_dependency("tzinfo",      ">= 0.3.22")
-  s.add_development_dependency("minitest", "> 4.0", "< 5.0") # For Kaminari, pending removal
   s.add_development_dependency("rspec", "~> 2.14.1")
   s.add_development_dependency("rack-test", ">= 0.5.7")
   s.add_development_dependency("rake", ">= 0.8.0")
+  s.add_development_dependency("minitest", "> 4.0", "< 5.0") # For Kaminari, pending removal
   s.add_development_dependency("kaminari", ">= 0.14.1", "< 0.16.0")
-  s.add_development_dependency("mime-types", "2.6.2") # Main maintain Ruby <2.0 compatibility
-  # s.add_development_dependency("jruby-openssl", ">= 0.7.3")
 end
