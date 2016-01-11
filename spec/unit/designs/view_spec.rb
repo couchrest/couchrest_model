@@ -221,7 +221,7 @@ describe "Design View" do
         it "should wrap rows in ViewRow class" do
           @obj.should_receive(:execute).and_return(true)
           @obj.should_receive(:result).twice.and_return({'rows' => [{:foo => :bar}]})
-          CouchRest::Model::Designs::ViewRow.should_receive(:new).with({:foo => :bar}, @obj.model)
+          CouchRest::Model::Designs::ViewRow.should_receive(:new).with({:foo => :bar}, @obj.model, DB)
           @obj.rows
         end
 
@@ -850,13 +850,19 @@ describe "Design View" do
       @klass = CouchRest::Model::Designs::ViewRow
     end
 
+    let :model do
+      m = double()
+      m.stub(:database).and_return(DB)
+      m
+    end
+
     describe "intialize" do
       it "should store reference to model" do
-        obj = @klass.new({}, "model")
-        obj.model.should eql('model')
+        obj = @klass.new({}, model)
+        obj.model.should eql(model)
       end
       it "should copy details from hash" do
-        obj = @klass.new({:foo => :bar, :test => :example}, "")
+        obj = @klass.new({:foo => :bar, :test => :example}, model)
         obj[:foo].should eql(:bar)
         obj[:test].should eql(:example)
       end
@@ -867,38 +873,50 @@ describe "Design View" do
       end
 
       it "should provide id" do
-        obj = @klass.new({'id' => '123456'}, 'model')
+        obj = @klass.new({'id' => '123456'}, model)
         obj.id.should eql('123456')
       end
 
+      it "may be instantiated with a database" do
+        obj = @klass.new({'id' => '123456'}, model, 'foo')
+        expect(obj.db).to eql('foo')
+      end
+
+      it "may use model's database" do
+        obj = @klass.new({'id' => '123456'}, model)
+        expect(obj.db).to eql(DB)
+      end
+
       it "should provide key" do
-        obj = @klass.new({'key' => 'thekey'}, 'model')
+        obj = @klass.new({'key' => 'thekey'}, model)
         obj.key.should eql('thekey')
       end
 
       it "should provide the value" do
-        obj = @klass.new({'value' => 'thevalue'}, 'model')
+        obj = @klass.new({'value' => 'thevalue'}, model)
         obj.value.should eql('thevalue')
       end
 
       it "should provide the raw document" do
-        obj = @klass.new({'doc' => 'thedoc'}, 'model')
+        obj = @klass.new({'doc' => 'thedoc'}, model)
         obj.raw_doc.should eql('thedoc')
       end
 
       it "should instantiate a new document" do
         hash = {'doc' => {'_id' => '12345', 'name' => 'sam'}}
         obj = @klass.new(hash, DesignViewModel)
-        doc = double('DesignViewModel')
-        obj.model.should_receive(:build_from_database).with(hash['doc']).and_return(doc)
-        obj.doc.should eql(doc)
+        doc = double('DesignViewDoc')
+        doc.stub(:database).and_return(DB)
+        expect(obj.model).to receive(:build_from_database).with(hash['doc']).and_return(doc)
+        expect(obj.doc).to eql(doc)
       end
 
       it "should try to load from id if no document" do
         hash = {'id' => '12345', 'value' => 5}
         obj = @klass.new(hash, DesignViewModel)
         doc = double('DesignViewModel')
-        obj.model.should_receive(:get).with('12345').and_return(doc)
+        doc.stub(:database).and_return(DB)
+        obj.model.should_receive(:get).with('12345', DB).and_return(doc)
         obj.doc.should eql(doc)
       end
 
@@ -906,7 +924,8 @@ describe "Design View" do
         hash = {'id' => '12345', 'value' => {'_id' => '54321'}}
         obj = @klass.new(hash, DesignViewModel)
         doc = double('DesignViewModel')
-        obj.model.should_receive(:get).with('54321').and_return(doc)
+        doc.stub(:database).and_return(DB)
+        obj.model.should_receive(:get).with('54321', DB).and_return(doc)
         obj.doc.should eql(doc)
       end
 

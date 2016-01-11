@@ -212,14 +212,16 @@ describe CouchRest::Model::Designs do
           end
         end
         it "should barf on all if no database given" do
-          lambda{Unattached.all.first}.should raise_error
+          expect do 
+            Unattached.all.first
+          end.to raise_error(CouchRest::Model::DatabaseNotDefined)
         end
         it "should query all" do
           rs = Unattached.all.database(@db).all
-          rs.length.should == 4
+          expect(rs.length).to eql(4)
         end
         it "should barf on query if no database given" do
-          lambda{Unattached.by_title.all}.should raise_error /Database must be defined/
+          expect() { Unattached.by_title.all }.to raise_error(CouchRest::Model::DatabaseNotDefined)
         end
         it "should make the design doc upon first query" do
           Unattached.by_title.database(@db)
@@ -230,22 +232,17 @@ describe CouchRest::Model::Designs do
           rs = Unattached.by_title.database(@db).startkey("bbb").endkey("eee")
           rs.length.should == 3
         end
-        it "should return nil on get if no database given" do
-          Unattached.get("aaa").should be_nil
-        end
-        it "should barf on get! if no database given" do
-          lambda{Unattached.get!("aaa")}.should raise_error
-        end
         it "should get from specific database" do
           u = Unattached.get(@first_id, @db)
           u.title.should == "aaa"
         end
         it "should barf on first if no database given" do
-          lambda{Unattached.first}.should raise_error
+          expect{ Unattached.first }.to raise_error(CouchRest::Model::DatabaseNotDefined)
         end
-        it "should get first" do
+        it "should get first with database set" do
           u = Unattached.all.database(@db).first
-          u.title.should =~ /\A...\z/
+          expect(u.title).to match(/\A...\z/)
+          expect(u.database).to eql(@db)
         end
         it "should get last" do
           u = Unattached.all.database(@db).last

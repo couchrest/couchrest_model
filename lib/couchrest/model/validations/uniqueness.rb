@@ -7,9 +7,16 @@ module CouchRest
       # Validates if a field is unique 
       class UniquenessValidator < ActiveModel::EachValidator
 
+        SETUP_DEPRECATED = ActiveModel.respond_to?(:version) && ActiveModel.version >= Gem::Version.new('4.1')
+
+        def initialize(options = {})
+          super
+          setup_uniqueness_validation(options[:class]) if options[:class]
+        end
+
         # Ensure we have a class available so we can check for a usable view
         # or add one if necessary.
-        def setup(model)
+        def setup_uniqueness_validation(model)
           @model = model
           if options[:view].blank?
             attributes.each do |attribute|
@@ -23,6 +30,9 @@ module CouchRest
             end
           end
         end
+
+        # Provide backwards compatibility for Rails < 4.1, which expects `#setup` to be defined.
+        alias_method :setup, :setup_uniqueness_validation unless SETUP_DEPRECATED
 
         def validate_each(document, attribute, value)
           opts = merge_view_options(attribute)

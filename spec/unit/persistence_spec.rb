@@ -262,7 +262,7 @@ describe CouchRest::Model::Persistence do
     end
     it "should make it go away" do
       @dobj.destroy
-      lambda{Basic.get!(@dobj.id)}.should raise_error(CouchRest::Model::DocumentNotFound)
+      expect(Basic.get(@dobj.id)).to be_nil
     end
     it "should freeze the object" do
       @dobj.destroy
@@ -272,7 +272,7 @@ describe CouchRest::Model::Persistence do
     it "trying to save after should fail" do
       @dobj.destroy
       lambda { @dobj.save }.should raise_error(StandardError)
-      lambda{Basic.get!(@dobj.id)}.should raise_error(CouchRest::Model::DocumentNotFound)
+      expect(Basic.get(@dobj.id)).to be_nil
     end
     it "should make destroyed? true" do
       @dobj.destroyed?.should be_false
@@ -303,13 +303,21 @@ describe CouchRest::Model::Persistence do
       Article.get("").should be_nil
     end
     it "should raise an error if `get!` is used and the document doesn't exist" do
-      expect{ Article.get!('matt aimonetti') }.to raise_error
+      expect{ Article.get!('matt aimonetti') }.to raise_error(CouchRest::Model::DocumentNotFound)
     end
     it "should raise an error if `get!` is requested with a blank id" do
-      expect{ Article.get!("") }.to raise_error
+      expect{ Article.get!("") }.to raise_error(CouchRest::Model::DocumentNotFound)
     end
     it "should raise an error if `find!` is used and the document doesn't exist" do
-      expect{ Article.find!('matt aimonetti') }.to raise_error
+      expect{ Article.find!('matt aimonetti') }.to raise_error(CouchRest::Model::DocumentNotFound)
+    end
+    context "without a database" do
+      it "should cause #get to raise an error" do
+        Article.stub(:database).and_return(nil)
+        expect{ Article.get('foo') }.to raise_error(CouchRest::Model::DatabaseNotDefined)
+        expect{ Article.get!('foo') }.to raise_error(CouchRest::Model::DatabaseNotDefined)
+      end
+
     end
   end
 

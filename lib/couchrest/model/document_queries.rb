@@ -33,11 +33,9 @@ module CouchRest
         # id<String, Integer>:: Document ID
         # db<Database>:: optional option to pass a custom database to use
         def get(id, db = database)
-          begin
-            get!(id, db)
-          rescue
-            nil
-          end
+          get!(id, db)
+        rescue CouchRest::Model::DocumentNotFound
+          nil
         end
         alias :find :get
 
@@ -54,11 +52,9 @@ module CouchRest
         # db<Database>:: optional option to pass a custom database to use
         def get!(id, db = database)
           raise CouchRest::Model::DocumentNotFound if id.blank?
-
-          doc = db.get id
+          raise CouchRest::Model::DatabaseNotDefined if db.nil?
+          doc = db.get(id) or raise CouchRest::Model::DocumentNotFound
           build_from_database(doc)
-        rescue CouchRest::NotFound
-          raise CouchRest::Model::DocumentNotFound
         end
         alias :find! :get!
 

@@ -100,7 +100,7 @@ describe CouchRest::Model::Design do
         end
 
         it "should not have been saved up until sync called" do
-          lambda { @mod.database.get(@doc['_id']) }.should raise_error(CouchRest::NotFound)
+          expect(@mod.database.get(@doc['_id'])).to be_nil
         end
 
 

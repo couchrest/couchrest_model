@@ -60,11 +60,11 @@ module CouchRest
           return @rows if @rows
           if block_given?
             execute do |row|
-              yield ViewRow.new(row, model)
+              yield ViewRow.new(row, model, use_database)
             end
           else
             if execute && result['rows']
-              @rows ||= result['rows'].map{|v| ViewRow.new(v, model)}
+              @rows ||= result['rows'].map{|v| ViewRow.new(v, model, use_database)}
             else 
               [ ]
             end
@@ -427,7 +427,7 @@ module CouchRest
 
         def execute(&block)
           return self.result if result
-          raise "Database must be defined in model or view!" if use_database.nil?
+          raise CouchRest::Model::DatabaseNotDefined if use_database.nil?
 
           # Remove the reduce value if its not needed to prevent CouchDB errors
           query.delete(:reduce) unless can_reduce?
@@ -547,9 +547,10 @@ module CouchRest
       # A special wrapper class that provides easy access to the key
       # fields in a result row.
       class ViewRow < Hash
-        attr_reader :model
-        def initialize(hash, model)
-          @model    = model
+        attr_reader :model, :db
+        def initialize(hash, model, db = nil)
+          @model = model
+          @db    = db || model.database
           replace(hash)
         end
         def id
@@ -567,9 +568,16 @@ module CouchRest
         # Send a request for the linked document either using the "id" field's
         # value, or the ["value"]["_id"] used for linked documents.
         def doc
-          return model.build_from_database(self['doc']) if self['doc']
-          doc_id = (value.is_a?(Hash) && value['_id']) ? value['_id'] : self.id
-          doc_id ? model.get(doc_id) : nil
+          @doc ||= begin
+            if self['doc']
+              obj = model.build_from_database(self['doc'])
+              obj.database ||= db
+              obj
+            else
+              doc_id = (value.is_a?(Hash) && value['_id']) ? value['_id'] : self.id
+              doc_id ? model.get(doc_id, db) : nil
+            end
+          end
         end
       end
 

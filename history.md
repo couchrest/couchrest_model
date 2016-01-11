@@ -1,9 +1,10 @@
 # CouchRest Model Change History
 
-## 2.1.0.beta1 - 2015-07-10
+## 2.1.0.beta1
 
-  * Upgrading to CouchRest 2.0.0.beta1 (@samlown)
+  * Upgrading to CouchRest 2.0.0 series (@samlown)
   * Support for streaming in View objects (@samlown)
+  * Support for ActiveModel >= 4.1 (@samlown)
 
 ## 2.0.4 - 2015-06-26
 
