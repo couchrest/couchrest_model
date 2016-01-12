@@ -277,7 +277,7 @@ describe "Model Base" do
     it "should automatically call a proc default at initialization" do
       @obj.set_by_proc.should be_an_instance_of(Time)
       @obj.set_by_proc.should == @obj.set_by_proc
-      @obj.set_by_proc.should < Time.now
+      expect(@obj.set_by_proc.utc).to be < Time.now.utc
     end
     
     it "should let you overwrite the default values" do
