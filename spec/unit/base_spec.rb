@@ -223,11 +223,11 @@ describe "Model Base" do
     end
     it "should silently ignore created_at" do
       @art.update_attributes_without_saving('created_at' => 'foobar')
-      @art['created_at'].should_not == 'foobar'
+      expect(@art['created_at'].to_s).to_not eql('foobar')
     end
     it "should silently ignore updated_at" do
       @art.update_attributes_without_saving('updated_at' => 'foobar')
-      @art['updated_at'].should_not == 'foobar'
+      expect(@art['updated_at']).to_not eql('foobar')
     end
     it "should also work using attributes= alias" do
       @art.respond_to?(:attributes=).should be_true
