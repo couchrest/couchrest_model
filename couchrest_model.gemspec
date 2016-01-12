@@ -28,6 +28,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency("rspec", "~> 2.14.1")
   s.add_development_dependency("rack-test", ">= 0.5.7")
   s.add_development_dependency("rake", ">= 0.8.0")
-  s.add_development_dependency("minitest", "> 4.0", "< 5.0") # For Kaminari, pending removal
+  s.add_development_dependency("minitest", "> 4.1", "< 5.0") # For Kaminari and activesupport, pending removal
   s.add_development_dependency("kaminari", ">= 0.14.1", "< 0.16.0")
 end

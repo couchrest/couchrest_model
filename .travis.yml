@@ -8,3 +8,5 @@ services: couchdb
 matrix:
   allow_failures:
     - rvm: jruby
+before_install:
+  - gem install bundler
