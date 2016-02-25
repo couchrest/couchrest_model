@@ -1,6 +1,10 @@
 # CouchRest Model Change History
 
-## 2.1.0.beta1
+## 2.1.0.beta2
+
+  * Changing migration namespace and supporting initial "prepare" phase (@samlown)
+
+## 2.1.0.beta1 - 2016-01-13
 
   * Upgrading to CouchRest 2.0.0 series (@samlown)
   * Support for streaming in View objects (@samlown)
