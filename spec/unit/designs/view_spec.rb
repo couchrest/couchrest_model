@@ -576,11 +576,11 @@ describe "Design View" do
       end
 
       describe "#skip" do
-        it "should update query with value" do 
+        it "should update query with value" do
           @obj.should_receive(:update_query).with({:skip => 3})
           @obj.skip(3)
         end
-        it "should update query with default value" do 
+        it "should update query with default value" do
           @obj.should_receive(:update_query).with({:skip => 0})
           @obj.skip
         end
@@ -939,7 +939,7 @@ describe "Design View" do
 
 
     end
-   
+
   end
 
 
@@ -1032,6 +1032,33 @@ describe "Design View" do
         @view.total_pages.should eql(1)
         @view.all.last.name.should eql('Vilma')
       end
+    end
+
+    describe "concurrent view accesses" do
+
+      # NOTE: must use `DesignViewModel2` instead of `DesignViewModel` to mimic
+      # a "cold" start of a multi-threaded application (as the checksum is
+      # stored at the class level)
+      class DesignViewModel2 < CouchRest::Model::Base
+        use_database DB
+        property :name
+
+        design do
+          view :by_name
+        end
+      end
+
+      it "should not conflict" do
+        expect {
+          threads = 2.times.map {
+            Thread.new {
+              DesignViewModel2.by_name.page(1).to_a
+            }
+          }
+          threads.each(&:join)
+        }.to_not raise_error
+      end
+
     end
 
   end
