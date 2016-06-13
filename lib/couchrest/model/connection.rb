@@ -30,8 +30,8 @@ module CouchRest
           @server ||= CouchRest::Server.new(prepare_server_uri)
         end
 
-        def prepare_database(db = nil)
-          db = @_use_database unless @_use_database.nil?
+        def prepare_database(db = nil, override_use_database = false)
+          db = @_use_database unless override_use_database || @_use_database.nil?
           if db.nil? || db.is_a?(String) || db.is_a?(Symbol)
             conf = connection_configuration
             db = [conf[:prefix], db.to_s, conf[:suffix]].reject{|s| s.to_s.empty?}.join(conf[:join])

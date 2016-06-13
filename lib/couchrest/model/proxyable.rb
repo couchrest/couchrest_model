@@ -6,7 +6,7 @@ module CouchRest
 
       def proxy_database
         raise StandardError, "Please set the #proxy_database_method" if self.class.proxy_database_method.nil?
-        @proxy_database ||= self.class.prepare_database(self.send(self.class.proxy_database_method))
+        @proxy_database ||= self.class.prepare_database(self.send(self.class.proxy_database_method), true)
       end
 
       module ClassMethods
