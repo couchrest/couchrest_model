@@ -17,6 +17,7 @@ describe CouchRest::Model::Proxyable do
     before do
       @class = Class.new(CouchRest::Model::Base)
       @class.class_eval do 
+        use_database "another_database"
         def slug; 'proxy'; end
       end
       @obj = @class.new
