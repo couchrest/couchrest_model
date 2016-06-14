@@ -4,9 +4,9 @@ module CouchRest
     module Proxyable
       extend ActiveSupport::Concern
 
-      def proxy_database
+      def proxy_database(suffix = nil)
         raise StandardError, "Please set the #proxy_database_method" if self.class.proxy_database_method.nil?
-        @proxy_database ||= self.class.prepare_database(self.send(self.class.proxy_database_method))
+        @proxy_database ||= self.class.prepare_database([self.send(self.class.proxy_database_method), suffix].compact.reject(&:blank?).join(self.class.connection[:join]))
       end
 
       module ClassMethods
@@ -15,13 +15,15 @@ module CouchRest
         # Define a collection that will use the base model for the database connection
         # details.
         def proxy_for(assoc_name, options = {})
-          db_method = options[:database_method] || "proxy_database"
+          db_method = (options[:database_method] || "proxy_database").to_sym
+          db_suffix = options[:database_suffix] || (options[:use_suffix] ? assoc_name.to_s : nil)
           options[:class_name] ||= assoc_name.to_s.singularize.camelize
           proxy_method_names   << assoc_name.to_sym    unless proxy_method_names.include?(assoc_name.to_sym)
           proxied_model_names  << options[:class_name] unless proxied_model_names.include?(options[:class_name])
+          db_method_call = db_suffix ? "#{db_method}(\"#{db_suffix}\")" : db_method
           class_eval <<-EOS, __FILE__, __LINE__ + 1
             def #{assoc_name}
-              @#{assoc_name} ||= CouchRest::Model::Proxyable::ModelProxy.new(::#{options[:class_name]}, self, self.class.to_s.underscore, #{db_method})
+              @#{assoc_name} ||= CouchRest::Model::Proxyable::ModelProxy.new(::#{options[:class_name]}, self, self.class.to_s.underscore, #{db_method_call})
             end
           EOS
         end

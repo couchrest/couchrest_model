@@ -35,6 +35,22 @@ describe CouchRest::Model::Proxyable do
     it "should raise an error if called and no proxy_database_method set" do
       lambda { @obj.proxy_database }.should raise_error(StandardError, /Please set/)
     end
+
+    it "should support passing a suffix" do
+      @class.stub(:proxy_database_method).and_return(:slug)
+      lambda { @obj.proxy_database("suffix") }.should_not raise_error
+    end
+
+    it "should join the suffix to the database name" do
+      @class.stub(:proxy_database_method).and_return(:slug)
+      expect(@obj.proxy_database("suffix").name).to eql('couchrest_proxy_suffix')
+    end
+
+    it "should use the configuration's join character to add the suffix" do
+      @class.connection.update(:join => '-')
+      @class.stub(:proxy_database_method).and_return(:slug)
+      expect(@obj.proxy_database("suffix").name).to eql('couchrest-proxy-suffix')
+    end
   end
 
   describe "class methods" do
@@ -87,6 +103,29 @@ describe CouchRest::Model::Proxyable do
         @class.proxy_for(:felines, class_name: "Cat")
         @class.proxy_method_names.should eql([:felines])
         @class.proxied_model_names.should eql(['Cat'])
+      end
+
+      describe "proxy database suffix" do
+        it "should support not passing a suffix" do
+          @class.proxy_for(:cats)
+          @obj = @class.new
+          @obj.should_receive(:proxy_database).with()
+          @obj.cats
+        end
+
+        it "should set the database suffix if provided" do
+          @class.proxy_for(:cats, use_suffix: true)
+          @obj = @class.new
+          @obj.should_receive(:proxy_database).with('cats')
+          @obj.cats
+        end
+
+        it "should accept a database suffix override" do
+          @class.proxy_for(:cats, database_suffix: 'felines')
+          @obj = @class.new
+          @obj.should_receive(:proxy_database).with('felines')
+          @obj.cats
+        end
       end
 
       it "should create a new method" do
