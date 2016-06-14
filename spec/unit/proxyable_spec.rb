@@ -83,6 +83,12 @@ describe CouchRest::Model::Proxyable do
         @class.proxy_method_names.should eql([:cats])
       end
 
+      it "should accept a class_name override" do
+        @class.proxy_for(:felines, class_name: "Cat")
+        @class.proxy_method_names.should eql([:felines])
+        @class.proxied_model_names.should eql(['Cat'])
+      end
+
       it "should create a new method" do
         DummyProxyable.stub(:method_defined?).and_return(true)
         DummyProxyable.proxy_for(:cats)
