@@ -28,28 +28,36 @@ describe CouchRest::Model::Proxyable do
 
     it "should provide proxy database from method" do
       expect(@class).to receive(:proxy_database_method).at_least(:twice).and_return(:slug)
-      expect(@obj.proxy_database).to be_a(CouchRest::Database)
-      expect(@obj.proxy_database.name).to eql('couchrest_proxy')
+      expect(@obj.proxy_database(:assoc)).to be_a(CouchRest::Database)
+      expect(@obj.proxy_database(:assoc).name).to eql('couchrest_proxy')
     end
 
     it "should raise an error if called and no proxy_database_method set" do
-      lambda { @obj.proxy_database }.should raise_error(StandardError, /Please set/)
+      lambda { @obj.proxy_database(:assoc) }.should raise_error(StandardError, /Please set/)
     end
 
     it "should support passing a suffix" do
       @class.stub(:proxy_database_method).and_return(:slug)
-      lambda { @obj.proxy_database("suffix") }.should_not raise_error
+      lambda { @obj.proxy_database(:assoc, "suffix") }.should_not raise_error
     end
 
     it "should join the suffix to the database name" do
       @class.stub(:proxy_database_method).and_return(:slug)
-      expect(@obj.proxy_database("suffix").name).to eql('couchrest_proxy_suffix')
+      expect(@obj.proxy_database(:assoc, "suffix").name).to eql('couchrest_proxy_suffix')
+    end
+
+    it "should support multiple databases with caching" do
+      @class.stub(:proxy_database_method).and_return(:slug)
+      expect(@obj.proxy_database(:assoc, "suffix").name).to eql('couchrest_proxy_suffix')
+      expect(@obj.proxy_database(:another_assoc, "another_suffix").name).to eql('couchrest_proxy_another_suffix')
+      expect(@obj.proxy_database(:assoc, "suffix").name).to eql('couchrest_proxy_suffix')
+      expect(@obj.proxy_database(:another_assoc, "another_suffix").name).to eql('couchrest_proxy_another_suffix')
     end
 
     it "should use the configuration's join character to add the suffix" do
       @class.connection.update(:join => '-')
       @class.stub(:proxy_database_method).and_return(:slug)
-      expect(@obj.proxy_database("suffix").name).to eql('couchrest-proxy-suffix')
+      expect(@obj.proxy_database(:assoc, "suffix").name).to eql('couchrest-proxy-suffix')
     end
   end
 
@@ -109,21 +117,21 @@ describe CouchRest::Model::Proxyable do
         it "should support not passing a suffix" do
           @class.proxy_for(:cats)
           @obj = @class.new
-          @obj.should_receive(:proxy_database).with()
+          @obj.should_receive(:proxy_database).with(:cats)
           @obj.cats
         end
 
         it "should set the database suffix if provided" do
           @class.proxy_for(:cats, use_suffix: true)
           @obj = @class.new
-          @obj.should_receive(:proxy_database).with('cats')
+          @obj.should_receive(:proxy_database).with(:cats, 'cats')
           @obj.cats
         end
 
         it "should accept a database suffix override" do
           @class.proxy_for(:cats, database_suffix: 'felines')
           @obj = @class.new
-          @obj.should_receive(:proxy_database).with('felines')
+          @obj.should_receive(:proxy_database).with(:cats, 'felines')
           @obj.cats
         end
       end
@@ -372,7 +380,7 @@ describe CouchRest::Model::Proxyable do
         use_database DB
         property :slug
         proxy_for :proxyable_invoices
-        def proxy_database
+        def proxy_database(assoc)
           @db ||= TEST_SERVER.database!(TESTDB + "-#{slug}")
         end
       end
