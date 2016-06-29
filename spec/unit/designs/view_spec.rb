@@ -157,6 +157,18 @@ describe "Design View" do
           @klass.define(@design_doc, 'by_title', :reduce => :stats)
           @design_doc['views']['by_title']['reduce'].should eql('_stats')
         end
+
+        it "should allow the emit value to be overridden" do
+          @klass.define(@design_doc, 'by_title', :emit => :name)
+          str = @design_doc['views']['by_title']['map']
+          str.should include("emit(doc['title'], doc['name']);")
+        end
+
+        it "should forward a non-symbol emit value straight into the view" do
+          @klass.define(@design_doc, 'by_title', :emit => 3)
+          str = @design_doc['views']['by_title']['map']
+          str.should include("emit(doc['title'], 3);")
+        end
       end
 
       describe ".create_model_methods" do
