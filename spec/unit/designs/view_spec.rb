@@ -169,6 +169,12 @@ describe "Design View" do
           str = @design_doc['views']['by_title']['map']
           str.should include("emit(doc['title'], 3);")
         end
+
+        it "should support emitting an array" do
+          @klass.define(@design_doc, 'by_title', :emit => [1, :name])
+          str = @design_doc['views']['by_title']['map']
+          str.should include("emit(doc['title'], [1, doc['name']]);")
+        end
       end
 
       describe ".create_model_methods" do

@@ -493,6 +493,7 @@ module CouchRest
 
               # convert emit symbols to properties
               opts[:emit] = "doc['#{opts[:emit]}']" if opts[:emit].try { is_a?(Symbol) }
+              opts[:emit] = "[" + opts[:emit].map { |i| i.is_a?(Symbol) ? "doc['#{i}']" : i }.join(', ') + "]" if opts[:emit].try { is_a?(Array) }
 
               opts[:allow_blank] = opts[:allow_blank].nil? ? true : opts[:allow_blank]
               opts[:guards] ||= []
