@@ -156,6 +156,12 @@ module CouchRest
           end
         end
 
+        private
+
+        def method_missing(m, *args, &block)
+          model.send(m, self, *args, &block)
+        end
+        
       end
     end
   end
