@@ -275,9 +275,12 @@ describe CouchRest::Model::Proxyable do
       end
 
       it "should proxy factory methods" do
-        # *args = *["arg_1", "arg_2"]
         @model.should_receive(:factory_method).with(@obj, "arg_1", "arg_2")
         @obj.factory_method("arg_1", "arg_2")
+      end
+
+      it "shouldn't forward undefined model methods" do
+        lambda { @obj.undefined_factory_method("arg_1", "arg_2") }.should raise_error(NoMethodError, /CouchRest::Model::Proxy/)
       end
 
 
