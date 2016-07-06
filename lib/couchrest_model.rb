@@ -16,6 +16,7 @@ require "mime/types"
 require "enumerator"
 require "time"
 require "digest/md5"
+require "yaml"
 
 require "bigdecimal" # used in typecast
 require "bigdecimal/util" # used in typecast

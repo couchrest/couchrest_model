@@ -1,5 +1,10 @@
 # CouchRest Model Change History
 
+## 2.1.0 - 2016-07-06
+
+  * Adding "persistent" connection configuration property (@samlown)
+  * Releasing 2.1.0 off of CouchRest 2.0.0.
+
 ## 2.1.0.beta2 - 2016-02-29
 
   * Changing migration namespace and supporting initial "prepare" phase (@samlown)

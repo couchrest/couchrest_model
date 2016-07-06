@@ -105,6 +105,11 @@ describe CouchRest::Model::Connection do
         @class.server.uri.to_s.should eql("https://foo:bar@127.0.0.1:5985")
       end
 
+      it "should pass through the persistent connection option" do
+        @class.connection[:persistent] = false
+        expect(@class.server.connection_options[:persistent]).to be_false
+      end
+
     end
 
     describe ".prepare_database" do

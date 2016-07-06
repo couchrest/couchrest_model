@@ -25,14 +25,15 @@ module CouchRest
           config.environment = :development
           config.connection_config_file = File.join(Dir.pwd, 'config', 'couchdb.yml')
           config.connection = {
-            :protocol => 'http',
-            :host     => 'localhost',
-            :port     => '5984',
-            :prefix   => 'couchrest',
-            :suffix   => nil,
-            :join     => '_',
-            :username => nil,
-            :password => nil
+            :protocol   => 'http',
+            :host       => 'localhost',
+            :port       => '5984',
+            :prefix     => 'couchrest',
+            :suffix     => nil,
+            :join       => '_',
+            :username   => nil,
+            :password   => nil,
+            :persistent => true
           }
         end
       end

@@ -3,10 +3,12 @@ rvm:
   - 2.2.2
   - 2.1.5
   - 2.0.0
-  - jruby-19mode
+  - jruby
 services: couchdb
 matrix:
   allow_failures:
     - rvm: jruby
 before_install:
   - gem install bundler
+env:
+  - JRUBY_OPTS=--2.0
