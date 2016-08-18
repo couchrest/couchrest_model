@@ -6,18 +6,14 @@ module CouchRest
       extend ActiveSupport::Concern
 
       included do
-        # internal dirty setting - overrides global setting.
-        # this is used to temporarily disable dirty tracking when setting 
-        # attributes directly, for performance reasons.
-        self.send(:attr_accessor, :disable_dirty)
-
         # The original attributes data hash, used for comparing changes.
         self.send(:attr_reader, :original_change_data)
       end
 
       def use_dirty?
-        doc = base_doc
-        doc && !doc.disable_dirty
+        # Use the configuration option. At some point we may want this
+        # to be over-writable on an instance level.
+        !disable_dirty_tracking
       end
 
       # Provide an array of changes according to the hashdiff gem of the raw
@@ -53,22 +49,25 @@ module CouchRest
         end
       end
 
+      protected
+
       def current_change_data
         as_couch_json.as_json
       end
 
       module ClassMethods
 
-        def create_property_dirty_tracking_methods(property)
-          create_property_dirty_change_method(property)
-          create_property_dirty_changed_method(property)
+        def create_dirty_property_methods(property)
+          create_dirty_property_change_method(property)
+          create_dirty_property_changed_method(property)
+          create_dirty_property_was_method(property)
         end
 
         # For #property_change.
         # Tries to be a bit more efficient by directly comparing the properties
         # current value with that stored in the original change data. This also
         # maintains compatibility with ActiveModel change results.
-        def create_property_dirty_change_method(property)
+        def create_dirty_property_change_method(property)
           define_method("#{property.name}_change") do
             val = read_attribute(property.name)
             if val.respond_to?(:changes)
@@ -91,7 +90,7 @@ module CouchRest
 
         # For #property_was value.
         # Uses the original raw value, if available.
-        def create_property_dirty_was_method(property)
+        def create_dirty_property_was_method(property)
           define_method("#{property.name}_was") do
             if original_change_data.nil?
               nil
@@ -102,10 +101,10 @@ module CouchRest
         end
 
         # For #property_changed?
-        def create_property_dirty_changed_method(property)
+        def create_dirty_property_changed_method(property)
           define_method("#{property.name}_changed?") do
             changes = send("#{property.name}_change")
-            changes.nil? && !changes.empty?
+            changes.nil? || !changes.empty?
           end
         end
 

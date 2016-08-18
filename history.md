@@ -1,5 +1,9 @@
 # CouchRest Model Change History
 
+## 2.2.0 - pending
+
+  * Radical refactor of dirty tracking using Hashdiff gem, providing reliable change detection with nested data. (@samlown)
+
 ## 2.1.0 - 2016-07-06
 
   * Adding "persistent" connection configuration property (@samlown)

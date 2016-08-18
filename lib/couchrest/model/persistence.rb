@@ -10,10 +10,10 @@ module CouchRest
         return false unless perform_validations(options)
         run_callbacks :create do
           run_callbacks :save do
-            set_unique_id if new? && self.respond_to?(:set_unique_id)
+            set_unique_id if new? && respond_to?(:set_unique_id)
             result = database.save_doc(self)
             ret = (result["ok"] == true) ? self : false
-            @changed_attributes.clear if ret && @changed_attributes
+            clear_changes_information if ret
             ret
           end
         end
@@ -31,12 +31,12 @@ module CouchRest
         raise "Cannot save a destroyed document!" if destroyed?
         raise "Calling #{self.class.name}#update on document that has not been created!" if new?
         return false unless perform_validations(options)
-        return true if !self.disable_dirty && !self.changed?
+        return true unless changed?
         run_callbacks :update do
           run_callbacks :save do
             result = database.save_doc(self)
             ret = result["ok"] == true
-            @changed_attributes.clear if ret && @changed_attributes
+            clear_changes_information if ret
             ret
           end
         end
@@ -83,7 +83,7 @@ module CouchRest
       #   doc.save
       #
       def update_attributes(hash)
-        update_attributes_without_saving hash
+        write_attributes(hash)
         save
       end
 
@@ -92,7 +92,9 @@ module CouchRest
       #
       # Returns self.
       def reload
-        prepare_all_attributes(database.get(id), :directly_set_attributes => true)
+        write_attributes_for_initialization(
+          database.get(id), :trusted_source => true
+        )
         self
       end
 
@@ -121,7 +123,7 @@ module CouchRest
         def build_from_database(doc = {}, options = {}, &block)
           src = doc[model_type_key]
           base = (src.blank? || src == model_type_value) ? self : src.constantize
-          base.new(doc, options.merge(:directly_set_attributes => true), &block)
+          base.new(doc, options.merge(:trusted_source => true), &block)
         end
 
         # Defines an instance and save it directly to the database

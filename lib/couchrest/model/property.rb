@@ -39,9 +39,6 @@ module CouchRest::Model
         arr.reject!{ |data| data.nil? } unless allow_blank
         # allow casted_by calls to be passed up chain by wrapping in CastedArray
         CastedArray.new(arr, self, parent)
-      elsif (type == Object || type == Hash) && (value.is_a?(Hash))
-        # allow casted_by calls to be passed up chain by wrapping in CastedHash
-        CastedHash[value, self, parent]
       elsif !value.nil?
         cast_value(parent, value)
       end

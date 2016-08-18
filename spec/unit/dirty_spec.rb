@@ -38,11 +38,7 @@ describe "Dirty" do
         @card = Card.new(:first_name => "matt")
         @card.first_name = "andrew"
         @card.first_name_changed?.should be_true
-        if ActiveModel::VERSION::STRING > "3.2.0"
-          @card.changes.should == { "first_name" => [nil, "andrew"] }
-        else
-          @card.changes.should == { "first_name" => ["matt", "andrew"] }
-        end
+        @card.changes.should == [ ["+", "first_name", "andrew"] ]
       end
     end
 
@@ -51,7 +47,7 @@ describe "Dirty" do
         @card = Card.create!(:first_name => "matt")
         @card.first_name = "andrew"
         @card.first_name_changed?.should be_true
-        @card.changes.should == { "first_name" => ["matt", "andrew"] }
+        @card.changes.should == [["~", "first_name", "matt", "andrew"]]
       end
     end
 
@@ -81,12 +77,12 @@ describe "Dirty" do
     # match activerecord behaviour
     it "should report no changes on a new object with no attributes set" do
       @card = Card.new
-      @card.changed?.should be_false
+      expect(@card.changed?).to be_false
     end
 
     it "should report no changes on a hash property with a default value" do
       @obj = DirtyModel.new
-      @obj.details.changed?.should be_false
+      expect(@obj.details_changed?).to be_false
     end
 
     # match activerecord behaviour
@@ -211,12 +207,12 @@ describe "Dirty" do
     it "should report changes to casted model in array" do
       @obj = Cat.create!(:name => 'felix', :toys => [{:name => "Catnip"}])
       @obj = Cat.get(@obj.id)
-      @obj.toys.first.name.should eql('Catnip')
-      @obj.toys.first.changed?.should be_false
-      @obj.changed?.should be_false
+      expect(@obj.toys.first.name).to eql('Catnip')
+      expect(@obj.toys.first.changed?).to be_false
+      expect(@obj.changed?).to be_false
       @obj.toys.first.name = "Super Catnip"
-      @obj.toys.first.changed?.should be_true
-      @obj.changed?.should be_true
+      expect(@obj.toys.first.changed?).to be_true
+      expect(@obj.changed?).to be_true
     end
 
     it "should report changes to anonymous casted models in array" do
@@ -238,9 +234,9 @@ describe "Dirty" do
       array = obj.keywords
       yield array, obj
       if change_expected
-        obj.changed?.should be_true
+        expect(obj.changed?).to be_true
       else
-        obj.changed?.should be_false
+        expect(obj.changed?).to be_false
       end
     end
 
@@ -321,18 +317,20 @@ describe "Dirty" do
     end
 
     it "should report changes on deletion from an array after reload" do
+      # NOTE: we don't use array help here as the object is different after reload!
       should_change_array do |array, obj|
-        array << "keyword"
+        obj.keywords << "keyword"
         obj.save!
         obj.reload
-        array.delete_at(0)
+        obj.keywords.delete_at(0)
       end
 
       should_change_array do |array, obj|
-        array << "keyword"
+        obj.keywords << "keyword"
         obj.save!
         obj.reload
-        array.delete("keyword")
+        obj.keywords.delete("keyword")
+        puts "CHANGES: #{obj.changes}"
       end
     end
 

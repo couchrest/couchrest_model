@@ -9,7 +9,6 @@ module CouchRest
         class_attribute(:properties_by_name) unless self.respond_to?(:properties_by_name)
         self.properties ||= []
         self.properties_by_name ||= {}
-        raise "You can only mixin Properties in a class responding to [] and []=, if you tried to mixin CastedModel, make sure your class inherits from Hash or responds to the proper methods" unless (method_defined?(:[]) && method_defined?(:[]=))
       end
 
       # Provide an attribute hash ready to be sent to CouchDB but with
@@ -18,50 +17,42 @@ module CouchRest
         super.delete_if{|k,v| v.nil?}
       end
 
-      # Returns the Class properties with their values
-      #
-      # ==== Returns
-      # Array:: the list of properties with their values
-      def properties_with_values
-        props = {}
-        properties.each { |property| props[property.name] = read_attribute(property.name) }
-        props
-      end
-
       # Read the casted value of an attribute defined with a property.
-      #
-      # ==== Returns
-      # Object:: the casted attibutes value.
       def read_attribute(property)
         self[find_property!(property).to_s]
       end
 
       # Store a casted value in the current instance of an attribute defined
-      # with a property and update dirty status
+      # with a property.
       def write_attribute(property, value)
         prop = find_property!(property)
         value = prop.cast(self, value)
-        couchrest_attribute_will_change!(prop.name) if use_dirty? && self[prop.name] != value
         self[prop.name] = value
       end
 
-      # Takes a hash as argument, and applies the values by using writer methods
-      # for each key. It doesn't save the document at the end. Raises a NoMethodError if the corresponding methods are
-      # missing. In case of error, no attributes are changed.
-      def update_attributes_without_saving(hash)
-        # Remove any protected and update all the rest. Any attributes
-        # which do not have a property will simply be ignored.
-        attrs = remove_protected_attributes(hash)
-        directly_set_attributes(attrs)
+      # Returns a hash of this object's attributes with a defined property.
+      # This is effectively an accessor to the underlying CouchRest 
+      # attributes hash.
+      def read_attributes
+        @_attributes
       end
-      alias :attributes= :update_attributes_without_saving
+      alias :attributes :read_attributes
 
-      # 'attributes' needed for Dirty
-      alias :attributes :properties_with_values
-
-      def set_attributes(hash)
+      # Takes a hash as argument, and applies the values by using writer
+      # methods respecting protected properties.
+      def write_attributes(hash)
         attrs = remove_protected_attributes(hash)
         directly_set_attributes(attrs)
+        self
+      end
+      alias :attributes= :write_attributes
+
+      # Takes the provided attribute hash and sets all properties, assuming
+      # that the data is from a trusted source, such as the database.
+      def write_all_attributes(attrs = {}, options = {})
+        directly_set_read_only_attributes(attrs)
+        directly_set_attributes(attrs, true)
+        self
       end
 
       protected
@@ -70,36 +61,28 @@ module CouchRest
         property.is_a?(Property) ? property : self.class.properties_by_name[property.to_s]
       end
 
-      # The following methods should be accessable by the Model::Base Class, but not by anything else!
+      def find_property!(property)
+        find_property(property) or
+          raise ArgumentError, "Missing property definition for #{property.to_s}"
+      end
+
+      def write_attributes_for_initialization(attrs = {}, opts = {})
+        apply_all_property_defaults
+        if opts[:trusted_source]
+          write_all_attributes(attrs)
+          clear_changes_information # Reset dirty tracking *after* init
+        else
+          clear_changes_information # Prepare dirty in advance
+          write_attributes(attrs)
+        end
+      end
+
+      # Apply each property's default value to the attributes. This should
+      # only ever be called on initialization.
       def apply_all_property_defaults
-        return if self.respond_to?(:new?) && (new? == false)
-        # TODO: cache the default object
-        # Never mark default options as dirty!
-        dirty, self.disable_dirty = self.disable_dirty, true
         self.class.properties.each do |property|
           write_attribute(property, property.default_value)
         end
-        self.disable_dirty = dirty
-      end
-
-      def prepare_all_attributes(attrs = {}, options = {})
-        self.disable_dirty = !!options[:directly_set_attributes]
-        apply_all_property_defaults
-        if options[:directly_set_attributes]
-          directly_set_read_only_attributes(attrs)
-          directly_set_attributes(attrs, true)
-        else
-          attrs = remove_protected_attributes(attrs)
-          directly_set_attributes(attrs)
-        end
-        self.disable_dirty = false
-        self
-      end
-
-      def find_property!(property)
-        prop = find_property(property)
-        raise ArgumentError, "Missing property definition for #{property.to_s}" if prop.nil?
-        prop
       end
 
       # Set all the attributes and return a hash with the attributes
@@ -116,12 +99,15 @@ module CouchRest
           elsif self.respond_to?("#{key}=")
             self.send("#{key}=", value) 
           elsif mass_assign || mass_assign_any_attribute
-            couchrest_attribute_will_change!(key) if use_dirty? && self[key] != value
             self[key] = value
           end
         end
 
-        assign_multiparameter_attributes(multi_parameter_attributes, hash) unless multi_parameter_attributes.empty?
+        # Handle attributes provided in an embedded object format, such
+        # as a web-form.
+        unless multi_parameter_attributes.empty?
+          assign_multiparameter_attributes(multi_parameter_attributes, hash)
+        end
       end
 
       def directly_set_read_only_attributes(hash)
@@ -215,7 +201,7 @@ module CouchRest
             end
 
             # Dirty!
-            create_property_dirty_tracking_methods(property)
+            create_dirty_property_methods(property)
 
             properties << property
             properties_by_name[property.to_s] = property
