@@ -214,6 +214,9 @@ module CouchRest
               validates_casted_model property.name
             end
 
+            # Dirty!
+            create_property_dirty_tracking_methods(property)
+
             properties << property
             properties_by_name[property.to_s] = property
             property
