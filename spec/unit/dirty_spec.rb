@@ -581,4 +581,37 @@ describe "Dirty" do
 
   end
 
+  context "when dirty tracking is disabled" do
+
+    let :obj do
+      Project.new(:name => 'Test')
+    end
+
+    it "should be persisted correctly" do
+      obj.save!
+      expect(Project.get(obj.id)).to_not be_nil
+    end
+
+    it "should always assume the doc has changed" do
+      expect(obj.changed?).to be_true
+      obj.save!
+      expect(obj.changed?).to be_true
+    end
+
+    it "should provide a nil changes set" do
+      expect(obj.changes).to be_nil
+    end
+
+    it "should not store a changes cache" do
+      expect(obj.send(:original_change_data)).to be_nil
+    end
+
+    it "should asume all properties have changed" do
+      obj.save!
+      obj.name = "Fooo"
+      expect(obj.name_changed?).to be_true
+      expect(obj.name_change).to eql(nil)
+    end
+
+  end
 end
