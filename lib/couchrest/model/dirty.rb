@@ -11,8 +11,7 @@ module CouchRest
       end
 
       def use_dirty?
-        # Use the configuration option. At some point we may want this
-        # to be over-writable on an instance level.
+        # Use the configuration option.
         !disable_dirty_tracking
       end
 

@@ -49,8 +49,8 @@ describe "Model Base" do
       @doc['foo'].should be_nil
     end
 
-    it "should set all properties with :directly_set_attributes option" do
-      @doc = WithDefaultValues.new({:name => 'test', :foo => 'bar'}, :directly_set_attributes => true)
+    it "should set all properties with :write_all_attributes option" do
+      @doc = WithDefaultValues.new({:name => 'test', :foo => 'bar'}, :write_all_attributes => true)
       @doc['name'].should eql('test')
       @doc['foo'].should eql('bar')
     end
@@ -209,35 +209,35 @@ describe "Model Base" do
       @art.save
     end
     it "should work for attribute= methods" do
-      @art['title'].should == "big bad danger"
-      @art.update_attributes_without_saving('date' => Time.now, :title => "super danger")
-      @art['title'].should == "super danger"
+      expect(@art['title']).to eql("big bad danger")
+      @art.write_attributes('date' => Time.now, :title => "super danger")
+      expect(@art['title']).to eql("super danger")
     end
     it "should silently ignore _id" do
-      @art.update_attributes_without_saving('_id' => 'foobar')
-      @art['_id'].should_not == 'foobar'
+      @art.write_attributes('_id' => 'foobar')
+      expect(@art['_id']).to_not eql('foobar')
     end
     it "should silently ignore _rev" do
-      @art.update_attributes_without_saving('_rev' => 'foobar')
-      @art['_rev'].should_not == 'foobar'
+      @art.write_attributes('_rev' => 'foobar')
+      expect(@art['_rev']).to_not eql('foobar')
     end
     it "should silently ignore created_at" do
-      @art.update_attributes_without_saving('created_at' => 'foobar')
+      @art.write_attributes('created_at' => 'foobar')
       expect(@art['created_at'].to_s).to_not eql('foobar')
     end
     it "should silently ignore updated_at" do
-      @art.update_attributes_without_saving('updated_at' => 'foobar')
+      @art.write_attributes('updated_at' => 'foobar')
       expect(@art['updated_at']).to_not eql('foobar')
     end
     it "should also work using attributes= alias" do
       @art.respond_to?(:attributes=).should be_true
       @art.attributes = {'date' => Time.now, :title => "something else"}
-      @art['title'].should == "something else"
+      expect(@art['title']).to eql("something else")
     end
     
     it "should not flip out if an attribute= method is missing and ignore it" do
       lambda {
-        @art.update_attributes_without_saving('slug' => "new-slug", :title => "super danger")
+        @art.attributes = {'slug' => "new-slug", :title => "super danger"}
       }.should_not raise_error
       @art.slug.should == "big-bad-danger"
     end

@@ -93,7 +93,7 @@ module CouchRest
       # Returns self.
       def reload
         write_attributes_for_initialization(
-          database.get(id), :trusted_source => true
+          database.get(id), :write_all_attributes => true
         )
         self
       end
@@ -123,7 +123,7 @@ module CouchRest
         def build_from_database(doc = {}, options = {}, &block)
           src = doc[model_type_key]
           base = (src.blank? || src == model_type_value) ? self : src.constantize
-          base.new(doc, options.merge(:trusted_source => true), &block)
+          base.new(doc, options.merge(:write_all_attributes => true), &block)
         end
 
         # Defines an instance and save it directly to the database

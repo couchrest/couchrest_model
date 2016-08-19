@@ -49,7 +49,7 @@ module CouchRest
 
       # Takes the provided attribute hash and sets all properties, assuming
       # that the data is from a trusted source, such as the database.
-      def write_all_attributes(attrs = {}, options = {})
+      def write_all_attributes(attrs = {})
         directly_set_read_only_attributes(attrs)
         directly_set_attributes(attrs, true)
         self
@@ -68,11 +68,14 @@ module CouchRest
 
       def write_attributes_for_initialization(attrs = {}, opts = {})
         apply_all_property_defaults
-        if opts[:trusted_source]
+        if opts[:write_all_attributes]
+          # Assume coming from a database, so we clear change information after
           write_all_attributes(attrs)
-          clear_changes_information # Reset dirty tracking *after* init
+          clear_changes_information
         else
-          clear_changes_information # Prepare dirty in advance
+          # Not from a persisted source, clear the change data in advance and do
+          # not set protected or read-only attributes.
+          clear_changes_information
           write_attributes(attrs)
         end
       end

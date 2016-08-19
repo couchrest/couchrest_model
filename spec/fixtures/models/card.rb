@@ -9,7 +9,8 @@ class Card < CouchRest::Model::Base
   property :last_name,        :alias     => :family_name
   property :read_only_value,  :read_only => true
   property :cast_alias,       Person,  :alias  => :calias
-  property :fg_color,         :default   => '#000'
+  property :fg_color,         String, :default   => '#000'
+  property :bg_color,         String, :protected => true
 
   timestamps!
 

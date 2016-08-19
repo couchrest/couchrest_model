@@ -31,12 +31,12 @@ module CouchRest::Model
     end
 
     def []= index, obj
-      value = instantiate_and_cast(obj, false)
+      value = instantiate_and_cast(obj)
       super(index, value)
     end
 
     def insert index, *args
-      values = *args.map{|obj| instantiate_and_cast(obj, false)}
+      values = *args.map{|obj| instantiate_and_cast(obj)}
       super(index, *values)
     end
 
@@ -68,7 +68,7 @@ module CouchRest::Model
 
     protected
 
-    def instantiate_and_cast(obj, change = true)
+    def instantiate_and_cast(obj)
       property = casted_by_property
       if casted_by && property && obj.class != property.type
         property.cast_value(casted_by, obj)

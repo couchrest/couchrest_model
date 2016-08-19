@@ -45,7 +45,7 @@ module CouchRest
       #
       # Options supported:
       #
-      # * :trusted_source, true when data comes directly from database
+      # * :write_all_attributes, true when data comes directly from database so we can set protected and read-only attributes.
       # * :database, provide an alternative database
       #
       # If a block is provided the new model will be passed into the

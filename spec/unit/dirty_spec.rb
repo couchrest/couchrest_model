@@ -231,8 +231,7 @@ describe "Dirty" do
     def test_casted_array(change_expected)
       obj = DirtyModel.create!
       obj = DirtyModel.get(obj.id)
-      array = obj.keywords
-      yield array, obj
+      yield obj
       if change_expected
         expect(obj.changed?).to be_true
       else
@@ -241,53 +240,53 @@ describe "Dirty" do
     end
 
     def should_change_array
-      test_casted_array(true) { |a,b| yield a,b }
+      test_casted_array(true) { |a| yield a }
     end
 
     def should_not_change_array
-      test_casted_array(false) { |a,b| yield a,b }
+      test_casted_array(false) { |a| yield a }
     end
 
     it "should report changes if an array index is modified" do
-      should_change_array do |array, obj|
-        array[0] = "keyword"
+      should_change_array do |obj|
+        obj.keywords[0] = "keyword"
       end
     end
 
     it "should report no changes if an array index is unmodified" do
-      should_not_change_array do |array, obj|
-        array[0] = array[0]
+      should_not_change_array do |obj|
+        obj.keywords[0] = obj.keywords[0]
       end
     end
 
     it "should report changes if an array is appended with <<" do
-      should_change_array do |array, obj|
-        array << 'keyword'
+      should_change_array do |obj|
+        obj.keywords << 'keyword'
       end
     end
 
     it "should report changes if item is inserted into array" do
-      should_change_array do |array, obj|
-        array.insert(0, 'keyword')
-        obj.keywords[0].should eql('keyword')
+      should_change_array do |obj|
+        obj.keywords.insert(0, 'keyword')
+        expect(obj.keywords[0]).to eql('keyword')
       end
     end
 
     it "should report changes if items are inserted into array" do
-      should_change_array do |array, obj|
-        array.insert(1, 'keyword', 'keyword2')
-        obj.keywords[2].should eql('keyword2')
+      should_change_array do |obj|
+        obj.keywords.insert(1, 'keyword', 'keyword2')
+        expect(obj.keywords[2]).to eql('keyword2')
       end
     end
 
     it "should report changes if an array is popped" do
-      should_change_array do |array, obj|
-        array.pop
+      should_change_array do |obj|
+        obj.keywords.pop
       end
     end
 
     it "should report changes if an array is popped after reload" do
-      should_change_array do |array, obj|
+      should_change_array do |obj|
         obj.reload
         obj.keywords.pop
       end
@@ -295,88 +294,86 @@ describe "Dirty" do
 
 
     it "should report no changes if an empty array is popped" do
-      should_not_change_array do |array, obj|
-        array.clear
+      should_not_change_array do |obj|
+        obj.keywords.clear
         obj.save!  # clears changes
-        array.pop
+        obj.keywords.pop
       end
     end
 
     it "should report changes on deletion from an array" do
-      should_change_array do |array, obj|
-        array << "keyword"
+      should_change_array do |obj|
+        obj.keywords << "keyword"
         obj.save!
-        array.delete_at(0)
+        obj.keywords.delete_at(0)
       end
 
-      should_change_array do |array, obj|
-        array << "keyword"
+      should_change_array do |obj|
+        obj.keywords << "keyword"
         obj.save!
-        array.delete("keyword")
+        obj.keywords.delete("keyword")
       end
     end
 
     it "should report changes on deletion from an array after reload" do
-      # NOTE: we don't use array help here as the object is different after reload!
-      should_change_array do |array, obj|
+      should_change_array do |obj|
         obj.keywords << "keyword"
         obj.save!
         obj.reload
         obj.keywords.delete_at(0)
       end
 
-      should_change_array do |array, obj|
+      should_change_array do |obj|
         obj.keywords << "keyword"
         obj.save!
         obj.reload
         obj.keywords.delete("keyword")
-        puts "CHANGES: #{obj.changes}"
       end
     end
 
     it "should report no changes on deletion from an empty array" do
-      should_not_change_array do |array, obj|
-        array.clear
+      should_not_change_array do |obj|
+        obj.keywords.clear
         obj.save!
-        array.delete_at(0)
+        obj.keywords.delete_at(0)
       end
 
-      should_not_change_array do |array, obj|
-        array.clear
+      should_not_change_array do |obj|
+        obj.keywords.clear
         obj.save!
-        array.delete("keyword")
+        obj.keywords.delete("keyword")
       end
     end
 
     it "should report changes if an array is pushed" do
-      should_change_array do |array, obj|
-        array.push("keyword")
+      should_change_array do |obj|
+        obj.keywords.push("keyword")
       end
     end
 
     it "should report changes if an array is shifted" do
-      should_change_array do |array, obj|
-        array.shift
+      should_change_array do |obj|
+        obj.keywords.shift
       end
     end
 
     it "should report no changes if an empty array is shifted" do
-      should_not_change_array do |array, obj|
-        array.clear
+      should_not_change_array do |obj|
+        obj.keywords.clear
         obj.save!  # clears changes
-        array.shift
+        obj.keywords.shift
       end
     end
 
     it "should report changes if an array is unshifted" do
-      should_change_array do |array, obj|
-        array.unshift("keyword")
+      should_change_array do |obj|
+        obj.keywords.unshift("keyword")
       end
     end
 
     it "should report changes if an array is cleared" do
-      should_change_array do |array, obj|
-        array.clear
+      should_change_array do |obj|
+        obj.keywords.clear
       end
     end
 
@@ -486,6 +483,63 @@ describe "Dirty" do
 
   end
 
+  describe "#clear_changes_information" do
+
+    let :obj do
+      Cat.new(:name => "Sam")
+    end
+
+    it "should reset any change information" do
+      obj.name = "Sambo"
+      obj.clear_changes_information
+      expect(obj.changed?).to be_false
+      expect(obj.name_changed?).to be_false
+    end
+
+    it "should reset nested changed information" do
+      obj.favorite_toy = { name: 'freddo' }
+      obj.save
+      obj.favorite_toy.name = 'froddo'
+      expect(obj.changed?).to be_true
+      obj.clear_changes_information
+      expect(obj.changed?).to be_false
+      expect(obj.favorite_toy.changed?).to be_false
+      expect(obj.favorite_toy.name_changed?).to be_false
+    end
+
+  end
+
+  describe "property methods" do
+
+    let :obj do
+      Card.create!(:first_name => "Sam")
+    end
+
+    describe "#property_changed?" do
+      it "should be true on change" do
+        expect(obj.first_name_changed?).to be_false
+        obj.first_name = "Sambo"
+        expect(obj.first_name_changed?).to be_true
+      end
+    end
+
+    describe "#property_was" do
+      it "should be true on change" do
+        expect(obj.first_name_was).to eql("Sam")
+        obj.first_name = "Sambo"
+        expect(obj.first_name_was).to eql("Sam")
+      end
+    end
+
+    describe "#property_change" do
+      it "should show change" do
+        expect(obj.first_name_change).to eql([])
+        obj.first_name = "Sambo"
+        expect(obj.first_name_change).to eql(['Sam', 'Sambo'])
+      end
+    end
+
+  end
 
   describe "when mass_assign_any_attribute true" do
     before(:each) do
