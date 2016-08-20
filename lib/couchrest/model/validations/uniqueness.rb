@@ -1,4 +1,7 @@
-# encoding: utf-8
+
+I18n.load_path << File.join(
+  File.dirname(__FILE__), "locale", "en.yml"
+)
 
 module CouchRest
   module Model

@@ -21,16 +21,15 @@ module CouchRest::Model
         def base_doc?
           false # Can never be base doc!
         end
-
       end
     end
 
     # Initialize a new Casted Model. Accepts the same
     # options as CouchRest::Model::Base for preparing and initializing
     # attributes.
-    def initialize(keys = {}, options = {})
+    def initialize(attributes = {}, options = {})
       super()
-      prepare_all_attributes(keys, options)
+      write_attributes_for_initialization(attributes, options)
       run_callbacks(:initialize) { self }
     end
 
@@ -53,17 +52,6 @@ module CouchRest::Model
     end
     alias :to_key :id
     alias :to_param :id
-
-    # Sets the attributes from a hash
-    def update_attributes_without_saving(hash)
-      hash.each do |k, v|
-        raise NoMethodError, "#{k}= method not available, use property :#{k}" unless self.respond_to?("#{k}=")
-      end      
-      hash.each do |k, v|
-        self.send("#{k}=",v)
-      end
-    end
-    alias :attributes= :update_attributes_without_saving
 
   end # End Embeddable
 

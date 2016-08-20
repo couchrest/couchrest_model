@@ -9,7 +9,7 @@ module CouchRest
         raise ArgumentError unless args[:file] && args[:name]
         return if has_attachment?(args[:name])
         set_attachment_attr(args)
-      rescue ArgumentError => e
+      rescue ArgumentError
         raise ArgumentError, 'You must specify :file and :name'
       end
       
@@ -29,7 +29,7 @@ module CouchRest
         return unless has_attachment?(args[:name])
         delete_attachment(args[:name])
         set_attachment_attr(args)
-      rescue ArgumentError => e
+      rescue ArgumentError
         raise ArgumentError, 'You must specify :file and :name'
       end
 
@@ -37,7 +37,6 @@ module CouchRest
       def delete_attachment(attachment_name)
         return unless attachments
         if attachments.include?(attachment_name)
-          attribute_will_change!("_attachments")
           attachments.delete attachment_name
         end
       end
@@ -71,7 +70,6 @@ module CouchRest
           content_type = args[:content_type] ? args[:content_type] : get_mime_type(args[:file].path)
           content_type ||= (get_mime_type(args[:name]) || 'text/plain')
 
-          attribute_will_change!("_attachments")
           attachments[args[:name]] = {
             'content_type' => content_type,
             'data'         => args[:file].read

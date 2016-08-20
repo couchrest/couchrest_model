@@ -45,24 +45,32 @@ module CouchRest
       #
       # Options supported:
       #
-      # * :directly_set_attributes, true when data comes directly from database
+      # * :write_all_attributes, true when data comes directly from database so we can set protected and read-only attributes.
       # * :database, provide an alternative database
       #
       # If a block is provided the new model will be passed into the
       # block so that it can be populated.
-      def initialize(attributes = {}, options = {})
+      def initialize(attributes = {}, options = {}, &block)
         super()
-        prepare_all_attributes(attributes, options)
-        # set the instance's database, if provided
+        
+        # Always force the type of model
+        self[self.model_type_key] = self.class.model_type_value
+
+        # Some instances may require a different database
         self.database = options[:database] unless options[:database].nil?
-        unless self['_id'] && self['_rev']
-          self[self.model_type_key] = self.class.model_type_value
-        end
+
+        # Deal with the attributes
+        write_attributes_for_initialization(attributes, options)
 
         yield self if block_given?
 
         after_initialize if respond_to?(:after_initialize)
         run_callbacks(:initialize) { self }
+      end
+
+      def self.build(attrs = {}, options = {}, &block)
+
+
       end
 
       alias :new_record? :new?

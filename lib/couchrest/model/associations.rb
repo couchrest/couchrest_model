@@ -1,12 +1,8 @@
 module CouchRest
   module Model
+    # Basic support for relationships between CouchRest::Model::Base
     module Associations
-
-      # Basic support for relationships between CouchRest::Model::Base
-      
-      def self.included(base)
-        base.extend(ClassMethods)
-      end
+      extend ActiveSupport::Concern
 
       module ClassMethods
 
@@ -240,8 +236,7 @@ module CouchRest
 
       # Override CastedArray instantiation_and_cast method for a simpler
       # version that will not try to cast the model.
-      def instantiate_and_cast(obj, change = true)
-        couchrest_parent_will_change! if change && use_dirty?
+      def instantiate_and_cast(obj)
         obj.casted_by = casted_by if obj.respond_to?(:casted_by)
         obj.casted_by_property = casted_by_property if obj.respond_to?(:casted_by_property)
         obj
