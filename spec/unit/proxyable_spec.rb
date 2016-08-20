@@ -227,7 +227,6 @@ describe CouchRest::Model::Proxyable do
         @obj.should_receive(:by_name).and_return(view)
         lambda { @obj.find_by_name!('name') }.should raise_error(CouchRest::Model::DocumentNotFound)
       end
-
     end
 
     describe "instance" do
@@ -268,10 +267,20 @@ describe CouchRest::Model::Proxyable do
         @obj.should_receive(:proxy_update)
         @obj.get(32)
       end
+
       it "should proxy #find" do
         @model.should_receive(:get).with(32, 'database')
         @obj.should_receive(:proxy_update)
         @obj.find(32)
+      end
+
+      it "should proxy factory methods" do
+        @model.should_receive(:factory_method).with(@obj, "arg_1", "arg_2")
+        @obj.factory_method("arg_1", "arg_2")
+      end
+
+      it "shouldn't forward undefined model methods" do
+        lambda { @obj.undefined_factory_method("arg_1", "arg_2") }.should raise_error(NoMethodError, /CouchRest::Model::Proxy/)
       end
 
 

@@ -156,6 +156,12 @@ module CouchRest
           end
         end
 
+        private
+
+        def method_missing(m, *args, &block)
+          model.respond_to?(m) ? model.send(m, self, *args, &block) : super
+        end
+        
       end
     end
   end
