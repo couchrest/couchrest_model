@@ -491,18 +491,23 @@ module CouchRest
               end
               raise "View cannot be created without recognised name, :map or :by options" if opts[:by].nil?
 
+              # convert emit symbols to properties
+              opts[:emit] = "doc['#{opts[:emit]}']" if opts[:emit].try { is_a?(Symbol) }
+              opts[:emit] = "[" + opts[:emit].map { |i| i.is_a?(Symbol) ? "doc['#{i}']" : i }.join(', ') + "]" if opts[:emit].try { is_a?(Array) }
+
               opts[:allow_blank] = opts[:allow_blank].nil? ? true : opts[:allow_blank]
               opts[:guards] ||= []
               opts[:guards].push "(doc['#{model.model_type_key}'] == '#{model.model_type_value}')"
 
               keys = opts[:by].map{|o| "doc['#{o}']"}
-              emit = keys.length == 1 ? keys.first : "[#{keys.join(', ')}]"
+              emit_keys = keys.length == 1 ? keys.first : "[#{keys.join(', ')}]"
+              emit_value = opts[:emit] || 1;
               opts[:guards] += keys.map{|k| "(#{k} != null)"} unless opts[:allow_nil]
               opts[:guards] += keys.map{|k| "(#{k} != '')"} unless opts[:allow_blank]
               opts[:map] = <<-EOF
                 function(doc) {
                   if (#{opts[:guards].join(' && ')}) {
-                    emit(#{emit}, 1);
+                    emit(#{emit_keys}, #{emit_value});
                   }
                 }
               EOF
