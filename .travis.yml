@@ -22,3 +22,4 @@ matrix:
       gemfile: Gemfile.activesupport-5.x
     - rvm: jruby
       gemfile: Gemfile.activesupport-5.x
+    - rvm: rbx # Has problems with Array#insert inheritence

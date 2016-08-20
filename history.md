@@ -7,6 +7,11 @@
   * Add view option to specify a custom emit value for views ([PR](https://github.com/couchrest/couchrest_model/pull/209) @ellneal)
   * Support proxying to multiple databases ([PR](https://github.com/couchrest/couchrest_model/pull/206) @ellneal)
   * Support concurrent auto design doc updates ([PR](https://github.com/couchrest/couchrest_model/pull/201) @ghempton)
+  * Upgrading to rspec 3.5 and adding ActiveSupport 5.X tests (@samlown)
+
+## 2.1.0 - skipped!
+
+  * No release, moved straight to 2.2.0.
 
 ## 2.1.0.rc1 - 2016-07-06
 

@@ -30,13 +30,12 @@ module CouchRest::Model
       super(instantiate_and_cast(obj))
     end
 
-    def []= index, obj
-      value = instantiate_and_cast(obj)
-      super(index, value)
+    def []=(index, obj)
+      super(index, instantiate_and_cast(obj))
     end
 
-    def insert index, *args
-      values = *args.map{|obj| instantiate_and_cast(obj)}
+    def insert(index, *args)
+      values = args.map{|obj| instantiate_and_cast(obj)}
       super(index, *values)
     end
 
