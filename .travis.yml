@@ -1,14 +1,24 @@
+language: ruby
+gemfile:
+  - Gemfile.activesupport-4.x
+  - Gemfile.activesupport-5.x
 rvm:
   - 2.3.0
-  - 2.2.2
+  - 2.2.4
   - 2.1.10
   - 2.0.0
   - jruby
+  - rbx
 services: couchdb
-matrix:
-  allow_failures:
-    - rvm: jruby
 before_install:
   - gem install bundler
 env:
   - JRUBY_OPTS=--2.0
+matrix:
+  allow_failures:
+    - rvm: 2.0.0
+      gemfile: Gemfile.activesupport-5.x
+    - rvm: 2.1.10
+      gemfile: Gemfile.activesupport-5.x
+    - rvm: jruby
+      gemfile: Gemfile.activesupport-5.x
