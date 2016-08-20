@@ -56,16 +56,16 @@ describe CouchRest::Model::Embeddable do
     end
     it "should automatically include the property mixin and define getters and setters" do
       @obj.name = 'Matt'
-      @obj.name.should == 'Matt'
+      expect(@obj.name).to eq('Matt')
     end
 
     it "should allow override of default" do
       @obj = WithCastedModelMixin.new(:name => 'Eric', :details => {'color' => 'orange'})
-      @obj.name.should == 'Eric'
-      @obj.details['color'].should == 'orange'
+      expect(@obj.name).to eq('Eric')
+      expect(@obj.details['color']).to eq('orange')
     end
     it "should always return base_doc? as false" do
-      @obj.base_doc?.should be_false
+      expect(@obj.base_doc?).to be_falsey
     end
     it "should call after_initialize callback if available" do
       klass = Class.new do
@@ -75,7 +75,7 @@ describe CouchRest::Model::Embeddable do
         def set_name; self.name = "foobar"; end
       end
       @obj = klass.new
-      @obj.name.should eql("foobar")
+      expect(@obj.name).to eql("foobar")
     end
     it "should allow override of initialize with super" do
       klass = Class.new do
@@ -86,7 +86,7 @@ describe CouchRest::Model::Embeddable do
         def initialize(attrs = {}); super(); end
       end
       @obj = klass.new
-      @obj.name.should eql("foobar")
+      expect(@obj.name).to eql("foobar")
     end
   end
 
@@ -96,7 +96,7 @@ describe CouchRest::Model::Embeddable do
       @casted_obj = @obj.casted_attribute
     end
     it "should be nil" do
-      @casted_obj.should == nil
+      expect(@casted_obj).to eq(nil)
     end
   end
 
@@ -105,20 +105,20 @@ describe CouchRest::Model::Embeddable do
       @obj = DummyModel.new
     end
     it "should be empty initially" do
-      @obj.sub_models.should_not be_nil
-      @obj.sub_models.should be_empty
+      expect(@obj.sub_models).not_to be_nil
+      expect(@obj.sub_models).to be_empty
     end
     it "should be updatable using a hash" do
       @obj.sub_models << {:title => 'test'}
-      @obj.sub_models.first.title.should eql('test')
+      expect(@obj.sub_models.first.title).to eql('test')
     end
     it "should be empty intitally (without params)" do
-      @obj.param_free_sub_models.should_not be_nil
-      @obj.param_free_sub_models.should be_empty
+      expect(@obj.param_free_sub_models).not_to be_nil
+      expect(@obj.param_free_sub_models).to be_empty
     end
     it "should be updatable using a hash (without params)" do
       @obj.param_free_sub_models << {:title => 'test'}
-      @obj.param_free_sub_models.first.title.should eql('test')
+      expect(@obj.param_free_sub_models.first.title).to eql('test')
     end
   end
 
@@ -130,35 +130,35 @@ describe CouchRest::Model::Embeddable do
     end
 
     it "should be available from its parent" do
-      @casted_obj.should be_an_instance_of(WithCastedModelMixin)
+      expect(@casted_obj).to be_an_instance_of(WithCastedModelMixin)
     end
 
     it "should have the getters defined" do
-      @casted_obj.name.should == 'whatever'
+      expect(@casted_obj.name).to eq('whatever')
     end
 
     it "should know who casted it" do
-      @casted_obj.casted_by.should == @obj
+      expect(@casted_obj.casted_by).to eq(@obj)
     end
 
     it "should know which property casted it" do
-      @casted_obj.casted_by_property.should == @obj.properties.detect{|p| p.to_s == 'casted_attribute'}
+      expect(@casted_obj.casted_by_property).to eq(@obj.properties.detect{|p| p.to_s == 'casted_attribute'})
     end
 
     it "should return nil for the 'no_value' attribute" do
-      @casted_obj.no_value.should be_nil
+      expect(@casted_obj.no_value).to be_nil
     end
 
     it "should return nil for the unknown attribute" do
-      @casted_obj["unknown"].should be_nil
+      expect(@casted_obj["unknown"]).to be_nil
     end
 
     it "should return {} for the hash attribute" do
-      @casted_obj.details.should == {}
+      expect(@casted_obj.details).to eq({})
     end
 
     it "should cast its own attributes" do
-      @casted_obj.casted_attribute.should be_instance_of(WithCastedModelMixin)
+      expect(@casted_obj.casted_attribute).to be_instance_of(WithCastedModelMixin)
     end
 
     it "should raise an error if save or update_attributes called" do
@@ -174,23 +174,23 @@ describe CouchRest::Model::Embeddable do
       @casted_obj = @obj.old_casted_attribute
     end
     it "should be available from its parent" do
-      @casted_obj.should be_an_instance_of(OldFashionedMixin)
+      expect(@casted_obj).to be_an_instance_of(OldFashionedMixin)
     end
 
     it "should have the getters defined" do
-      @casted_obj.name.should == 'Testing'
+      expect(@casted_obj.name).to eq('Testing')
     end
 
     it "should know who casted it" do
-      @casted_obj.casted_by.should == @obj
+      expect(@casted_obj.casted_by).to eq(@obj)
     end
 
     it "should know which property casted it" do
-      @casted_obj.casted_by_property.should == @obj.properties.detect{|p| p.to_s == 'old_casted_attribute'}
+      expect(@casted_obj.casted_by_property).to eq(@obj.properties.detect{|p| p.to_s == 'old_casted_attribute'})
     end
 
     it "should return nil for the unknown attribute" do
-      @casted_obj["unknown"].should be_nil
+      expect(@casted_obj["unknown"]).to be_nil
     end
   end
 
@@ -200,8 +200,8 @@ describe CouchRest::Model::Embeddable do
     end
 
     it "should cast the array properly" do
-      @obj.keywords.should be_kind_of(Array)
-      @obj.keywords.first.should == 'couch'
+      expect(@obj.keywords).to be_kind_of(Array)
+      expect(@obj.keywords.first).to eq('couch')
     end
   end
 
@@ -209,33 +209,35 @@ describe CouchRest::Model::Embeddable do
     before(:each) do
       @question = Question.new(:q => "What is your quest?", :a => "To seek the Holy Grail")
     end
-    it "should work for attribute= methods" do
-      @question.q.should == "What is your quest?"
-      @question['a'].should == "To seek the Holy Grail"
-      @question.update_attributes_without_saving(:q => "What is your favorite color?", 'a' => "Blue")
-      @question['q'].should == "What is your favorite color?"
-      @question.a.should == "Blue"
+    it "should work for write_attributes method" do
+      expect(@question.q).to eq("What is your quest?")
+      expect(@question['a']).to eq("To seek the Holy Grail")
+      @question.write_attributes(
+        :q => "What is your favorite color?", 'a' => "Blue"
+      )
+      expect(@question['q']).to eq("What is your favorite color?")
+      expect(@question.a).to eq("Blue")
     end
 
     it "should also work for attributes= alias" do
-      @question.respond_to?(:attributes=).should be_true
+      expect(@question.respond_to?(:attributes=)).to be_truthy
       @question.attributes = {:q => "What is your favorite color?", 'a' => "Blue"}
-      @question['q'].should == "What is your favorite color?"
-      @question.a.should == "Blue"
+      expect(@question['q']).to eq("What is your favorite color?")
+      expect(@question.a).to eq("Blue")
     end
 
     it "should flip out if an attribute= method is missing" do
-      lambda {
-        @q.update_attributes_without_saving('foo' => "something", :a => "No green")
-      }.should raise_error(NoMethodError)
+      expect {
+        @q.attributes = { 'foo' => "something", :a => "No green" }
+      }.to raise_error(NoMethodError)
     end
 
     it "should not change any attributes if there is an error" do
-      lambda {
-        @q.update_attributes_without_saving('foo' => "something", :a => "No green")
-      }.should raise_error(NoMethodError)
-      @question.q.should == "What is your quest?"
-      @question.a.should == "To seek the Holy Grail"
+      expect {
+        @q.attributes = { 'foo' => "something", :a => "No green" }
+      }.to raise_error(NoMethodError)
+      expect(@question.q).to eq("What is your quest?")
+      expect(@question.a).to eq("To seek the Holy Grail")
     end
 
   end
@@ -244,25 +246,25 @@ describe CouchRest::Model::Embeddable do
     before(:each) do
       reset_test_db!
       @obj = DummyModel.new(:casted_attribute => {:name => 'whatever'})
-      @obj.save.should be_true
+      expect(@obj.save).to be_truthy
       @obj = DummyModel.get(@obj.id)
     end
 
     it "should be able to load with the casted models" do
       casted_obj = @obj.casted_attribute
-      casted_obj.should_not be_nil
-      casted_obj.should be_an_instance_of(WithCastedModelMixin)
+      expect(casted_obj).not_to be_nil
+      expect(casted_obj).to be_an_instance_of(WithCastedModelMixin)
     end
 
     it "should have defined getters for the casted model" do
       casted_obj = @obj.casted_attribute
-      casted_obj.name.should == "whatever"
+      expect(casted_obj.name).to eq("whatever")
     end
 
     it "should have defined setters for the casted model" do
       casted_obj = @obj.casted_attribute
       casted_obj.name = "test"
-      casted_obj.name.should == "test"
+      expect(casted_obj.name).to eq("test")
     end
 
     it "should retain an override of a casted model attribute's default" do
@@ -270,7 +272,7 @@ describe CouchRest::Model::Embeddable do
       casted_obj.details['color'] = 'orange'
       @obj.save
       casted_obj = DummyModel.get(@obj.id).casted_attribute
-      casted_obj.details['color'].should == 'orange'
+      expect(casted_obj.details['color']).to eq('orange')
     end
 
   end
@@ -284,27 +286,27 @@ describe CouchRest::Model::Embeddable do
     it "should save" do
       toy = CatToy.new :name => "Mouse"
       @cat.toys.push(toy)
-      @cat.save.should be_true
+      expect(@cat.save).to be_truthy
       @cat = Cat.get @cat.id
-      @cat.toys.class.should == CouchRest::Model::CastedArray
-      @cat.toys.first.class.should == CatToy
-      @cat.toys.first.should === toy
+      expect(@cat.toys.class).to eq(CouchRest::Model::CastedArray)
+      expect(@cat.toys.first.class).to eq(CatToy)
+      expect(@cat.toys.first).to be === toy
     end
 
     it "should fail because name is not present" do
       toy = CatToy.new
       @cat.toys.push(toy)
-      @cat.should_not be_valid
-      @cat.save.should be_false
+      expect(@cat).not_to be_valid
+      expect(@cat.save).to be_falsey
     end
 
     it "should not fail if the casted model doesn't have validation" do
       Cat.property :masters, [Person], :default => []
       Cat.validates_presence_of :name
       cat = Cat.new(:name => 'kitty')
-      cat.should be_valid
+      expect(cat).to be_valid
       cat.masters.push Person.new
-      cat.should be_valid
+      expect(cat).to be_valid
     end
   end
 
@@ -321,46 +323,46 @@ describe CouchRest::Model::Embeddable do
 
     describe "on the top document" do
       it "should put errors on all invalid casted models" do
-        @cat.should_not be_valid
-        @cat.errors.should_not be_empty
-        @toy1.errors.should_not be_empty
-        @toy2.errors.should_not be_empty
-        @toy3.errors.should_not be_empty
+        expect(@cat).not_to be_valid
+        expect(@cat.errors).not_to be_empty
+        expect(@toy1.errors).not_to be_empty
+        expect(@toy2.errors).not_to be_empty
+        expect(@toy3.errors).not_to be_empty
       end
 
       it "should not put errors on valid casted models" do
         @toy1.name = "Feather"
         @toy2.name = "Twine"
-        @cat.should_not be_valid
-        @cat.errors.should_not be_empty
-        @toy1.errors.should be_empty
-        @toy2.errors.should be_empty
-        @toy3.errors.should_not be_empty
+        expect(@cat).not_to be_valid
+        expect(@cat.errors).not_to be_empty
+        expect(@toy1.errors).to be_empty
+        expect(@toy2.errors).to be_empty
+        expect(@toy3.errors).not_to be_empty
       end
 
       it "should not use dperecated ActiveModel options" do
-        ActiveSupport::Deprecation.should_not_receive(:warn)
-        @cat.should_not be_valid
+        expect(ActiveSupport::Deprecation).not_to receive(:warn)
+        expect(@cat).not_to be_valid
       end
     end
 
     describe "on a casted model property" do
       it "should only validate itself" do
-        @toy1.should_not be_valid
-        @toy1.errors.should_not be_empty
-        @cat.errors.should be_empty
-        @toy2.errors.should be_empty
-        @toy3.errors.should be_empty
+        expect(@toy1).not_to be_valid
+        expect(@toy1.errors).not_to be_empty
+        expect(@cat.errors).to be_empty
+        expect(@toy2.errors).to be_empty
+        expect(@toy3.errors).to be_empty
       end
     end
 
     describe "on a casted model inside a casted collection" do
       it "should only validate itself" do
-        @toy2.should_not be_valid
-        @toy2.errors.should_not be_empty
-        @cat.errors.should be_empty
-        @toy1.errors.should be_empty
-        @toy3.errors.should be_empty
+        expect(@toy2).not_to be_valid
+        expect(@toy2.errors).not_to be_empty
+        expect(@cat.errors).to be_empty
+        expect(@toy1.errors).to be_empty
+        expect(@toy3.errors).to be_empty
       end
     end
   end
@@ -375,37 +377,37 @@ describe CouchRest::Model::Embeddable do
     end
 
     it "should be true on new" do
-      CatToy.new.should be_new
-      CatToy.new.new_record?.should be_true
+      expect(CatToy.new).to be_new
+      expect(CatToy.new.new_record?).to be_truthy
     end
 
     it "should be true after assignment" do
-      @cat.should be_new
-      @cat.favorite_toy.should be_new
-      @cat.toys.first.should be_new
+      expect(@cat).to be_new
+      expect(@cat.favorite_toy).to be_new
+      expect(@cat.toys.first).to be_new
     end
 
     it "should not be true after create or save" do
       @cat.create
       @cat.save
-      @cat.favorite_toy.should_not be_new
-      @cat.toys.first.casted_by.should eql(@cat)
-      @cat.toys.first.should_not be_new
+      expect(@cat.favorite_toy).not_to be_new
+      expect(@cat.toys.first.casted_by).to eql(@cat)
+      expect(@cat.toys.first).not_to be_new
     end
 
     it "should not be true after get from the database" do
       @cat.save
       @cat = Cat.get(@cat.id)
-      @cat.favorite_toy.should_not be_new
-      @cat.toys.first.should_not be_new
+      expect(@cat.favorite_toy).not_to be_new
+      expect(@cat.toys.first).not_to be_new
     end
 
     it "should still be true after a failed create or save" do
       @cat.name = nil
-      @cat.create.should be_false
-      @cat.save.should be_false
-      @cat.favorite_toy.should be_new
-      @cat.toys.first.should be_new
+      expect(@cat.create).to be_falsey
+      expect(@cat.save).to be_falsey
+      expect(@cat.favorite_toy).to be_new
+      expect(@cat.toys.first).to be_new
     end
   end
 
@@ -427,27 +429,27 @@ describe CouchRest::Model::Embeddable do
       @course.questions << question
       new_course = Course.new
       new_course.questions = @course.questions
-      new_course.questions.should include(question)
+      expect(new_course.questions).to include(question)
     end
 
     it "should reference the top document for" do
-      @course.base_doc.should === @course
-      @professor.casted_by.should === @course
-      @professor.base_doc.should === @course
-      @cat.base_doc.should === @course
-      @toy1.base_doc.should === @course
-      @toy2.base_doc.should === @course
+      expect(@course.base_doc).to be === @course
+      expect(@professor.casted_by).to be === @course
+      expect(@professor.base_doc).to be === @course
+      expect(@cat.base_doc).to be === @course
+      expect(@toy1.base_doc).to be === @course
+      expect(@toy2.base_doc).to be === @course
     end
 
     it "should call setter on top document" do
-      @toy1.base_doc.should_not be_nil
+      expect(@toy1.base_doc).not_to be_nil
       @toy1.base_doc.title = 'Tom Foolery'
-      @course.title.should == 'Tom Foolery'
+      expect(@course.title).to eq('Tom Foolery')
     end
 
     it "should return nil if not yet casted" do
       person = Person.new
-      person.base_doc.should == nil
+      expect(person.base_doc).to eq(nil)
     end
   end
 
@@ -460,16 +462,16 @@ describe CouchRest::Model::Embeddable do
     end
 
     it "should not save parent document when casted model is invalid" do
-      @toy.should_not be_valid
-      @toy.base_doc.save.should be_false
-      lambda{@toy.base_doc.save!}.should raise_error
+      expect(@toy).not_to be_valid
+      expect(@toy.base_doc.save).to be_falsey
+      expect{@toy.base_doc.save!}.to raise_error(/Validation Failed/)
     end
 
     it "should save parent document when nested casted model is valid" do
       @toy.name = "Mr Squeaks"
-      @toy.should be_valid
-      @toy.base_doc.save.should be_true
-      lambda{@toy.base_doc.save!}.should_not raise_error
+      expect(@toy).to be_valid
+      expect(@toy.base_doc.save).to be_truthy
+      expect{@toy.base_doc.save!}.not_to raise_error
     end
   end
 
@@ -482,14 +484,14 @@ describe CouchRest::Model::Embeddable do
 
     describe "validate" do
       it "should run before_validation before validating" do
-        @model.run_before_validation.should be_nil
-        @model.should be_valid
-        @model.run_before_validation.should be_true
+        expect(@model.run_before_validation).to be_nil
+        expect(@model).to be_valid
+        expect(@model.run_before_validation).to be_truthy
       end
       it "should run after_validation after validating" do
-        @model.run_after_validation.should be_nil
-        @model.should be_valid
-        @model.run_after_validation.should be_true
+        expect(@model.run_after_validation).to be_nil
+        expect(@model).to be_valid
+        expect(@model.run_after_validation).to be_truthy
       end
     end
   end

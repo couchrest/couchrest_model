@@ -17,6 +17,7 @@ module CouchRest
       def initialize(model, prefix = nil)
         self.model       = model
         self.method_name = self.class.method_name(prefix)
+        @lock            = Mutex.new
         suffix = prefix ? "_#{prefix}" : ''
         self["_id"] = "_design/#{model.to_s}#{suffix}"
         apply_defaults
@@ -26,7 +27,8 @@ module CouchRest
         if auto_update
           db ||= database
           if cache_checksum(db) != checksum
-            sync!(db)
+            # Only allow one thread to update the design document at a time
+            @lock.synchronize { sync!(db) }
             set_cache_checksum(db, checksum)
           end
         end
@@ -39,6 +41,7 @@ module CouchRest
         # Load up the last copy. We never blindly overwrite the remote copy
         # as it may contain views that are not used or known about by
         # our model.
+
         doc = load_from_database(db)
 
         if !doc || doc['couchrest-hash'] != checksum
@@ -181,5 +184,3 @@ module CouchRest
     end
   end
 end
-
-

@@ -14,20 +14,20 @@ describe CouchRest::Model::Connection do
 
     describe "#database" do
       it "should respond to" do
-        @obj.should respond_to(:database)
+        expect(@obj).to respond_to(:database)
       end
       it "should provided class's database" do
-        @obj.class.should_receive :database
+        expect(@obj.class).to receive :database
         @obj.database
       end
     end
 
     describe "#server" do
       it "should respond to method" do
-        @obj.should respond_to(:server)
+        expect(@obj).to respond_to(:server)
       end
       it "should return class's server" do
-        @obj.class.should_receive :server
+        expect(@obj.class).to receive :server
         @obj.server
       end
     end
@@ -36,13 +36,13 @@ describe CouchRest::Model::Connection do
   describe "default configuration" do
 
     it "should provide environment" do
-      @class.environment.should eql(:development)
+      expect(@class.environment).to eql(:development)
     end
     it "should provide connection config file" do
-      @class.connection_config_file.should eql(File.join(Dir.pwd, 'config', 'couchdb.yml'))
+      expect(@class.connection_config_file).to eql(File.join(Dir.pwd, 'config', 'couchdb.yml'))
     end
     it "should provided simple connection details" do
-      @class.connection[:prefix].should eql('couchrest')
+      expect(@class.connection[:prefix]).to eql('couchrest')
     end
 
   end
@@ -51,46 +51,46 @@ describe CouchRest::Model::Connection do
 
     describe ".use_database" do
       it "should respond to" do
-        @class.should respond_to(:use_database)
+        expect(@class).to respond_to(:use_database)
       end
       it "should set the database if object provided" do
         db = @class.server.database('test')
         @class.use_database(db)
-        @class.database.should eql(db)
+        expect(@class.database).to eql(db)
       end
       it "should never prepare the database before it is needed" do
         db = @class.server.database('test')
-        @class.should_not_receive(:prepare_database)
+        expect(@class).not_to receive(:prepare_database)
         @class.use_database('test')
         @class.use_database(db)
       end
       it "should use the database specified" do
         @class.use_database(:test)
-        @class.database.name.should eql('couchrest_test')
+        expect(@class.database.name).to eql('couchrest_test')
       end
     end
 
     describe ".database" do
       it "should respond to" do
-        @class.should respond_to(:database)
+        expect(@class).to respond_to(:database)
       end
       it "should provide a database object" do
-        @class.database.should be_a(CouchRest::Database)
+        expect(@class.database).to be_a(CouchRest::Database)
       end
       it "should provide a database with default name" do
-        @class.database.name.should eql('couchrest')
+        expect(@class.database.name).to eql('couchrest')
       end
     end
 
     describe ".server" do
       it "should respond to" do
-        @class.should respond_to(:server)
+        expect(@class).to respond_to(:server)
       end
       it "should provide a server object" do
-        @class.server.should be_a(CouchRest::Server)
+        expect(@class.server).to be_a(CouchRest::Server)
       end
       it "should provide a server with default config" do
-        @class.server.uri.to_s.should eql("http://localhost:5984")
+        expect(@class.server.uri.to_s).to eql("http://localhost:5984")
       end
       it "should allow the configuration to be overwritten" do
         @class.connection = {
@@ -102,32 +102,37 @@ describe CouchRest::Model::Connection do
             :username => 'foo',
             :password => 'bar'
           }
-        @class.server.uri.to_s.should eql("https://foo:bar@127.0.0.1:5985")
+        expect(@class.server.uri.to_s).to eql("https://foo:bar@127.0.0.1:5985")
+      end
+
+      it "should pass through the persistent connection option" do
+        @class.connection[:persistent] = false
+        expect(@class.server.connection_options[:persistent]).to be_falsey
       end
 
     end
 
     describe ".prepare_database" do
       it "should respond to" do
-        @class.should respond_to(:prepare_database)
+        expect(@class).to respond_to(:prepare_database)
       end
 
       it "should join the database name correctly" do
         @class.connection[:suffix] = 'db'
         db = @class.prepare_database('test')
-        db.name.should eql('couchrest_test_db')
+        expect(db.name).to eql('couchrest_test_db')
       end
 
       it "should ignore nil values in database name" do
         @class.connection[:suffix] = nil
         db = @class.prepare_database('test')
-        db.name.should eql('couchrest_test')
+        expect(db.name).to eql('couchrest_test')
       end
 
       it "should use the .use_database value" do
         @class.use_database('testing')
         db = @class.prepare_database
-        db.name.should eql('couchrest_testing')
+        expect(db.name).to eql('couchrest_testing')
       end
     end
 
@@ -135,26 +140,26 @@ describe CouchRest::Model::Connection do
 
       describe ".connection_configuration" do
         it "should provide main config by default" do
-          @class.send(:connection_configuration).should eql(@class.connection)
+          expect(@class.send(:connection_configuration)).to eql(@class.connection)
         end
         it "should load file if available" do
           @class.connection_config_file = File.join(FIXTURE_PATH, 'config', 'couchdb.yml')
           hash = @class.send(:connection_configuration)
-          hash[:protocol].should eql('https')
-          hash[:host].should eql('sample.cloudant.com')
-          hash[:join].should eql('_')
+          expect(hash[:protocol]).to eql('https')
+          expect(hash[:host]).to eql('sample.cloudant.com')
+          expect(hash[:join]).to eql('_')
         end
       end
 
       describe ".load_connection_config_file" do
         it "should provide an empty hash if config not found" do
-          @class.send(:load_connection_config_file).should eql({})
+          expect(@class.send(:load_connection_config_file)).to eql({})
         end
         it "should load file if available" do
           @class.connection_config_file = File.join(FIXTURE_PATH, 'config', 'couchdb.yml')
           hash = @class.send(:load_connection_config_file)
-          hash[:development].should_not be_nil
-          @class.server.uri.to_s.should eql("https://test:user@sample.cloudant.com")
+          expect(hash[:development]).not_to be_nil
+          expect(@class.server.uri.to_s).to eql("https://test:user@sample.cloudant.com")
         end
 
       end

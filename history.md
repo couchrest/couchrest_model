@@ -1,5 +1,18 @@
 # CouchRest Model Change History
 
+## 2.2.0.beta1 - pending
+
+  * Radical re-factor of dirty tracking using Hashdiff gem, providing reliable change detection with nested data. ([PR](https://github.com/couchrest/couchrest_model/pull/211) @samlown)
+  * Implement proxy for factory methods ([PR](https://github.com/couchrest/couchrest_model/pull/210) @ellneal)
+  * Add view option to specify a custom emit value for views ([PR](https://github.com/couchrest/couchrest_model/pull/209) @ellneal)
+  * Support proxying to multiple databases ([PR](https://github.com/couchrest/couchrest_model/pull/206) @ellneal)
+  * Support concurrent auto design doc updates ([PR](https://github.com/couchrest/couchrest_model/pull/201) @ghempton)
+
+## 2.1.0.rc1 - 2016-07-06
+
+  * Adding "persistent" connection configuration property (@samlown)
+  * Releasing 2.1.0 off of CouchRest 2.0.0.
+
 ## 2.1.0.beta2 - 2016-02-29
 
   * Changing migration namespace and supporting initial "prepare" phase (@samlown)

@@ -27,7 +27,7 @@ module CouchRest
         end
 
         def server
-          @server ||= CouchRest::Server.new(prepare_server_uri)
+          @server ||= CouchRest::Server.new(prepare_server_uri, :persistent => connection_configuration[:persistent])
         end
 
         def prepare_database(db = nil, override_use_database = false)

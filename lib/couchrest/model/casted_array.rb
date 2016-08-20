@@ -5,6 +5,7 @@
 
 module CouchRest::Model
   class CastedArray < Array
+    include CouchRest::Model::Configuration
     include CouchRest::Model::CastedBy
     include CouchRest::Model::Dirty
     attr_accessor :casted_by_property
@@ -30,40 +31,13 @@ module CouchRest::Model
     end
 
     def []= index, obj
-      value = instantiate_and_cast(obj, false)
-      couchrest_parent_will_change! if use_dirty? && value != self[index]
+      value = instantiate_and_cast(obj)
       super(index, value)
     end
 
     def insert index, *args
-      values = *args.map{|obj| instantiate_and_cast(obj, false)}
-      couchrest_parent_will_change! if use_dirty?
+      values = *args.map{|obj| instantiate_and_cast(obj)}
       super(index, *values)
-    end
-
-    def pop
-      couchrest_parent_will_change! if use_dirty? && self.length > 0
-      super
-    end
-
-    def shift
-      couchrest_parent_will_change! if use_dirty? && self.length > 0
-      super
-    end
-
-    def clear
-      couchrest_parent_will_change! if use_dirty? && self.length > 0
-      super
-    end
-
-    def delete(obj)
-      couchrest_parent_will_change! if use_dirty? && self.length > 0
-      super(obj)
-    end
-
-    def delete_at(index)
-      couchrest_parent_will_change! if use_dirty? && self.length > 0
-      super(index)
     end
 
     def build(*args)
@@ -76,11 +50,26 @@ module CouchRest::Model
       map{ |v| (v.respond_to?(:as_couch_json) ? v.as_couch_json : v)}
     end
 
+    # Overwrite the standard dirty tracking clearing.
+    # We don't have any properties, but we do need to check
+    # entries in our array.
+    def clear_changes_information
+      if use_dirty?
+        each do |val|
+          if val.respond_to?(:clear_changes_information)
+            val.clear_changes_information
+          end
+        end
+        @original_change_data = current_change_data
+      else
+        @original_change_data = nil
+      end
+    end
+
     protected
 
-    def instantiate_and_cast(obj, change = true)
+    def instantiate_and_cast(obj)
       property = casted_by_property
-      couchrest_parent_will_change! if change && use_dirty?
       if casted_by && property && obj.class != property.type
         property.cast_value(casted_by, obj)
       else

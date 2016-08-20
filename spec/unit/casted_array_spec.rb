@@ -17,9 +17,9 @@ describe CouchRest::Model::CastedArray do
       prop   = double('Property')
       parent = double('Parent')
       obj = klass.new([], prop, parent)
-      obj.casted_by_property.should eql(prop)
-      obj.casted_by.should eql(parent)
-      obj.should be_empty
+      expect(obj.casted_by_property).to eql(prop)
+      expect(obj.casted_by).to eql(parent)
+      expect(obj).to be_empty
     end
   end
 
@@ -34,16 +34,16 @@ describe CouchRest::Model::CastedArray do
       ], property)
     end
     it "should return an array" do
-      obj.as_couch_json.should be_a(Array)
+      expect(obj.as_couch_json).to be_a(Array)
     end
     it "should call as_couch_json on each value" do
-      obj.first.should_receive(:as_couch_json)
+      expect(obj.first).to receive(:as_couch_json)
       obj.as_couch_json
     end
     it "should return value if no as_couch_json method" do
       obj = klass.new(['Felix', 'Garfield'], CouchRest::Model::Property.new(:title, :type => String))
-      obj.first.should_not respond_to(:as_couch_json)
-      obj.as_couch_json.first.should eql('Felix')
+      expect(obj.first).not_to respond_to(:as_couch_json)
+      expect(obj.as_couch_json.first).to eql('Felix')
     end
 
   end

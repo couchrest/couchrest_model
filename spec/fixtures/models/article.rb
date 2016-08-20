@@ -33,6 +33,6 @@ class Article < CouchRest::Model::Base
   before_save :generate_slug_from_title
 
   def generate_slug_from_title
-    self['slug'] = title.downcase.gsub(/[^a-z0-9]/,'-').squeeze('-').gsub(/^\-|\-$/,'') if new?
+    self['slug'] = title.to_s.downcase.gsub(/[^a-z0-9]/,'-').squeeze('-').gsub(/^\-|\-$/,'') if new?
   end
 end

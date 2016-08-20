@@ -19,6 +19,8 @@ See the [update history](https://github.com/couchrest/couchrest_model/blob/maste
 
 ### Upgrading from an earlier version?
 
+*Pre 2.2:* As of August 2016, dirty tracking has been radically re-factored away from ActiveModel::Dirty, which only has support for basic attributes, into a solution that uses [Hashdiff](https://github.com/liufengyun/hashdiff), more details available in the [pull request](https://github.com/couchrest/couchrest_model/pull/211). The result is that some of ActiveModel's Dirty methods are no longer available, these are: `changes_applied`, `restore_attributes`, `previous_changes`, and `changed_attributes`.
+
 *Pre 2.0:* As of June 2012, couchrest model no longer supports the `view_by` and `view` calls from the model. Views are no only accessed via a design document. If you have older code and wish to upgrade, please ensure you move to the new syntax for using views.
 
 *Pre 1.1:* As of April 2011 and the release of version 1.1.0, the default model type key is 'type' instead of 'couchrest-type'. Simply updating your project will not work unless you migrate your data or set the configuration option in your initializers:

@@ -5,10 +5,10 @@ module CouchRest
       #
       # A proxy class that allows view queries to be created using
       # chained method calls. After each call a new instance of the method
-      # is created based on the original in a similar fashion to ruby's Sequel 
+      # is created based on the original in a similar fashion to ruby's Sequel
       # library, or Rails 3's Arel.
       #
-      # CouchDB views have inherent limitations, so joins and filters as used in 
+      # CouchDB views have inherent limitations, so joins and filters as used in
       # a normal relational database are not possible.
       #
       class View
@@ -52,7 +52,7 @@ module CouchRest
         # == View Execution Methods
         #
         # Request to the CouchDB database using the current query values.
-       
+
         # Return each row wrapped in a ViewRow object. Unlike the raw
         # CouchDB request, this will provide an empty array if there
         # are no results.
@@ -65,7 +65,7 @@ module CouchRest
           else
             if execute && result['rows']
               @rows ||= result['rows'].map{|v| ViewRow.new(v, model, use_database)}
-            else 
+            else
               [ ]
             end
           end
@@ -81,7 +81,7 @@ module CouchRest
         end
 
         # Provide all the documents from the view. If the view has not been
-        # prepared with the +include_docs+ option, each document will be 
+        # prepared with the +include_docs+ option, each document will be
         # loaded individually.
         def docs
           if block_given?
@@ -93,17 +93,17 @@ module CouchRest
           end
         end
 
-        # If another request has been made on the view, this will return 
+        # If another request has been made on the view, this will return
         # the first document in the set. If not, a new query object will be
-        # generated with a limit of 1 so that only the first document is 
+        # generated with a limit of 1 so that only the first document is
         # loaded.
         def first
           result ? all.first : limit(1).all.first
         end
 
         # Same as first but will order the view in descending order. This
-        # does not however reverse the search keys or the offset, so if you 
-        # are using a +startkey+ and +endkey+ you might end up with 
+        # does not however reverse the search keys or the offset, so if you
+        # are using a +startkey+ and +endkey+ you might end up with
         # unexpected results.
         #
         # If in doubt, don't use this method!
@@ -127,7 +127,7 @@ module CouchRest
         #
         # Trying to use this method with the group option will raise an error.
         #
-        # If no reduce function is defined, a query will be performed 
+        # If no reduce function is defined, a query will be performed
         # to return the total number of rows, this is the equivalant of:
         #
         #    view.limit(0).total_rows
@@ -142,7 +142,7 @@ module CouchRest
           end
         end
 
-        # Check to see if the array of documents is empty. This *will* 
+        # Check to see if the array of documents is empty. This *will*
         # perform the query and return all documents ready to use, if you don't
         # want to load anything, use +#total_rows+ or +#count+ instead.
         def empty?
@@ -181,7 +181,7 @@ module CouchRest
         #
         # In this example, the raw option will be ignored, and the total rows
         # will still be accessible.
-        # 
+        #
         def [](value)
           execute[value]
         end
@@ -194,8 +194,8 @@ module CouchRest
 
 
         # == View Filter Methods
-        # 
-        # View filters return a copy of the view instance with the query 
+        #
+        # View filters return a copy of the view instance with the query
         # modified appropriatly. Errors will be raised if the methods
         # are combined in an incorrect fashion.
         #
@@ -208,10 +208,10 @@ module CouchRest
           update_query(:key => value)
         end
 
-        # Find all index keys that start with the value provided. May or may 
+        # Find all index keys that start with the value provided. May or may
         # not be used in conjunction with the +endkey+ option.
         #
-        # When the +#descending+ option is used (not the default), the start 
+        # When the +#descending+ option is used (not the default), the start
         # and end keys should be reversed, as per the CouchDB API.
         #
         # Cannot be used if the key has been set.
@@ -220,7 +220,7 @@ module CouchRest
           update_query(:startkey => value)
         end
 
-        # The result set should start from the position of the provided document. 
+        # The result set should start from the position of the provided document.
         # The value may be provided as an object that responds to the +#id+ call
         # or a string.
         def startkey_doc(value)
@@ -237,19 +237,19 @@ module CouchRest
           update_query(:endkey => value)
         end
 
-        # The result set should end at the position of the provided document. 
-        # The value may be provided as an object that responds to the +#id+ 
+        # The result set should end at the position of the provided document.
+        # The value may be provided as an object that responds to the +#id+
         # call or a string.
         def endkey_doc(value)
           update_query(:endkey_docid => value.is_a?(String) ? value : value.id)
         end
 
         # Keys is a special CouchDB option that will cause the view request to be POSTed
-        # including an array of keys. Only documents with the matching keys will be 
-        # returned. This is much faster than sending multiple requests for a set 
+        # including an array of keys. Only documents with the matching keys will be
+        # returned. This is much faster than sending multiple requests for a set
         # non-consecutive documents.
         #
-        # If no values are provided, this method will act as a wrapper around 
+        # If no values are provided, this method will act as a wrapper around
         # the rows result set, providing an array of keys.
         def keys(*keys)
           if keys.empty?
@@ -302,16 +302,16 @@ module CouchRest
         # Control whether the reduce function reduces to a set of distinct keys
         # or to a single result row.
         #
-        # By default the value is false, and can only be set when the view's 
+        # By default the value is false, and can only be set when the view's
         # +#reduce+ option has been set.
         def group
           raise "View#reduce must have been set before grouping is permitted" unless query[:reduce]
           update_query(:group => true)
         end
 
-        # Will set the level the grouping should be performed to. As per the 
+        # Will set the level the grouping should be performed to. As per the
         # CouchDB API, it only makes sense when the index key is an array.
-        # 
+        #
         # This will automatically set the group option.
         def group_level(value)
           group.update_query(:group_level => value.to_i)
@@ -325,7 +325,7 @@ module CouchRest
 
         # Allow the results of a query to be provided "stale". Setting to 'ok'
         # will disable all view updates for the query.
-        # When 'update_after' is provided the index will be update after the 
+        # When 'update_after' is provided the index will be update after the
         # result has been returned.
         def stale(value)
           unless (['ok', 'update_after'].include?(value.to_s))
@@ -445,17 +445,17 @@ module CouchRest
             create_model_methods(design_doc, name, opts)
           end
 
-          # Simplified view definition. A new view will be added to the 
+          # Simplified view definition. A new view will be added to the
           # provided design document using the name and options.
           #
-          # If the view name starts with "by_" and +:by+ is not provided in 
+          # If the view name starts with "by_" and +:by+ is not provided in
           # the options, the new view's map method will be interpreted and
           # generated automatically. For example:
           #
           #   View.define(Meeting, design, "by_date_and_name")
           #
-          # Will create a view that searches by the date and name properties. 
-          # Explicity setting the attributes to use is possible using the 
+          # Will create a view that searches by the date and name properties.
+          # Explicity setting the attributes to use is possible using the
           # +:by+ option. For example:
           #
           #   View.define(Meeting, design, "by_date_and_name", :by => [:date, :firstname, :lastname])
@@ -491,18 +491,23 @@ module CouchRest
               end
               raise "View cannot be created without recognised name, :map or :by options" if opts[:by].nil?
 
+              # convert emit symbols to properties
+              opts[:emit] = "doc['#{opts[:emit]}']" if opts[:emit].is_a?(Symbol)
+              opts[:emit] = "[" + opts[:emit].map { |i| i.is_a?(Symbol) ? "doc['#{i}']" : i }.join(', ') + "]" if opts[:emit].is_a?(Array)
+
               opts[:allow_blank] = opts[:allow_blank].nil? ? true : opts[:allow_blank]
               opts[:guards] ||= []
               opts[:guards].push "(doc['#{model.model_type_key}'] == '#{model.model_type_value}')"
 
               keys = opts[:by].map{|o| "doc['#{o}']"}
-              emit = keys.length == 1 ? keys.first : "[#{keys.join(', ')}]"
+              emit_keys = keys.length == 1 ? keys.first : "[#{keys.join(', ')}]"
+              emit_value = opts[:emit] || 1;
               opts[:guards] += keys.map{|k| "(#{k} != null)"} unless opts[:allow_nil]
               opts[:guards] += keys.map{|k| "(#{k} != '')"} unless opts[:allow_blank]
               opts[:map] = <<-EOF
                 function(doc) {
                   if (#{opts[:guards].join(' && ')}) {
-                    emit(#{emit}, 1);
+                    emit(#{emit_keys}, #{emit_value});
                   }
                 }
               EOF

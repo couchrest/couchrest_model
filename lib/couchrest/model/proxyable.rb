@@ -4,9 +4,12 @@ module CouchRest
     module Proxyable
       extend ActiveSupport::Concern
 
-      def proxy_database
+      def proxy_database(assoc_name)
         raise StandardError, "Please set the #proxy_database_method" if self.class.proxy_database_method.nil?
-        @proxy_database ||= self.class.prepare_database(self.send(self.class.proxy_database_method), true)
+        db_name = self.send(self.class.proxy_database_method)
+        db_suffix = self.class.proxy_database_suffixes[assoc_name.to_sym]
+        @proxy_databases ||= {}
+        @proxy_databases[assoc_name.to_sym] ||= self.class.prepare_database([db_name, db_suffix].compact.reject(&:blank?).join(self.class.connection[:join]), true)
       end
 
       module ClassMethods
@@ -15,13 +18,16 @@ module CouchRest
         # Define a collection that will use the base model for the database connection
         # details.
         def proxy_for(assoc_name, options = {})
-          db_method = options[:database_method] || "proxy_database"
+          db_method = (options[:database_method] || "proxy_database").to_sym
+          db_suffix = options[:database_suffix] || (options[:use_suffix] ? assoc_name.to_s : nil)
           options[:class_name] ||= assoc_name.to_s.singularize.camelize
           proxy_method_names   << assoc_name.to_sym    unless proxy_method_names.include?(assoc_name.to_sym)
           proxied_model_names  << options[:class_name] unless proxied_model_names.include?(options[:class_name])
+          proxy_database_suffixes[assoc_name.to_sym] = db_suffix
+          db_method_call = "#{db_method}(:#{assoc_name.to_s})"
           class_eval <<-EOS, __FILE__, __LINE__ + 1
             def #{assoc_name}
-              @#{assoc_name} ||= CouchRest::Model::Proxyable::ModelProxy.new(::#{options[:class_name]}, self, self.class.to_s.underscore, #{db_method})
+              @#{assoc_name} ||= CouchRest::Model::Proxyable::ModelProxy.new(::#{options[:class_name]}, self, self.class.to_s.underscore, #{db_method_call})
             end
           EOS
         end
@@ -55,6 +61,10 @@ module CouchRest
 
         def proxied_model_names
           @proxied_model_names ||= []
+        end
+
+        def proxy_database_suffixes
+          @proxy_database_suffixes ||= {}
         end
 
         private
@@ -156,6 +166,12 @@ module CouchRest
           end
         end
 
+        private
+
+        def method_missing(m, *args, &block)
+          model.respond_to?(m) ? model.send(m, self, *args, &block) : super
+        end
+        
       end
     end
   end

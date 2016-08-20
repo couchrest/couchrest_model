@@ -15,24 +15,27 @@ module CouchRest
         add_config :connection
         add_config :connection_config_file
         add_config :time_fraction_digits
+        add_config :disable_dirty_tracking
 
         configure do |config|
           config.model_type_key = 'type' # was 'couchrest-type'
           config.mass_assign_any_attribute = false
           config.auto_update_design_doc = true
           config.time_fraction_digits = 3
+          config.disable_dirty_tracking = false
 
           config.environment = :development
           config.connection_config_file = File.join(Dir.pwd, 'config', 'couchdb.yml')
           config.connection = {
-            :protocol => 'http',
-            :host     => 'localhost',
-            :port     => '5984',
-            :prefix   => 'couchrest',
-            :suffix   => nil,
-            :join     => '_',
-            :username => nil,
-            :password => nil
+            :protocol   => 'http',
+            :host       => 'localhost',
+            :port       => '5984',
+            :prefix     => 'couchrest',
+            :suffix     => nil,
+            :join       => '_',
+            :username   => nil,
+            :password   => nil,
+            :persistent => true
           }
         end
       end
