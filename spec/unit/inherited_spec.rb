@@ -18,15 +18,15 @@ end
 
 describe "Using chained inheritance without CouchRest::Model::Base" do
   it "should preserve inheritable attributes" do
-    PlainParent.foo.should == :bar
-    PlainChild.foo.should == :bar
+    expect(PlainParent.foo).to eq(:bar)
+    expect(PlainChild.foo).to eq(:bar)
   end
 end
 
 describe "Using chained inheritance with CouchRest::Model::Base" do
   it "should preserve inheritable attributes" do
-    ExtendedParent.foo.should == :bar
-    ExtendedChild.foo.should == :bar
+    expect(ExtendedParent.foo).to eq(:bar)
+    expect(ExtendedChild.foo).to eq(:bar)
   end
 end
 

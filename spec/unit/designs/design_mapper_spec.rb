@@ -15,22 +15,22 @@ describe CouchRest::Model::Designs::DesignMapper do
     end
 
     it "should set basic variables" do
-      @object.send(:model).should eql(DesignModel)
-      @object.send(:prefix).should be_nil
-      @object.send(:method).should eql('design_doc')
+      expect(@object.send(:model)).to eql(DesignModel)
+      expect(@object.send(:prefix)).to be_nil
+      expect(@object.send(:method)).to eql('design_doc')
     end
 
     it "should add design doc to list" do
-      @object.model.design_docs.should include(@object.model.design_doc)
+      expect(@object.model.design_docs).to include(@object.model.design_doc)
     end
 
     it "should create a design doc method" do
-      @object.model.should respond_to('design_doc')
-      @object.design_doc.should eql(@object.model.design_doc)
+      expect(@object.model).to respond_to('design_doc')
+      expect(@object.design_doc).to eql(@object.model.design_doc)
     end
 
     it "should use default for autoupdate" do
-      @object.design_doc.auto_update.should be_true
+      expect(@object.design_doc.auto_update).to be_truthy
     end
 
   end
@@ -41,22 +41,22 @@ describe CouchRest::Model::Designs::DesignMapper do
     end
 
     it "should set basics" do
-      @object.send(:model).should eql(DesignModel)
-      @object.send(:prefix).should eql('stats')
-      @object.send(:method).should eql('stats_design_doc')
+      expect(@object.send(:model)).to eql(DesignModel)
+      expect(@object.send(:prefix)).to eql('stats')
+      expect(@object.send(:method)).to eql('stats_design_doc')
     end
 
     it "should add design doc to list" do
-      @object.model.design_docs.should include(@object.model.stats_design_doc)
+      expect(@object.model.design_docs).to include(@object.model.stats_design_doc)
     end
 
     it "should not create an all method" do
-      @object.model.should_not respond_to('all')
+      expect(@object.model).not_to respond_to('all')
     end
 
     it "should create a design doc method" do
-      @object.model.should respond_to('stats_design_doc')
-      @object.design_doc.should eql(@object.model.stats_design_doc)
+      expect(@object.model).to respond_to('stats_design_doc')
+      expect(@object.design_doc).to eql(@object.model.stats_design_doc)
     end
 
   end
@@ -65,7 +65,7 @@ describe CouchRest::Model::Designs::DesignMapper do
     it "should disable auto updates" do
       @object = @klass.new(DesignModel)
       @object.disable_auto_update
-      @object.design_doc.auto_update.should be_false
+      expect(@object.design_doc.auto_update).to be_falsey
     end
   end
 
@@ -73,14 +73,14 @@ describe CouchRest::Model::Designs::DesignMapper do
     it "should enable auto updates" do
       @object = @klass.new(DesignModel)
       @object.enable_auto_update
-      @object.design_doc.auto_update.should be_true
+      expect(@object.design_doc.auto_update).to be_truthy
     end
   end
 
   describe "#model_type_key" do
     it "should return models type key" do
       @object = @klass.new(DesignModel)
-      @object.model_type_key.should eql(@object.model.model_type_key)
+      expect(@object.model_type_key).to eql(@object.model.model_type_key)
     end
   end
 
@@ -91,18 +91,18 @@ describe CouchRest::Model::Designs::DesignMapper do
     end
 
     it "should call create method on view" do
-      CouchRest::Model::Designs::View.should_receive(:define).with(@object.design_doc, 'test', {})
+      expect(CouchRest::Model::Designs::View).to receive(:define).with(@object.design_doc, 'test', {})
       @object.view('test')
     end
 
     it "should create a method on parent model" do
-      CouchRest::Model::Designs::View.stub(:define)
+      allow(CouchRest::Model::Designs::View).to receive(:define)
       @object.view('test_view')
-      DesignModel.should respond_to(:test_view)
+      expect(DesignModel).to respond_to(:test_view)
     end
 
     it "should create a method for view instance" do
-      @object.design_doc.should_receive(:create_view).with('test', {})
+      expect(@object.design_doc).to receive(:create_view).with('test', {})
       @object.view('test')
     end
   end
@@ -115,8 +115,8 @@ describe CouchRest::Model::Designs::DesignMapper do
 
     it "should add the provided function to the design doc" do
       @object.filter(:important, "function(doc, req) { return doc.priority == 'high'; }")
-      DesignModel.design_doc['filters'].should_not be_empty
-      DesignModel.design_doc['filters']['important'].should_not be_blank
+      expect(DesignModel.design_doc['filters']).not_to be_empty
+      expect(DesignModel.design_doc['filters']['important']).not_to be_blank
     end
   end
 
@@ -128,9 +128,9 @@ describe CouchRest::Model::Designs::DesignMapper do
     it "should add the #view_lib function to the design doc" do
       val = "exports.bar = 42;"
       @object.view_lib(:foo, val)
-      DesignModel.design_doc['views']['lib'].should_not be_empty
-      DesignModel.design_doc['views']['lib'].should_not be_blank
-      DesignModel.design_doc['views']['lib']['foo'].should eql(val)
+      expect(DesignModel.design_doc['views']['lib']).not_to be_empty
+      expect(DesignModel.design_doc['views']['lib']).not_to be_blank
+      expect(DesignModel.design_doc['views']['lib']['foo']).to eql(val)
     end
   end
 

@@ -13,7 +13,7 @@ describe CouchRest::Model::Configuration do
       @class.configure do |config|
         config.foo_bar = 'monkey'
       end
-      @class.foo_bar.should == 'monkey'
+      expect(@class.foo_bar).to eq('monkey')
     end
   end
 
@@ -22,7 +22,7 @@ describe CouchRest::Model::Configuration do
     it "should add a class level accessor" do
       @class.add_config :foo_bar
       @class.foo_bar = 'foo'
-      @class.foo_bar.should == 'foo'
+      expect(@class.foo_bar).to eq('foo')
     end
     
     ['foo', :foo, 45, ['foo', :bar]].each do |val|
@@ -31,13 +31,13 @@ describe CouchRest::Model::Configuration do
         @child_class = Class.new(@class)
 
         @class.foo_bar = val
-        @class.foo_bar.should == val
-        @child_class.foo_bar.should == val
+        expect(@class.foo_bar).to eq(val)
+        expect(@child_class.foo_bar).to eq(val)
 
         @child_class.foo_bar = "bar"
-        @child_class.foo_bar.should == "bar"
+        expect(@child_class.foo_bar).to eq("bar")
 
-        @class.foo_bar.should == val
+        expect(@class.foo_bar).to eq(val)
       end
     end
     
@@ -45,13 +45,13 @@ describe CouchRest::Model::Configuration do
     it "should add an instance level accessor" do
       @class.add_config :foo_bar
       @class.foo_bar = 'foo'
-      @class.new.foo_bar.should == 'foo'
+      expect(@class.new.foo_bar).to eq('foo')
     end
     
     it "should add a convenient in-class setter" do
       @class.add_config :foo_bar
       @class.foo_bar "monkey"
-      @class.foo_bar.should == "monkey"
+      expect(@class.foo_bar).to eq("monkey")
     end
   end
 
@@ -67,10 +67,10 @@ describe CouchRest::Model::Configuration do
       Cat.instance_eval do
         model_type_key 'cat-type'
       end
-      CouchRest::Model::Base.model_type_key.should eql(default_model_key)
-      Cat.model_type_key.should eql('cat-type')
+      expect(CouchRest::Model::Base.model_type_key).to eql(default_model_key)
+      expect(Cat.model_type_key).to eql('cat-type')
       cat = Cat.new
-      cat.model_type_key.should eql('cat-type')
+      expect(cat.model_type_key).to eql('cat-type')
     end
   end
 

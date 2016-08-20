@@ -23,11 +23,11 @@ describe "casting an extended document" do
   end
 
   it "should retain all properties of the casted attribute" do
-    @car.driver.should == @driver
+    expect(@car.driver).to eq(@driver)
   end
   
   it "should let the casted document know who casted it" do
-    @car.driver.casted_by.should == @car
+    expect(@car.driver.casted_by).to eq(@car)
   end
 end
 
@@ -39,17 +39,17 @@ describe "assigning a value to casted attribute after initializing an object" do
   end
   
   it "should not create an empty casted object" do
-    @car.driver.should be_nil
+    expect(@car.driver).to be_nil
   end
   
   it "should let you assign the value" do
     @car.driver = @driver
-    @car.driver.name.should == 'Matt'
+    expect(@car.driver.name).to eq('Matt')
   end
   
   it "should cast attribute" do
     @car.driver = JSON.parse(@driver.to_json)
-    @car.driver.should be_instance_of(Driver)
+    expect(@car.driver).to be_instance_of(Driver)
   end
 
 end
@@ -63,10 +63,10 @@ describe "casting a model from parsed JSON" do
   end
 
   it "should cast casted attribute" do
-    @new_car.driver.should be_instance_of(Driver)
+    expect(@new_car.driver).to be_instance_of(Driver)
   end
   
   it "should retain all properties of the casted attribute" do
-    @new_car.driver.should == @driver
+    expect(@new_car.driver).to eq(@driver)
   end
 end

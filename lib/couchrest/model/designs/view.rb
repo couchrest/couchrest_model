@@ -492,8 +492,8 @@ module CouchRest
               raise "View cannot be created without recognised name, :map or :by options" if opts[:by].nil?
 
               # convert emit symbols to properties
-              opts[:emit] = "doc['#{opts[:emit]}']" if opts[:emit].try { is_a?(Symbol) }
-              opts[:emit] = "[" + opts[:emit].map { |i| i.is_a?(Symbol) ? "doc['#{i}']" : i }.join(', ') + "]" if opts[:emit].try { is_a?(Array) }
+              opts[:emit] = "doc['#{opts[:emit]}']" if opts[:emit].is_a?(Symbol)
+              opts[:emit] = "[" + opts[:emit].map { |i| i.is_a?(Symbol) ? "doc['#{i}']" : i }.join(', ') + "]" if opts[:emit].is_a?(Array)
 
               opts[:allow_blank] = opts[:allow_blank].nil? ? true : opts[:allow_blank]
               opts[:guards] ||= []

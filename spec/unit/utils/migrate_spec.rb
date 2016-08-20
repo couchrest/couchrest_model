@@ -13,8 +13,8 @@ describe CouchRest::Model::Utils::Migrate do
     end
     it "should detect if Rails is available and require models" do
       Rails = double()
-      Rails.stub(:root).and_return("")
-      Dir.should_receive(:[]).with("app/models/**/*.rb").and_return(['failed_require'])
+      allow(Rails).to receive(:root).and_return("")
+      expect(Dir).to receive(:[]).with("app/models/**/*.rb").and_return(['failed_require'])
       # we can't double require, so just expect an error
       expect {
         @module.load_all_models

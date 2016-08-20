@@ -155,16 +155,11 @@ module CouchRest
         # database, so if you'd like to scope uniqueness to this class, you
         # should use the class name as part of the unique id.
         def unique_id(method = nil, &block)
-          if method
-            define_method :set_unique_id do
-              self['_id'] ||= self.send(method)
-            end
-          elsif block
-            define_method :set_unique_id do
-              uniqid = block.call(self)
-              raise ArgumentError, "unique_id block must not return nil" if uniqid.nil?
-              self['_id'] ||= uniqid
-            end
+          return if method.nil? && !block
+          define_method :set_unique_id do
+            uniqid = method.nil? ? block.call(self) : send(method)
+            raise ArgumentError, "unique_id cannot be nil nor empty" if uniqid.blank?
+            self['_id'] ||= uniqid
           end
         end
 

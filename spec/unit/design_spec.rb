@@ -31,11 +31,11 @@ describe CouchRest::Model::Design do
 
     describe ".method_name" do
       it "should return standard method name" do
-        @klass.method_name.should eql('design_doc')
+        expect(@klass.method_name).to eql('design_doc')
       end
 
       it "should add prefix to standard method name" do
-        @klass.method_name('stats').should eql('stats_design_doc')
+        expect(@klass.method_name('stats')).to eql('stats_design_doc')
       end
     end
 
@@ -45,23 +45,23 @@ describe CouchRest::Model::Design do
 
     before :each do
       @model = double("ModelExample")
-      @model.stub(:to_s).and_return("ModelExample")
+      allow(@model).to receive(:to_s).and_return("ModelExample")
       @obj = CouchRest::Model::Design.new(@model)
     end
 
 
     describe "initialisation without prefix" do
       it "should associate model and set method name" do
-        @obj.model.should eql(@model)
-        @obj.method_name.should eql("design_doc")
+        expect(@obj.model).to eql(@model)
+        expect(@obj.method_name).to eql("design_doc")
       end
 
       it "should generate correct id" do
-        @obj['_id'].should eql("_design/ModelExample")
+        expect(@obj['_id']).to eql("_design/ModelExample")
       end
 
       it "should apply defaults" do
-        @obj['language'].should eql('javascript')
+        expect(@obj['language']).to eql('javascript')
       end
     end
 
@@ -69,13 +69,13 @@ describe CouchRest::Model::Design do
 
       it "should associate model and set method name" do
         @obj = CouchRest::Model::Design.new(@model, 'stats')
-        @obj.model.should eql(@model)
-        @obj.method_name.should eql("stats_design_doc")
+        expect(@obj.model).to eql(@model)
+        expect(@obj.method_name).to eql("stats_design_doc")
       end
 
       it "should generate correct id with prefix" do
         @obj = CouchRest::Model::Design.new(@model, 'stats')
-        @obj['_id'].should eql("_design/ModelExample_stats")
+        expect(@obj['_id']).to eql("_design/ModelExample_stats")
       end
 
     end
@@ -86,7 +86,7 @@ describe CouchRest::Model::Design do
 
       it "should skip if auto update disabled" do
         @obj.auto_update = false
-        @obj.should_not_receive(:sync!)
+        expect(@obj).not_to receive(:sync!)
         @obj.sync
       end
 
@@ -110,28 +110,28 @@ describe CouchRest::Model::Design do
           # This would fail if changes were not detected!
           @doc.sync
           doc = @db.get(@doc['_id'])
-          doc['views']['all']['map'].should eql(@doc['views']['all']['map'])
+          expect(doc['views']['all']['map']).to eql(@doc['views']['all']['map'])
         end
 
         it "should not save a design that is not in cache and has not changed" do
           @doc.sync # put doc in cache
           @doc.send(:set_cache_checksum, @doc.database, nil)
 
-          @db.should_not_receive(:save_doc)
-          @doc.should_receive(:set_cache_checksum)
+          expect(@db).not_to receive(:save_doc)
+          expect(@doc).to receive(:set_cache_checksum)
           @doc.sync
         end
 
         it "should not reload a design that is in cache and has not changed" do
           @doc.sync
-          @doc.should_not_receive(:load_from_database)
+          expect(@doc).not_to receive(:load_from_database)
           @doc.sync
         end
 
         it "should be re-created if database destroyed" do
           @doc.sync  # saved
           reset_test_db!
-          @db.should_receive(:save_doc).with(@doc)
+          expect(@db).to receive(:save_doc).with(@doc)
           @doc.sync
         end
 
@@ -142,8 +142,8 @@ describe CouchRest::Model::Design do
           @db.save_doc(doc)
           @doc.send(:set_cache_checksum, @doc.database, nil)
           @doc.sync
-          @doc['views'].should_not have_key('test')
-          @doc['_rev'].should be_nil
+          expect(@doc['views']).not_to have_key('test')
+          expect(@doc['_rev']).to be_nil
         end
 
         it "should save a non existant design" do
@@ -155,8 +155,8 @@ describe CouchRest::Model::Design do
           @db.delete_doc(doc) if doc
           @doc.sync!
           doc = @db.get(@doc['_id'])
-          doc.should_not be_nil
-          doc['views']['all'].should eql(@doc['views']['all'])
+          expect(doc).not_to be_nil
+          expect(doc['views']['all']).to eql(@doc['views']['all'])
         end
 
       end
@@ -172,19 +172,19 @@ describe CouchRest::Model::Design do
       end
 
       it "should return fresh checksum when not calculated earlier" do
-        @doc.checksum.should_not be_blank
+        expect(@doc.checksum).not_to be_blank
       end
 
       it "should provide same checksum without refresh on re-request" do
         chk = @doc.checksum
-        @doc.should_not_receive(:checksum!)
-        @doc.checksum.should eql(chk)
+        expect(@doc).not_to receive(:checksum!)
+        expect(@doc.checksum).to eql(chk)
       end
 
       it "should provide new checksum if the design has changed" do
         chk = @doc.checksum
         @doc['views']['all']['map'] += '// comment'
-        @doc.checksum.should_not eql(chk)
+        expect(@doc.checksum).not_to eql(chk)
       end
 
     end
@@ -193,7 +193,7 @@ describe CouchRest::Model::Design do
       it "should provide model's database" do
         @mod = DesignSampleModel
         @doc = @mod.design_doc
-        @mod.should_receive(:database)
+        expect(@mod).to receive(:database)
         @doc.database
       end
     end
@@ -202,13 +202,13 @@ describe CouchRest::Model::Design do
     describe "#uri" do
       it "should provide complete url" do
         @doc = DesignSampleModel.design_doc
-        @doc.uri.should eql("#{DesignSampleModel.database.root}/_design/DesignSampleModel")
+        expect(@doc.uri).to eql("#{DesignSampleModel.database.root}/_design/DesignSampleModel")
       end
     end
 
     describe "#view" do
       it "should instantiate a new view and pass options" do
-        CouchRest::Model::Designs::View.should_receive(:new).with(@obj, @model, {}, 'by_test')
+        expect(CouchRest::Model::Designs::View).to receive(:new).with(@obj, @model, {}, 'by_test')
         @obj.view('by_test', {})
       end
     end
@@ -216,7 +216,7 @@ describe CouchRest::Model::Design do
     describe "#view_names" do
       it "should provide a list of all the views available" do
         @doc = DesignSampleModel.design_doc
-        @doc.view_names.should eql(['by_name', 'all'])
+        expect(@doc.view_names).to eql(['by_name', 'all'])
       end
     end
 
@@ -226,15 +226,15 @@ describe CouchRest::Model::Design do
       end
 
       it "should tell us if a view exists" do
-        @doc.has_view?('by_name').should be_true
+        expect(@doc.has_view?('by_name')).to be_truthy
       end
 
       it "should tell us if a view exists as symbol" do
-        @doc.has_view?(:by_name).should be_true
+        expect(@doc.has_view?(:by_name)).to be_truthy
       end
 
       it "should tell us if a view does not exist" do
-        @doc.has_view?(:by_foobar).should be_false
+        expect(@doc.has_view?(:by_foobar)).to be_falsey
       end
     end
 
@@ -245,12 +245,12 @@ describe CouchRest::Model::Design do
       end
 
       it "should forward view creation to View model" do
-        CouchRest::Model::Designs::View.should_receive(:define_and_create).with(@doc, 'by_other_name', {})
+        expect(CouchRest::Model::Designs::View).to receive(:define_and_create).with(@doc, 'by_other_name', {})
         @doc.create_view('by_other_name')
       end
 
       it "should forward view creation to View model with opts" do
-        CouchRest::Model::Designs::View.should_receive(:define_and_create).with(@doc, 'by_other_name', {:by => 'name'})
+        expect(CouchRest::Model::Designs::View).to receive(:define_and_create).with(@doc, 'by_other_name', {:by => 'name'})
         @doc.create_view('by_other_name', :by => 'name')
       end
     end
@@ -263,7 +263,7 @@ describe CouchRest::Model::Design do
 
       it "should add simple filter" do
         @doc.create_filter('test', 'foobar')
-        @doc['filters']['test'].should eql('foobar')
+        expect(@doc['filters']['test']).to eql('foobar')
         @doc['filters'] = nil # cleanup
       end
     end
@@ -275,7 +275,7 @@ describe CouchRest::Model::Design do
 
       it "should add simple view lib" do
         @doc.create_view_lib('test', 'foobar')
-        @doc['views']['lib']['test'].should eql('foobar')
+        expect(@doc['views']['lib']['test']).to eql('foobar')
         @doc['views']['lib'] = nil # cleanup
       end
     end
@@ -286,17 +286,17 @@ describe CouchRest::Model::Design do
 
     it "should calculate a consistent checksum for model" do
       #WithTemplateAndUniqueID.design_doc.checksum.should eql('caa2b4c27abb82b4e37421de76d96ffc')
-      WithTemplateAndUniqueID.design_doc.checksum.should eql('7f44e88afbce06204010c49b76f31bcf')
+      expect(WithTemplateAndUniqueID.design_doc.checksum).to eql('7f44e88afbce06204010c49b76f31bcf')
     end
 
     it "should calculate checksum for complex model" do
       #Article.design_doc.checksum.should eql('70dff8caea143bf40fad09adf0701104')
-      Article.design_doc.checksum.should eql('81f6553c44ecc3fe12a39331b0cdee46')
+      expect(Article.design_doc.checksum).to eql('81f6553c44ecc3fe12a39331b0cdee46')
     end
 
     it "should cache the generated checksum value" do
       Article.design_doc.checksum
-      Article.design_doc['couchrest-hash'].should_not be_blank
+      expect(Article.design_doc['couchrest-hash']).not_to be_blank
       Article.first
     end
 

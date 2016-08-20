@@ -4,7 +4,7 @@ require "spec_helper"
 describe CouchRest::Model::Designs do
 
   it "should accessable from model" do
-    DesignModel.respond_to?(:design).should be_true
+    expect(DesignModel.respond_to?(:design)).to be_truthy
   end
 
   describe "class methods" do
@@ -18,35 +18,35 @@ describe CouchRest::Model::Designs do
       describe "without block" do
         it "should create design_doc and all methods" do
           @klass.design
-          @klass.should respond_to(:design_doc)
-          @klass.should respond_to(:all)
+          expect(@klass).to respond_to(:design_doc)
+          expect(@klass).to respond_to(:all)
         end
 
         it "should created named design_doc method and not all" do
           @klass.design :stats
-          @klass.should respond_to(:stats_design_doc)
-          @klass.should_not respond_to(:all)
+          expect(@klass).to respond_to(:stats_design_doc)
+          expect(@klass).not_to respond_to(:all)
         end
 
         it "should have added itself to a design_blocks array" do
           @klass.design
           blocks = @klass.instance_variable_get(:@_design_blocks)
-          blocks.length.should eql(1)
-          blocks.first.should eql({:args => [], :block => nil})
+          expect(blocks.length).to eql(1)
+          expect(blocks.first).to eql({:args => [], :block => nil})
         end
 
         it "should have added itself to a design_blocks array" do
           @klass.design
           blocks = @klass.instance_variable_get(:@_design_blocks)
-          blocks.length.should eql(1)
-          blocks.first.should eql({:args => [], :block => nil})
+          expect(blocks.length).to eql(1)
+          expect(blocks.first).to eql({:args => [], :block => nil})
         end
 
         it "should have added itself to a design_blocks array with prefix" do
           @klass.design :stats
           blocks = @klass.instance_variable_get(:@_design_blocks)
-          blocks.length.should eql(1)
-          blocks.first.should eql({:args => [:stats], :block => nil})
+          expect(blocks.length).to eql(1)
+          expect(blocks.first).to eql({:args => [:stats], :block => nil})
         end
       end
 
@@ -59,13 +59,13 @@ describe CouchRest::Model::Designs do
         end
 
         it "should pass calls to mapper" do
-          @klass.design_doc.auto_update.should be_false
+          expect(@klass.design_doc.auto_update).to be_falsey
         end
 
         it "should have added itself to a design_blocks array" do
           blocks = @klass.instance_variable_get(:@_design_blocks)
-          blocks.length.should eql(1)
-          blocks.first.should eql({:args => [], :block => @block})
+          expect(blocks.length).to eql(1)
+          expect(blocks.first).to eql({:args => [], :block => @block})
         end
 
         it "should handle multiple designs" do
@@ -74,9 +74,9 @@ describe CouchRest::Model::Designs do
           end
           @klass.design :stats, &@block2
           blocks = @klass.instance_variable_get(:@_design_blocks)
-          blocks.length.should eql(2)
-          blocks.first.should eql({:args => [], :block => @block})
-          blocks.last.should eql({:args => [:stats], :block => @block2})
+          expect(blocks.length).to eql(2)
+          expect(blocks.first).to eql({:args => [], :block => @block})
+          expect(blocks.last).to eql({:args => [:stats], :block => @block2})
         end
       end
 
@@ -92,21 +92,21 @@ describe CouchRest::Model::Designs do
       end
 
       it "should add designs to sub module" do
-        @klass.should respond_to(:design_doc)
+        expect(@klass).to respond_to(:design_doc)
       end
 
     end
 
     describe "default_per_page" do
       it "should return 25 default" do
-        DesignModel.default_per_page.should eql(25)
+        expect(DesignModel.default_per_page).to eql(25)
       end
     end
 
     describe ".paginates_per" do
       it "should set the default per page value" do
         DesignModel.paginates_per(21)
-        DesignModel.default_per_page.should eql(21)
+        expect(DesignModel.default_per_page).to eql(21)
       end
     end
   end
@@ -136,12 +136,12 @@ describe CouchRest::Model::Designs do
 
       it "will fail if reduce is not specific in view" do
         @mod.create(:title => 'This is a test')
-        lambda { @mod.by_title_fail.first }.should raise_error(CouchRest::NotFound)
+        expect { @mod.by_title_fail.first }.to raise_error(CouchRest::NotFound)
       end
 
       it "will perform view request" do
         @mod.create(:title => 'This is a test')
-        @mod.by_title.first.title.should eql("This is a test")
+        expect(@mod.by_title.first.title).to eql("This is a test")
       end
 
     end
@@ -159,28 +159,28 @@ describe CouchRest::Model::Designs do
 
         it "should return single matched record with find helper" do
           course = Course.find_by_title('bbb')
-          course.should_not be_nil
-          course.title.should eql('bbb') # Ensure really is a Course!
+          expect(course).not_to be_nil
+          expect(course.title).to eql('bbb') # Ensure really is a Course!
         end
 
         it "should return nil if not found" do
           course = Course.find_by_title('fff')
-          course.should be_nil
+          expect(course).to be_nil
         end
 
         it "should peform search on view with two properties" do
           course = Course.find_by_title_and_active(['bbb', true])
-          course.should_not be_nil
-          course.title.should eql('bbb') # Ensure really is a Course!
+          expect(course).not_to be_nil
+          expect(course.title).to eql('bbb') # Ensure really is a Course!
         end
 
         it "should return nil if not found" do
           course = Course.find_by_title_and_active(['bbb', false])
-          course.should be_nil
+          expect(course).to be_nil
         end
 
         it "should raise exception if view not present" do
-          lambda { Course.find_by_foobar('123') }.should raise_error(NoMethodError)
+          expect { Course.find_by_foobar('123') }.to raise_error(NoMethodError)
         end
 
       end
@@ -226,15 +226,15 @@ describe CouchRest::Model::Designs do
         it "should make the design doc upon first query" do
           Unattached.by_title.database(@db)
           doc = Unattached.design_doc
-          doc['views']['all']['map'].should include('Unattached')
+          expect(doc['views']['all']['map']).to include('Unattached')
         end
         it "should merge query params" do
           rs = Unattached.by_title.database(@db).startkey("bbb").endkey("eee")
-          rs.length.should == 3
+          expect(rs.length).to eq(3)
         end
         it "should get from specific database" do
           u = Unattached.get(@first_id, @db)
-          u.title.should == "aaa"
+          expect(u.title).to eq("aaa")
         end
         it "should barf on first if no database given" do
           expect{ Unattached.first }.to raise_error(CouchRest::Model::DatabaseNotDefined)
@@ -246,7 +246,7 @@ describe CouchRest::Model::Designs do
         end
         it "should get last" do
           u = Unattached.all.database(@db).last
-          u.title.should == "aaa"
+          expect(u.title).to eq("aaa")
         end
 
       end
@@ -268,18 +268,18 @@ describe CouchRest::Model::Designs do
         it "should create the design doc" do
           Article.by_user_id_and_date rescue nil
           doc = Article.design_doc
-          doc['views']['by_date'].should_not be_nil
+          expect(doc['views']['by_date']).not_to be_nil
         end
         it "should sort correctly" do
           articles = Article.by_user_id_and_date.all
-          articles.collect{|a|a['user_id']}.should == ['aaron', 'aaron', 'quentin', 
-            'quentin']
-          articles[1].title.should == 'not junk'
+          expect(articles.collect{|a|a['user_id']}).to eq(['aaron', 'aaron', 'quentin', 
+            'quentin'])
+          expect(articles[1].title).to eq('not junk')
         end
         it "should be queryable with couchrest options" do
           articles = Article.by_user_id_and_date(:limit => 1, :startkey => 'quentin').all
-          articles.length.should == 1
-          articles[0].title.should == "even more interesting"
+          expect(articles.length).to eq(1)
+          expect(articles[0].title).to eq("even more interesting")
         end
       end
 

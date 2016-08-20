@@ -12,16 +12,16 @@ describe "Model Attributes" do
     it "should not protect anything through new" do
       user = NoProtection.new(:name => "will", :phone => "555-5555")
 
-      user.name.should == "will"
-      user.phone.should == "555-5555"
+      expect(user.name).to eq("will")
+      expect(user.phone).to eq("555-5555")
     end
 
     it "should not protect anything through attributes=" do
       user = NoProtection.new
       user.attributes = {:name => "will", :phone => "555-5555"}
 
-      user.name.should == "will"
-      user.phone.should == "555-5555"
+      expect(user.name).to eq("will")
+      expect(user.phone).to eq("555-5555")
     end
 
     it "should recreate from the database properly" do
@@ -31,14 +31,14 @@ describe "Model Attributes" do
       user.save!
 
       user = NoProtection.get(user.id)
-      user.name.should == "will"
-      user.phone.should == "555-5555"
+      expect(user.name).to eq("will")
+      expect(user.phone).to eq("555-5555")
     end
 
     it "should provide a list of all properties as accessible" do
       user = NoProtection.new(:name => "will", :phone => "555-5555")
-      user.accessible_properties.length.should eql(2)
-      user.protected_properties.should be_empty
+      expect(user.accessible_properties.length).to eql(2)
+      expect(user.protected_properties).to be_empty
     end
   end
 
@@ -53,29 +53,29 @@ describe "Model Attributes" do
 
     it "should recognize accessible properties" do
       props = WithAccessible.accessible_properties.map { |prop| prop.name}
-      props.should include("name")
-      props.should_not include("admin")
+      expect(props).to include("name")
+      expect(props).not_to include("admin")
     end
 
     it "should protect non-accessible properties set through new" do
       user = WithAccessible.new(:name => "will", :admin => true)
 
-      user.name.should == "will"
-      user.admin.should == false
+      expect(user.name).to eq("will")
+      expect(user.admin).to eq(false)
     end
 
     it "should protect non-accessible properties set through attributes=" do
       user = WithAccessible.new
       user.attributes = {:name => "will", :admin => true}
 
-      user.name.should == "will"
-      user.admin.should == false
+      expect(user.name).to eq("will")
+      expect(user.admin).to eq(false)
     end
     
     it "should provide correct accessible and protected property lists" do
       user = WithAccessible.new(:name => 'will', :admin => true)
-      user.accessible_properties.map{|p| p.to_s}.should eql(['name'])
-      user.protected_properties.map{|p| p.to_s}.should eql(['admin'])
+      expect(user.accessible_properties.map{|p| p.to_s}).to eql(['name'])
+      expect(user.protected_properties.map{|p| p.to_s}).to eql(['admin'])
     end
   end
 
@@ -90,37 +90,37 @@ describe "Model Attributes" do
 
     it "should recognize protected properties" do
       props = WithProtected.protected_properties.map { |prop| prop.name}
-      props.should_not include("name")
-      props.should include("admin")
+      expect(props).not_to include("name")
+      expect(props).to include("admin")
     end
 
     it "should protect non-accessible properties set through new" do
       user = WithProtected.new(:name => "will", :admin => true)
 
-      user.name.should == "will"
-      user.admin.should == false
+      expect(user.name).to eq("will")
+      expect(user.admin).to eq(false)
     end
 
     it "should protect non-accessible properties set through attributes=" do
       user = WithProtected.new
       user.attributes = {:name => "will", :admin => true}
 
-      user.name.should == "will"
-      user.admin.should == false
+      expect(user.name).to eq("will")
+      expect(user.admin).to eq(false)
     end
 
     it "should not modify the provided attribute hash" do
       user = WithProtected.new
       attrs = {:name => "will", :admin => true}
       user.attributes = attrs
-      attrs[:admin].should be_true
-      attrs[:name].should eql('will')
+      expect(attrs[:admin]).to be_truthy
+      expect(attrs[:name]).to eql('will')
     end
 
     it "should provide correct accessible and protected property lists" do
       user = WithProtected.new(:name => 'will', :admin => true)
-      user.accessible_properties.map{|p| p.to_s}.should eql(['name'])
-      user.protected_properties.map{|p| p.to_s}.should eql(['admin'])
+      expect(user.accessible_properties.map{|p| p.to_s}).to eql(['name'])
+      expect(user.protected_properties.map{|p| p.to_s}).to eql(['admin'])
     end
 
   end
@@ -138,9 +138,9 @@ describe "Model Attributes" do
     it 'should assume that any unspecified property is protected by default' do
       user = WithBothAndUnspecified.new(:name => 'will', :admin => true, :phone => '555-1234')
 
-      user.name.should == 'will'
-      user.admin.should == false
-      user.phone.should == 'unset phone number'
+      expect(user.name).to eq('will')
+      expect(user.admin).to eq(false)
+      expect(user.phone).to eq('unset phone number')
     end
 
   end
@@ -163,8 +163,8 @@ describe "Model Attributes" do
     end
 
     def verify_attrs(user)
-      user.name.should  == "will"
-      user.admin.should == true
+      expect(user.name).to  eq("will")
+      expect(user.admin).to eq(true)
     end
 
     it "Base#get should not strip protected attributes" do
@@ -180,7 +180,7 @@ describe "Model Attributes" do
     it "Base#all should not strip protected attributes" do
       # all creates a CollectionProxy
       docs = WithProtected.all(:key => @user.id)
-      docs.length.should == 1
+      expect(docs.length).to eq(1)
       reloaded = docs.first
       verify_attrs reloaded
     end
