@@ -1,0 +1,26 @@
+version: "2"
+services:
+  test:
+    build:
+      context: .
+    entrypoint: ["bundle", "exec"]
+    command: ["rspec"]
+    environment:
+      RAILS_ENV: test
+      COUCH_HOST: "http://couch:5984/"
+    depends_on:
+      - couch
+    volumes:
+      - ./:/usr/lib/couchrest_model
+    networks:
+      - couchrest_model
+  couch:
+    image: couchdb:1.6
+    ports:
+      - "5984"
+    networks:
+      - couchrest_model
+      - default
+networks:
+  couchrest_model:
+    driver: bridge
