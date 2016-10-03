@@ -189,6 +189,12 @@ describe "Design View" do
           expect(str).to include("doc['another_property'] != null")
         end
 
+        it "should not guard against nulls for non-symbol emits" do
+          @klass.define(@design_doc, 'by_title', :emit => [:name, 3])
+          str = @design_doc['views']['by_title']['map']
+          expect(str).not_to include("( != null)")
+        end
+
         it "should not provide a default reduce function the emit value is overridden" do
           @klass.define(@design_doc, 'by_title', :emit => :name)
           str = @design_doc['views']['by_title']['reduce']

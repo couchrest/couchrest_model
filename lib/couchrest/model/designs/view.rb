@@ -497,7 +497,7 @@ module CouchRest
               elsif opts[:emit].is_a? Array
                 [
                   opts[:emit].map { |i| i.is_a?(Symbol) ? "doc['#{i}']" : i },
-                  opts[:emit].map { |i| i.is_a?(Symbol) ? "doc['#{i}']" : nil}.flatten
+                  opts[:emit].map { |i| i.is_a?(Symbol) ? "doc['#{i}']" : nil}.compact
                 ]
               else
                 [[opts[:emit] || 1], nil]
