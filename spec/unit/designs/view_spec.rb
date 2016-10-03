@@ -158,7 +158,7 @@ describe "Design View" do
           expect(@design_doc['views']['by_title']['reduce']).to eql('_stats')
         end
 
-        it "should allow the emit value to be overidden" do
+        it "should allow the emit value to be overridden" do
           @klass.define(@design_doc, 'by_title', :emit => :name)
           str = @design_doc['views']['by_title']['map']
           expect(str).to include("emit(doc['title'], doc['name']);")
@@ -189,7 +189,7 @@ describe "Design View" do
           expect(str).to include("doc['another_property'] != null")
         end
 
-        it "should not provide a default reduce function the emit value is overidden" do
+        it "should not provide a default reduce function the emit value is overridden" do
           @klass.define(@design_doc, 'by_title', :emit => :name)
           str = @design_doc['views']['by_title']['reduce']
           expect(str).to be_nil
