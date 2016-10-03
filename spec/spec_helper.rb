@@ -15,7 +15,7 @@ unless defined?(FIXTURE_PATH)
   FIXTURE_PATH = File.join(File.dirname(__FILE__), '/fixtures')
   SCRATCH_PATH = File.join(File.dirname(__FILE__), '/tmp')
 
-  COUCHHOST = "http://127.0.0.1:5984"
+  COUCHHOST = ENV["COUCH_HOST"] || "http://127.0.0.1:5984"
   TESTDB    = 'couchrest-model-test'
   TEST_SERVER    = CouchRest.new COUCHHOST
   # TEST_SERVER.default_database = TESTDB
@@ -23,6 +23,21 @@ unless defined?(FIXTURE_PATH)
 end
 
 RSpec.configure do |config|
+  config.before(:suite) do
+    couch_uri = URI.parse(ENV['COUCH_HOST'] || "http://127.0.0.1:5984")
+    CouchRest::Model::Base.configure do |config|
+      config.connection  = {
+        :protocol => couch_uri.scheme,
+        :host     => couch_uri.host,
+        :port     => couch_uri.port,
+        :username => couch_uri.user,
+        :password => couch_uri.password,
+        :prefix   => "couchrest",
+        :join     => "_"
+      }
+    end
+  end
+
   config.before(:all) { reset_test_db! }
 
   config.after(:all) do
