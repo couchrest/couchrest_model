@@ -33,4 +33,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency("minitest", "> 4.1") #, "< 5.0") # For Kaminari and activesupport, pending removal
   s.add_development_dependency("kaminari", ">= 0.14.1", "< 0.16.0")
   s.add_development_dependency("mime-types", "< 3.0") # Mime-types > 3.0 don't bundle properly on JRuby
+  s.add_development_dependency("guard-rspec", "~> 4.7.0")
 end
