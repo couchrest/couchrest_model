@@ -59,7 +59,7 @@ module CouchRest
         def all_models(opts = {})
           opts.reverse_merge!(activate: true, with_proxies: false)
           callbacks = migrate_each_model(find_models)
-          callbacks += migrate_each_proxying_model(find_proxying_models) if opts[:with_proxies]
+          callbacks += migrate_each_proxying_model(find_proxying_base_models) if opts[:with_proxies]
           activate_designs(callbacks) if opts[:activate]
         end
 
@@ -74,8 +74,8 @@ module CouchRest
           CouchRest::Model::Base.subclasses.reject{|m| m.proxy_owner_method.present?}
         end
 
-        def find_proxying_models
-          CouchRest::Model::Base.subclasses.reject{|m| m.proxy_method_names.empty?}
+        def find_proxying_base_models
+          CouchRest::Model::Base.subclasses.reject{|m| m.proxy_method_names.empty? || m.proxy_owner_method.present?}
         end
 
         def migrate_each_model(models, db = nil)
@@ -91,12 +91,14 @@ module CouchRest
         def migrate_each_proxying_model(models)
           callbacks = [ ]
           models.each do |model|
-            methods = model.proxy_method_names
+            model_class = model.is_a?(CouchRest::Model::Proxyable::ModelProxy) ? model.model : model
+            methods = model_class.proxy_method_names
             methods.each do |method|
-              puts "Finding proxied models for #{model}##{method}"
+              puts "Finding proxied models for #{model_class}##{method}"
               model.all.each do |obj|
                 proxy = obj.send(method)
                 callbacks += migrate_each_model([proxy.model], proxy.database)
+                callbacks += migrate_each_proxying_model([proxy]) unless model_class.proxy_method_names.empty?
               end
             end
           end
