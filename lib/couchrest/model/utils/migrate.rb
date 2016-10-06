@@ -95,6 +95,7 @@ module CouchRest
             methods = model_class.proxy_method_names
             methods.each do |method|
               puts "Finding proxied models for #{model_class}##{method}"
+              model_class.design_doc.auto_update = false
               model.all.each do |obj|
                 proxy = obj.send(method)
                 callbacks += migrate_each_model([proxy.model], proxy.database)
