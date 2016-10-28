@@ -859,6 +859,14 @@ describe "Design View" do
           end
         end
       end
+
+      describe "ActiveRecord compatibility methods" do
+        describe "#model_name" do
+          it "should use the #model class" do
+            expect(@obj.model_name.to_s).to eql DesignViewModel.to_s
+          end
+        end
+      end
     end
   end
 
