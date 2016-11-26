@@ -11,11 +11,15 @@ rvm:
 services: couchdb
 before_install:
   - gem install bundler
-env:
 matrix:
   include:
-    - rvm: jruby-1.7.22
-      env: JRUBY_OPTS=--2.0
+    # JRuby takes a lot more effort
+    - rvm: jruby-1.7.26
+      env: JRUBY_OPTS='--2.0'
+      gemfile: Gemfile.activesupport-4.x
+    - rvm: jruby-1.7.26
+      env: JRUBY_OPTS='--2.0'
+      gemfile: Gemfile.activesupport-5.x
   allow_failures:
     - rvm: 2.0.0
       gemfile: Gemfile.activesupport-5.x
