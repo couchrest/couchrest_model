@@ -175,6 +175,31 @@ describe "Design View" do
           str = @design_doc['views']['by_title']['map']
           expect(str).to include("emit(doc['title'], [1, doc['name']]);")
         end
+
+        it "should guard against nulls when emitting properties" do
+          @klass.define(@design_doc, 'by_title', :emit => :name)
+          str = @design_doc['views']['by_title']['map']
+          expect(str).to include("doc['name'] != null")
+        end
+
+        it "should guard against nulls when emitting multiple properties" do
+          @klass.define(@design_doc, 'by_title', :emit => [:name, :another_property])
+          str = @design_doc['views']['by_title']['map']
+          expect(str).to include("doc['name'] != null")
+          expect(str).to include("doc['another_property'] != null")
+        end
+
+        it "should not guard against nulls for non-symbol emits" do
+          @klass.define(@design_doc, 'by_title', :emit => [:name, 3])
+          str = @design_doc['views']['by_title']['map']
+          expect(str).not_to include("( != null)")
+        end
+
+        it "should not provide a default reduce function the emit value is overridden" do
+          @klass.define(@design_doc, 'by_title', :emit => :name)
+          str = @design_doc['views']['by_title']['reduce']
+          expect(str).to be_nil
+        end
       end
 
       describe ".create_model_methods" do

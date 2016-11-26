@@ -500,8 +500,16 @@ module CouchRest
               raise "View cannot be created without recognised name, :map or :by options" if opts[:by].nil?
 
               # convert emit symbols to properties
-              opts[:emit] = "doc['#{opts[:emit]}']" if opts[:emit].is_a?(Symbol)
-              opts[:emit] = "[" + opts[:emit].map { |i| i.is_a?(Symbol) ? "doc['#{i}']" : i }.join(', ') + "]" if opts[:emit].is_a?(Array)
+              emits, emit_guards = if opts[:emit].is_a? Symbol
+                [["doc['#{opts[:emit]}']"], ["doc['#{opts[:emit]}']"]]
+              elsif opts[:emit].is_a? Array
+                [
+                  opts[:emit].map { |i| i.is_a?(Symbol) ? "doc['#{i}']" : i },
+                  opts[:emit].map { |i| i.is_a?(Symbol) ? "doc['#{i}']" : nil}.compact
+                ]
+              else
+                [[opts[:emit] || 1], nil]
+              end
 
               opts[:allow_blank] = opts[:allow_blank].nil? ? true : opts[:allow_blank]
               opts[:guards] ||= []
@@ -509,9 +517,11 @@ module CouchRest
 
               keys = opts[:by].map{|o| "doc['#{o}']"}
               emit_keys = keys.length == 1 ? keys.first : "[#{keys.join(', ')}]"
-              emit_value = opts[:emit] || 1;
+              emit_value = emits.length == 1 ? emits.first : "[#{emits.join(', ')}]"
               opts[:guards] += keys.map{|k| "(#{k} != null)"} unless opts[:allow_nil]
               opts[:guards] += keys.map{|k| "(#{k} != '')"} unless opts[:allow_blank]
+              opts[:guards] += emit_guards.map{|k| "(#{k} != null)"} unless emit_guards.nil? || opts[:allow_nil]
+              opts[:guards] += emit_guards.map{|k| "(#{k} != '')"} unless emit_guards.nil? || opts[:allow_blank]
               opts[:map] = <<-EOF
                 function(doc) {
                   if (#{opts[:guards].join(' && ')}) {
@@ -519,7 +529,7 @@ module CouchRest
                   }
                 }
               EOF
-              if opts[:reduce].nil?
+              if opts[:reduce].nil? && emit_guards.nil?
                 # Use built-in sum function by default
                 opts[:reduce] = "_sum"
               end
