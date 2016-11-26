@@ -17,5 +17,5 @@ module CouchRest::Model
 end
 
 class CouchRest::Database
-  include(CouchRest::Model::Support::Database)
+  prepend CouchRest::Model::Support::Database
 end
