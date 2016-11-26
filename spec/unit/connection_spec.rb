@@ -90,7 +90,7 @@ describe CouchRest::Model::Connection do
         expect(@class.server).to be_a(CouchRest::Server)
       end
       it "should provide a server with default config" do
-        expect(@class.server.uri.to_s).to eql("http://localhost:5984")
+        expect(@class.server.uri.to_s).to eql(CouchRest::Model::Base.server.uri.to_s)
       end
       it "should allow the configuration to be overwritten" do
         @class.connection = {
