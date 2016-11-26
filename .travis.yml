@@ -7,19 +7,20 @@ rvm:
   - 2.2.4
   - 2.1.10
   - 2.0.0
-  - jruby
   - rbx
 services: couchdb
 before_install:
   - gem install bundler
 env:
-  - JRUBY_OPTS=--2.0
 matrix:
+  include:
+    - rvm: jruby-1.7.22
+      env: JRUBY_OPTS=--2.0
   allow_failures:
     - rvm: 2.0.0
       gemfile: Gemfile.activesupport-5.x
     - rvm: 2.1.10
       gemfile: Gemfile.activesupport-5.x
-    - rvm: jruby
+    - rvm: jruby-1.7.22
       gemfile: Gemfile.activesupport-5.x
     - rvm: rbx # Has problems with Array#insert inheritence

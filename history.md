@@ -1,6 +1,15 @@
 # CouchRest Model Change History
 
-## 2.2.0.beta1 - pending
+## 2.2.0.beta2 - pending
+
+  * Make View instance respond to model_name ([PR](https://github.com/couchrest/couchrest_model/pull/217) @adamcrown)
+  * Feature/proxyable custom databases ([PR](https://github.com/couchrest/couchrest_model/pull/218) @ellneal, @pacoguzman)
+  * Fix clear cache for delete db ([PR](https://github.com/couchrest/couchrest_model/pull/216) @MarkFull, @ktaragorn, @samlown) 
+  * Migration improvements and tests ([PR](https://github.com/couchrest/couchrest_model/pull/215) @ellneal)
+  * Add some guards to prevent view errors when using custom emit values ([PR](https://github.com/couchrest/couchrest_model/pull/214) @ellneal)
+  * Making running the tests a bit easier using Docker ([PR](https://github.com/couchrest/couchrest_model/pull/213) @ellneal)
+
+## 2.2.0.beta1 - 2016-08-20
 
   * Radical re-factor of dirty tracking using Hashdiff gem, providing reliable change detection with nested data. ([PR](https://github.com/couchrest/couchrest_model/pull/211) @samlown)
   * Implement proxy for factory methods ([PR](https://github.com/couchrest/couchrest_model/pull/210) @ellneal)
