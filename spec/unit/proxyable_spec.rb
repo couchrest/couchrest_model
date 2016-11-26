@@ -61,6 +61,23 @@ describe CouchRest::Model::Proxyable do
       allow(@class).to receive(:proxy_database_suffixes).and_return({ assoc: 'suffix' })
       expect(@obj.proxy_database(:assoc).name).to eql('couchrest-proxy-suffix')
     end
+
+    context "when use_database is set" do
+      before do
+        @class = Class.new(CouchRest::Model::Base)
+        @class.class_eval do
+          use_database "another_database"
+          def slug; 'proxy'; end
+        end
+        @obj = @class.new
+      end
+
+      it "should provide proxy database from method not considering use database" do
+        expect(@class).to receive(:proxy_database_method).at_least(:twice).and_return(:slug)
+        expect(@obj.proxy_database(:assoc)).to be_a(CouchRest::Database)
+        expect(@obj.proxy_database(:assoc).name).to eql('couchrest_proxy')
+      end
+    end
   end
 
   describe "class methods" do

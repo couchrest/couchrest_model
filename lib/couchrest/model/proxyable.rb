@@ -9,7 +9,7 @@ module CouchRest
         db_name = self.send(self.class.proxy_database_method)
         db_suffix = self.class.proxy_database_suffixes[assoc_name.to_sym]
         @proxy_databases ||= {}
-        @proxy_databases[assoc_name.to_sym] ||= self.class.prepare_database([db_name, db_suffix].compact.reject(&:blank?).join(self.class.connection[:join]))
+        @proxy_databases[assoc_name.to_sym] ||= self.class.prepare_database([db_name, db_suffix].compact.reject(&:blank?).join(self.class.connection[:join]), true)
       end
 
       module ClassMethods

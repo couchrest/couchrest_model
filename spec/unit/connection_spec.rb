@@ -134,6 +134,12 @@ describe CouchRest::Model::Connection do
         db = @class.prepare_database
         expect(db.name).to eql('couchrest_testing')
       end
+
+      it "should ignore the .use_database value when overrride" do
+        @class.use_database('testing')
+        db = @class.prepare_database('test', true)
+        expect(db.name).to eql('couchrest_test')
+      end
     end
 
     describe "protected methods" do
