@@ -400,6 +400,14 @@ module CouchRest
           (offset_value / limit_value) + 1
         end
 
+        # == ActiveRecord compatibility support
+
+        # Return the model name for #model just as User::ActiveRecord_Relation
+        # would for better ActiveRecord interoperability
+        def model_name
+          ActiveModel::Name.new(model)
+        end
+
         protected
 
         def include_docs!
