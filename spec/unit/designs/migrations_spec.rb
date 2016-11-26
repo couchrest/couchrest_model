@@ -42,6 +42,7 @@ describe CouchRest::Model::Designs::Migrations do
           end
           doc = @db.get(@doc['_id'])
           expect(doc['views']['all']).to eql(@doc['views']['all'])
+          expect(doc['couchrest-hash']).not_to be_nil
           expect(callback).to be_nil
         end
 

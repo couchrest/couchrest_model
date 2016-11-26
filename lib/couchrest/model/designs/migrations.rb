@@ -46,6 +46,9 @@ module CouchRest
           id      = self['_id']
 
           if !doc
+            # make sure the checksum has been calculated
+            checksum! if !self['couchrest-hash']
+            
             # no need to migrate, just save it
             new_doc = to_hash.dup
             db.save_doc(new_doc)
