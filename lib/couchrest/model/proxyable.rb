@@ -8,8 +8,10 @@ module CouchRest
         raise StandardError, "Please set the #proxy_database_method" if self.class.proxy_database_method.nil?
         db_name = self.send(self.class.proxy_database_method)
         db_suffix = self.class.proxy_database_suffixes[assoc_name.to_sym]
-        @proxy_databases ||= {}
-        @proxy_databases[assoc_name.to_sym] ||= self.class.prepare_database([db_name, db_suffix].compact.reject(&:blank?).join(self.class.connection[:join]), true)
+        @_proxy_databases ||= {}
+        @_proxy_databases[assoc_name.to_sym] ||= begin
+          self.class.prepare_database([db_name, db_suffix].compact.reject(&:blank?).join(self.class.connection[:join]))
+        end
       end
 
       module ClassMethods

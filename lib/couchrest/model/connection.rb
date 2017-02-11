@@ -9,39 +9,41 @@ module CouchRest
 
       module ClassMethods
 
-        # Overwrite the normal use_database method so that a database
+        # Overwrite the CouchRest::Document.use_database method so that a database
         # name can be provided instead of a full connection.
-        # The actual database will be validated when it is requested for use.
-        # Note that this should not be used with proxied models!
+        # We prepare the database immediatly, so ensure any connection details
+        # are provided in advance.
+        # Note that this will not work correctly with proxied models.
         def use_database(db)
-          @_use_database = db
+          @database = prepare_database(db)
         end
 
         # Overwrite the default database method so that it always
         # provides something from the configuration.
         # It will try to inherit the database from an ancester
-        # unless the use_database method has been used, in which
-        # case a new connection will be started.
+        # unless the use_database method has been used.
         def database
           @database ||= prepare_database(super)
         end
 
         def server
-          @server ||= CouchRest::Server.new(prepare_server_uri, :persistent => connection_configuration[:persistent])
+          @server ||= ServerPool.instance[prepare_server_uri]
         end
 
-        def prepare_database(db = nil, override_use_database = false)
-          db = @_use_database unless override_use_database || @_use_database.nil?
+        def prepare_database(db = nil)
           if db.nil? || db.is_a?(String) || db.is_a?(Symbol)
-            conf = connection_configuration
-            db = [conf[:prefix], db.to_s, conf[:suffix]].reject{|s| s.to_s.empty?}.join(conf[:join])
-            self.server.database!(db)
+            self.server.database!(prepare_database_name(db))
           else
             db
           end
         end
 
         protected
+
+        def prepare_database_name(base)
+          conf = connection_configuration
+          [conf[:prefix], base.to_s, conf[:suffix]].reject{|s| s.to_s.empty?}.join(conf[:join])
+        end
 
         def prepare_server_uri
           conf = connection_configuration
@@ -59,14 +61,7 @@ module CouchRest
 
         def load_connection_config_file
           file = connection_config_file
-          connection_config_cache[file] ||=
-            (File.exists?(file) ?
-              YAML::load(ERB.new(IO.read(file)).result) :
-              { }).symbolize_keys
-        end
-
-        def connection_config_cache
-          Thread.current[:connection_config_cache] ||= {}
+          ConnectionConfig.instance[file]
         end
 
       end

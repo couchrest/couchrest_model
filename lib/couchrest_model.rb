@@ -26,6 +26,8 @@ require "couchrest"
 
 require "couchrest/model"
 require "couchrest/model/errors"
+require "couchrest/model/server_pool"
+require "couchrest/model/connection_config"
 require "couchrest/model/configuration"
 require "couchrest/model/translation"
 require "couchrest/model/persistence"
