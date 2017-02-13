@@ -54,7 +54,7 @@ module CouchRest
 
         def connection_configuration
           @connection_configuration ||=
-            self.connection.update(
+            self.connection.merge(
               (load_connection_config_file[environment.to_sym] || {}).symbolize_keys
             )
         end
