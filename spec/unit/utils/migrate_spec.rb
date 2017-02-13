@@ -105,6 +105,7 @@ describe CouchRest::Model::Utils::Migrate do
       before :each do
         # clear data from previous test runs
         MigrateModel.all.each do |mm|
+          next if mm.nil?
           mm.migrate_proxy_models.all.each do |mpm|
             mpm.migrate_proxy_nested_models.database.delete! rescue nil
           end rescue nil
