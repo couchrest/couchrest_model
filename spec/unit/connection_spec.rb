@@ -58,12 +58,6 @@ describe CouchRest::Model::Connection do
         @class.use_database(db)
         expect(@class.database).to eql(db)
       end
-      it "should never prepare the database before it is needed" do
-        db = @class.server.database('test')
-        expect(@class).not_to receive(:prepare_database)
-        @class.use_database('test')
-        @class.use_database(db)
-      end
       it "should use the database specified" do
         @class.use_database(:test)
         expect(@class.database.name).to eql('couchrest_test')
@@ -131,15 +125,10 @@ describe CouchRest::Model::Connection do
 
       it "should use the .use_database value" do
         @class.use_database('testing')
-        db = @class.prepare_database
+        db = @class.database
         expect(db.name).to eql('couchrest_testing')
       end
 
-      it "should ignore the .use_database value when overrride" do
-        @class.use_database('testing')
-        db = @class.prepare_database('test', true)
-        expect(db.name).to eql('couchrest_test')
-      end
     end
 
     describe "protected methods" do

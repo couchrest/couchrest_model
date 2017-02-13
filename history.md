@@ -8,6 +8,8 @@
   * Migration improvements and tests ([PR](https://github.com/couchrest/couchrest_model/pull/215) @ellneal)
   * Add some guards to prevent view errors when using custom emit values ([PR](https://github.com/couchrest/couchrest_model/pull/214) @ellneal)
   * Making running the tests a bit easier using Docker ([PR](https://github.com/couchrest/couchrest_model/pull/213) @ellneal)
+  * Upgraded to Couchrest 2.0.1 ([PR](https://github.com/couchrest/couchrest_model/pull/220) @samlown)
+  * Removed :persistent and simplifying connection handling with aim to reduce number of connections and improve multithreading ([PR](https://github.com/couchrest/couchrest_model/pull/220) @samlown)
 
 ## 2.2.0.beta1 - 2016-08-20
 
