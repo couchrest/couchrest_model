@@ -93,9 +93,11 @@ module CouchRest
       # Returns self.
       def reload
         write_attributes_for_initialization(
-          database.get(id), :write_all_attributes => true
+          database.get!(id), :write_all_attributes => true
         )
         self
+      rescue CouchRest::NotFound
+        raise CouchRest::Model::DocumentNotFound
       end
 
       protected
