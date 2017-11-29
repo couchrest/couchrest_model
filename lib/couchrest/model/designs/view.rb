@@ -20,21 +20,21 @@ module CouchRest
         # outside CouchRest Model.
         def initialize(design_doc, parent, new_query = {}, name = nil)
           self.design_doc = design_doc
-
-          # Extrace important non-regular query values
+          
+          # Extract options from query
           proxy  = new_query.delete(:proxy)
           delete = new_query.delete(:delete)
 
           if parent.is_a?(Class) && parent < CouchRest::Model::Base
             raise "Name must be provided for view to be initialized" if name.nil?
-            self.model    = (proxy || parent)
-            self.owner    = parent
+            self.owner    = (proxy || parent)
+            self.model    = parent
             self.name     = name.to_s
             # Default options:
             self.query    = { }
           elsif parent.is_a?(self.class)
-            self.model    = (proxy || parent.model)
-            self.owner    = parent.owner
+            self.owner    = (proxy || parent.owner)
+            self.model    = parent.model
             self.name     = parent.name
             self.query    = parent.query.dup
           else
@@ -60,11 +60,11 @@ module CouchRest
           return @rows if @rows
           if block_given?
             execute do |row|
-              yield ViewRow.new(row, model, use_database)
+              yield ViewRow.new(row, owner)
             end
           else
             if execute && result['rows']
-              @rows ||= result['rows'].map{|v| ViewRow.new(v, model, use_database)}
+              @rows ||= result['rows'].map{|v| ViewRow.new(v, owner)}
             else
               [ ]
             end
@@ -334,12 +334,6 @@ module CouchRest
           update_query(:stale => value.to_s)
         end
 
-        # Specify the database the view should use. If not defined,
-        # an attempt will be made to load its value from the model.
-        def database(value)
-          update_query(:database => value)
-        end
-
         # Set the view's proxy that will be used instead of the model
         # for any future searches. As soon as this enters the
         # new view's initializer it will be removed and set as the model
@@ -367,7 +361,7 @@ module CouchRest
         #
 
         def page(page)
-          limit(owner.default_per_page).skip(owner.default_per_page * ([page.to_i, 1].max - 1))
+          limit(model.default_per_page).skip(model.default_per_page * ([page.to_i, 1].max - 1))
         end
 
         def per(num)
@@ -429,20 +423,20 @@ module CouchRest
           !design_doc['views'][name]['reduce'].blank?
         end
 
-        def use_database
-          query[:database] || model.database
+        def database
+          owner.database
         end
 
         def execute(&block)
           return self.result if result
-          raise CouchRest::Model::DatabaseNotDefined if use_database.nil?
+          raise CouchRest::Model::DatabaseNotDefined if database.nil?
 
           # Remove the reduce value if its not needed to prevent CouchDB errors
           query.delete(:reduce) unless can_reduce?
 
-          design_doc.sync(use_database)
+          design_doc.sync(database)
 
-          self.result = design_doc.view_on(use_database, name, query, &block)
+          self.result = design_doc.view_on(database, name, query, &block)
         end
 
         # Class Methods
@@ -570,10 +564,15 @@ module CouchRest
       # A special wrapper class that provides easy access to the key
       # fields in a result row.
       class ViewRow < Hash
-        attr_reader :model, :db
-        def initialize(hash, model, db = nil)
-          @model = model
-          @db    = db || model.database
+        
+        # Owner will either be the original model, or a proxy and must respond
+        # to `#build_from_database` and `#get` calls.
+        # The owner is responsible for setting the correct database on instantiation,
+        # if required.
+        attr_reader :owner
+
+        def initialize(hash, owner)
+          @owner = owner
           replace(hash)
         end
         def id
@@ -593,12 +592,10 @@ module CouchRest
         def doc
           @doc ||= begin
             if self['doc']
-              obj = model.build_from_database(self['doc'])
-              obj.database ||= db
-              obj
+              owner.build_from_database(self['doc'])
             else
               doc_id = (value.is_a?(Hash) && value['_id']) ? value['_id'] : self.id
-              doc_id ? model.get(doc_id, db) : nil
+              doc_id ? owner.get(doc_id) : nil
             end
           end
         end

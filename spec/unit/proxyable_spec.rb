@@ -329,15 +329,33 @@ describe CouchRest::Model::Proxyable do
       end
 
       it "should proxy #get" do
-        expect(@model).to receive(:get).with(32, 'database')
+        expect(@model).to receive(:fetch_and_build_from_database).with(32, 'database')
         expect(@obj).to receive(:proxy_update)
         @obj.get(32)
       end
 
+      it "should proxy #get and catch missing doc error" do
+        expect(@model).to receive(:fetch_and_build_from_database).with(32, 'database').and_raise(CouchRest::Model::DocumentNotFound)
+        expect(@obj.get(32)).to be_nil
+      end
+
+
       it "should proxy #find" do
-        expect(@model).to receive(:get).with(32, 'database')
+        expect(@model).to receive(:fetch_and_build_from_database).with(32, 'database')
         expect(@obj).to receive(:proxy_update)
         @obj.find(32)
+      end
+
+      it "should proxy #get!" do
+        expect(@model).to receive(:fetch_and_build_from_database).with(32, 'database')
+        expect(@obj).to receive(:proxy_update)
+        @obj.get!(32)
+      end
+
+      it "should proxy #find!" do
+        expect(@model).to receive(:fetch_and_build_from_database).with(32, 'database')
+        expect(@obj).to receive(:proxy_update)
+        @obj.find!(32)
       end
 
       it "should proxy factory methods" do

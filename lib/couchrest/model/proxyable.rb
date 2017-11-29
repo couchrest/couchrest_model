@@ -120,9 +120,16 @@ module CouchRest
         end
 
         def get(id)
-          proxy_update(@model.get(id, @database))
+          get!(id)
+        rescue CouchRest::Model::DocumentNotFound
+          nil
         end
         alias :find :get
+
+        def get!(id)
+          proxy_update(@model.fetch_and_build_from_database(id, @database))
+        end
+        alias :find! :get!
 
         protected
 
