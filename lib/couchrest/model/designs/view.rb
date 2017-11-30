@@ -402,6 +402,10 @@ module CouchRest
           ActiveModel::Name.new(model)
         end
 
+        def database
+          owner.database
+        end
+
         protected
 
         def include_docs!
@@ -421,10 +425,6 @@ module CouchRest
 
         def can_reduce?
           !design_doc['views'][name]['reduce'].blank?
-        end
-
-        def database
-          owner.database
         end
 
         def execute(&block)

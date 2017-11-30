@@ -760,6 +760,12 @@ describe "Design View" do
         end
       end
 
+      describe "#database" do
+        it "should reference the owners database" do
+          expect(@obj.database).to eql(@mod.database)
+        end
+      end
+
       describe "#execute" do
         before :each do
           # disable real execution!
