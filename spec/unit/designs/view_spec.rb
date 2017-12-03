@@ -65,20 +65,23 @@ describe "Design View" do
       end
 
       describe "with proxy in query for first initialization" do
-        it "should set model to proxy object and remove from query" do
+        it "should set owner to proxy object and remove from query" do
           proxy = double("Proxy")
           @obj = @klass.new(@mod.design_doc, @mod, {:proxy => proxy}, 'test_view')
-          expect(@obj.model).to eql(proxy)
+          expect(@obj.owner).to eql(proxy)
+          expect(@obj.model).to eql(@mod)
         end
       end
 
       describe "with proxy in query for chained instance" do
-        it "should set the model to proxy object instead of parents model" do
+        it "should set the owner to proxy object instead of parents model" do
           proxy = double("Proxy")
           @obj = @klass.new(@mod.design_doc, @mod, {}, 'test_view')
+          expect(@obj.owner).to eql(@mod)
           expect(@obj.model).to eql(@mod)
           @obj = @obj.proxy(proxy)
-          expect(@obj.model).to eql(proxy)
+          expect(@obj.owner).to eql(proxy)
+          expect(@obj.model).to eql(@mod)
         end
       end
 
@@ -264,7 +267,7 @@ describe "Design View" do
         it "should wrap rows in ViewRow class" do
           expect(@obj).to receive(:execute).and_return(true)
           expect(@obj).to receive(:result).twice.and_return({'rows' => [{:foo => :bar}]})
-          expect(CouchRest::Model::Designs::ViewRow).to receive(:new).with({:foo => :bar}, @obj.model, DB)
+          expect(CouchRest::Model::Designs::ViewRow).to receive(:new).with({:foo => :bar}, @obj.owner)
           @obj.rows
         end
 
@@ -469,13 +472,6 @@ describe "Design View" do
       describe "#info" do
         it "should raise error" do
           expect { @obj.info }.to raise_error(/Not yet implemented/)
-        end
-      end
-
-      describe "#database" do
-        it "should update query with value" do
-          expect(@obj).to receive(:update_query).with({:database => 'foo'})
-          @obj.database('foo')
         end
       end
 
@@ -764,6 +760,12 @@ describe "Design View" do
         end
       end
 
+      describe "#database" do
+        it "should reference the owners database" do
+          expect(@obj.database).to eql(@mod.database)
+        end
+      end
+
       describe "#execute" do
         before :each do
           # disable real execution!
@@ -779,10 +781,7 @@ describe "Design View" do
         end
 
         it "should raise issue if no database" do
-          expect(@obj).to receive(:query).and_return({:database => nil})
-          model = double("SomeModel")
-          expect(model).to receive(:database).and_return(nil)
-          expect(@obj).to receive(:model).and_return(model)
+          expect(@obj).to receive(:database).and_return(nil)
           expect { @obj.send(:execute) }.to raise_error(CouchRest::Model::DatabaseNotDefined)
         end
 
@@ -901,19 +900,19 @@ describe "Design View" do
       @klass = CouchRest::Model::Designs::ViewRow
     end
 
-    let :model do
+    let :owner do
       m = double()
       allow(m).to receive(:database).and_return(DB)
       m
     end
 
     describe "intialize" do
-      it "should store reference to model" do
-        obj = @klass.new({}, model)
-        expect(obj.model).to eql(model)
+      it "should store reference to owner" do
+        obj = @klass.new({}, owner)
+        expect(obj.owner).to eql(owner)
       end
       it "should copy details from hash" do
-        obj = @klass.new({:foo => :bar, :test => :example}, model)
+        obj = @klass.new({:foo => :bar, :test => :example}, owner)
         expect(obj[:foo]).to eql(:bar)
         expect(obj[:test]).to eql(:example)
       end
@@ -924,32 +923,22 @@ describe "Design View" do
       end
 
       it "should provide id" do
-        obj = @klass.new({'id' => '123456'}, model)
+        obj = @klass.new({'id' => '123456'}, owner)
         expect(obj.id).to eql('123456')
       end
 
-      it "may be instantiated with a database" do
-        obj = @klass.new({'id' => '123456'}, model, 'foo')
-        expect(obj.db).to eql('foo')
-      end
-
-      it "may use model's database" do
-        obj = @klass.new({'id' => '123456'}, model)
-        expect(obj.db).to eql(DB)
-      end
-
       it "should provide key" do
-        obj = @klass.new({'key' => 'thekey'}, model)
+        obj = @klass.new({'key' => 'thekey'}, owner)
         expect(obj.key).to eql('thekey')
       end
 
       it "should provide the value" do
-        obj = @klass.new({'value' => 'thevalue'}, model)
+        obj = @klass.new({'value' => 'thevalue'}, owner)
         expect(obj.value).to eql('thevalue')
       end
 
       it "should provide the raw document" do
-        obj = @klass.new({'doc' => 'thedoc'}, model)
+        obj = @klass.new({'doc' => 'thedoc'}, owner)
         expect(obj.raw_doc).to eql('thedoc')
       end
 
@@ -957,8 +946,7 @@ describe "Design View" do
         hash = {'doc' => {'_id' => '12345', 'name' => 'sam'}}
         obj = @klass.new(hash, DesignViewModel)
         doc = double('DesignViewDoc')
-        allow(doc).to receive(:database).and_return(DB)
-        expect(obj.model).to receive(:build_from_database).with(hash['doc']).and_return(doc)
+        expect(obj.owner).to receive(:build_from_database).with(hash['doc']).and_return(doc)
         expect(obj.doc).to eql(doc)
       end
 
@@ -966,8 +954,7 @@ describe "Design View" do
         hash = {'id' => '12345', 'value' => 5}
         obj = @klass.new(hash, DesignViewModel)
         doc = double('DesignViewModel')
-        allow(doc).to receive(:database).and_return(DB)
-        expect(obj.model).to receive(:get).with('12345', DB).and_return(doc)
+        expect(obj.owner).to receive(:get).with('12345').and_return(doc)
         expect(obj.doc).to eql(doc)
       end
 
@@ -975,16 +962,14 @@ describe "Design View" do
         hash = {'id' => '12345', 'value' => {'_id' => '54321'}}
         obj = @klass.new(hash, DesignViewModel)
         doc = double('DesignViewModel')
-        allow(doc).to receive(:database).and_return(DB)
-        expect(obj.model).to receive(:get).with('54321', DB).and_return(doc)
+        expect(obj.owner).to receive(:get).with('54321').and_return(doc)
         expect(obj.doc).to eql(doc)
       end
 
       it "should try to return nil for document if none available" do
         hash = {'value' => 23} # simulate reduce
         obj = @klass.new(hash, DesignViewModel)
-        doc = double('DesignViewModel')
-        expect(obj.model).not_to receive(:get)
+        expect(obj.owner).not_to receive(:get)
         expect(obj.doc).to be_nil
       end
 
