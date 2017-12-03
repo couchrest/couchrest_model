@@ -1,6 +1,6 @@
 # CouchRest Model Change History
 
-## 2.2.0.beta2 - pending
+## 2.2.0.beta2 - 2017-12-03
 
   * Make View instance respond to model_name ([PR](https://github.com/couchrest/couchrest_model/pull/217) @adamcrown)
   * Feature/proxyable custom databases ([PR](https://github.com/couchrest/couchrest_model/pull/218) @ellneal, @pacoguzman)
@@ -10,7 +10,8 @@
   * Making running the tests a bit easier using Docker ([PR](https://github.com/couchrest/couchrest_model/pull/213) @ellneal)
   * Upgraded to Couchrest 2.0.1 ([PR](https://github.com/couchrest/couchrest_model/pull/220) @samlown)
   * Removed :persistent and simplifying connection handling with aim to reduce number of connections and improve multithreading ([PR](https://github.com/couchrest/couchrest_model/pull/220) @samlown)
-  * Removed passing database in views and get calls, to simplify API. Use Proxying or instantiate objects manually to use a different database.
+  * Removed passing database in views and get calls, to simplify API. Use Proxying or instantiate objects manually to use a different database.([PR](https://github.com/couchrest/couchrest_model/pull/224) @samlown)
+  * Document#reload! now raises DocumentNotFound on deleted doc ([PR](https://github.com/couchrest/couchrest_model/pull/223) @azul)
 
 ## 2.2.0.beta1 - 2016-08-20
 
