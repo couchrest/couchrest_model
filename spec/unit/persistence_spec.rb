@@ -485,6 +485,13 @@ describe CouchRest::Model::Persistence do
       i = Article.create!(:title => "Reload return self")
       expect(i.reload).to be(i)
     end
+
+    it "should raise DocumentNotFound if doc has been deleted" do
+      i = Article.create!(:title => "Reload deleted")
+      dup = Article.find(i.id)
+      dup.destroy
+      expect { i.reload }.to raise_error(CouchRest::Model::DocumentNotFound)
+    end
   end
 
   describe ".model_type_value" do
