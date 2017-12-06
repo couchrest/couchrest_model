@@ -25,3 +25,4 @@ matrix:
     - rvm: jruby-1.7.22
       gemfile: Gemfile.activesupport-5.x
     - rvm: rbx # Has problems with Array#insert inheritence
+    - rvm: jruby-9.1.7.0
