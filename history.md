@@ -1,10 +1,13 @@
 # CouchRest Model Change History
 
+## 2.2.0.beta3 - 2020-05-05
+  * Do not load files inside app/models/concerns on CouchDB Design Document migrations ([PR](https://github.com/couchrest/couchrest_model/pull/) @dpzaba). This helps to support Rails versions from 4.1 to 5.2.3.
+
 ## 2.2.0.beta2 - 2017-12-03
 
   * Make View instance respond to model_name ([PR](https://github.com/couchrest/couchrest_model/pull/217) @adamcrown)
   * Feature/proxyable custom databases ([PR](https://github.com/couchrest/couchrest_model/pull/218) @ellneal, @pacoguzman)
-  * Fix clear cache for delete db ([PR](https://github.com/couchrest/couchrest_model/pull/216) @MarkFull, @ktaragorn, @samlown) 
+  * Fix clear cache for delete db ([PR](https://github.com/couchrest/couchrest_model/pull/216) @MarkFull, @ktaragorn, @samlown)
   * Migration improvements and tests ([PR](https://github.com/couchrest/couchrest_model/pull/215) @ellneal)
   * Add some guards to prevent view errors when using custom emit values ([PR](https://github.com/couchrest/couchrest_model/pull/214) @ellneal)
   * Making running the tests a bit easier using Docker ([PR](https://github.com/couchrest/couchrest_model/pull/213) @ellneal)
@@ -50,7 +53,7 @@
   * Updating CouchRest dependency to ~> 1.2.1 (@samlown)
   * Migrations use design doc info requests as opposed to Stream (@samlown)
 
-## 2.0.3 - 2014-07-04 
+## 2.0.3 - 2014-07-04
 
   * Added find_by_view! method support for raising DocumentNotFound error when searching.
   * Upgraded CouchRest to ~> 1.2.0
@@ -88,10 +91,10 @@
   * Support typecasting `Symbol`
   * Added `:array` option to properties
   * Typecasting Dates, Times, and Booleans, with invalid values returns nil
-  
+
   * API Breaking Changes
     * Properties with blocks are now singular unless the `array: true` option is passed.
-  
+
 
 ## 1.2.0.beta - 2012-06-08
 

@@ -42,14 +42,29 @@ describe CouchRest::Model::Utils::Migrate do
       @module.load_all_models
     end
 
-    it "should detect if Rails is available and require models" do
-      Rails = double()
-      allow(Rails).to receive(:root).and_return("")
-      expect(Dir).to receive(:[]).with("app/models/**/*.rb").and_return(['failed_require'])
-      # we can't double require, so just expect an error
-      expect {
+    context "when detect Rails" do
+      before do
+        Rails = double()
+      end
+
+      it "should reload models but should not load anything inside models/concerns folder" do
+        allow(Rails).to receive(:root).and_return("")
+        expect(Dir).to receive(:[]).with("app/models/**/*.rb").and_return(Dir[ File.join(MODEL_PATH, "**/*.rb") ])
+
         @module.load_all_models
-      }.to raise_error(LoadError)
+
+        expect(defined?(Cat)).to eq("constant") # as an example
+        expect(defined?(Attachable)).to eq(nil)
+      end
+
+      it "should raise a LoadError for invalid model paths" do
+        allow(Rails).to receive(:root).and_return("")
+        expect(Dir).to receive(:[]).with("app/models/**/*.rb").and_return(['failed_require'])
+
+        expect {
+          @module.load_all_models
+        }.to raise_error(LoadError)
+      end
     end
   end
 

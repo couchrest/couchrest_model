@@ -49,7 +49,13 @@ module CouchRest
         def load_all_models
           # Make a reasonable effort to load all models
           return unless defined?(Rails)
+
           Dir[Rails.root + 'app/models/**/*.rb'].each do |path|
+            # For compatibility issues with Rails version >= 4.1 until 5.2.3
+            # we have to avoid to load more than once the Rails concerns
+            # https://github.com/rails/rails/pull/34553
+            next if path.include?('models/concerns/')
+
             require path
           end
         end
