@@ -1,28 +1,31 @@
+dist: xenial
 language: ruby
-gemfile:
-  - Gemfile.activesupport-4.x
-  - Gemfile.activesupport-5.x
-rvm:
-  - 2.3.0
-  - 2.2.4
-  - 2.1.10
-  - 2.0.0
-  - rbx
-services: couchdb
-before_install:
-  - gem install bundler
-matrix:
+jobs:
   include:
-    # JRuby takes a lot more effort
-    - rvm: jruby-9.1.7.0
-      env: JRUBY_OPTS='--2.0'
+    - rvm: 2.7.0
+      gemfile: Gemfile.activesupport-5.x
+    - rvm: 2.6.0
+      gemfile: Gemfile.activesupport-5.x
+    - rvm: 2.6.0
       gemfile: Gemfile.activesupport-4.x
-  allow_failures:
-    - rvm: 2.0.0
+    - rvm: 2.5.0
       gemfile: Gemfile.activesupport-5.x
+    - rvm: 2.5.0
+      gemfile: Gemfile.activesupport-4.x
+    - rvm: 2.4.10
+      gemfile: Gemfile.activesupport-5.x
+    - rvm: 2.4.10
+      gemfile: Gemfile.activesupport-4.x
+    - rvm: 2.3.0
+      gemfile: Gemfile.activesupport-5.x
+    - rvm: 2.3.0
+      gemfile: Gemfile.activesupport-4.x
+    - rvm: 2.2.4
+      gemfile: Gemfile.activesupport-5.x
+    - rvm: 2.2.4
+      gemfile: Gemfile.activesupport-4.x
     - rvm: 2.1.10
-      gemfile: Gemfile.activesupport-5.x
-    - rvm: jruby-1.7.22
-      gemfile: Gemfile.activesupport-5.x
-    - rvm: rbx # Has problems with Array#insert inheritence
-    - rvm: jruby-9.1.7.0
+      gemfile: Gemfile.activesupport-4.x
+    - rvm: 2.0.0
+      gemfile: Gemfile.activesupport-4.x
+services: couchdb
