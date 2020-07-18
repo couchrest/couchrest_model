@@ -57,6 +57,7 @@ module CouchRest
 
         def inherited(model)
           super
+          @_design_blocks ||= nil
 
           # Go through our design blocks and re-implement them in the child.
           unless @_design_blocks.nil?

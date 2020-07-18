@@ -64,7 +64,7 @@ module CouchRest
         # Create accessor in model and assign a new design doc.
         # New design doc is returned ready to use.
         def create_model_design_doc_reader
-          model.instance_eval "def #{method}; @#{method}; end"
+          model.instance_eval "def #{method}; @#{method} ||= nil; @#{method}; end"
         end
 
         def assign_model_design_doc
