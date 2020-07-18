@@ -8,7 +8,6 @@ module CouchRest::Model
     include CouchRest::Model::Configuration
     include CouchRest::Model::CastedBy
     include CouchRest::Model::Dirty
-    attr_accessor :casted_by_property
 
     def initialize(array, property, parent = nil)
       self.casted_by_property = property
