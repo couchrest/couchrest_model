@@ -22,7 +22,7 @@ module CouchRest
         if original_change_data.nil?
           nil
         else
-          HashDiff.diff(original_change_data, current_change_data)
+          Hashdiff.diff(original_change_data, current_change_data)
         end
       end
 

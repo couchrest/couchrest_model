@@ -25,7 +25,7 @@ Gem::Specification.new do |s|
   s.add_dependency("couchrest",   "2.0.1")
   s.add_dependency("activemodel", ">= 4.0.2")
   s.add_dependency("tzinfo",      ">= 0.3.22")
-  s.add_dependency("hashdiff",    "~> 0.3")
+  s.add_dependency("hashdiff",    '~> 1.0', '>= 1.0.1')
   s.add_development_dependency("rspec", "~> 3.5.0")
   s.add_development_dependency("rack-test", ">= 0.5.7")
   s.add_development_dependency("rake", ">= 0.8.0", "< 11.0")
